@@ -1,0 +1,467 @@
+{
+  "schema_version": "2.0.0",
+  "description": "AI Devcamp Synthetic Masters Squad Roster (Anonymized, PII-Free)",
+  "athletes": [
+    {
+      "id": "david_montgamery",
+      "name": "David Montgamery",
+      "role": "Coach & Rower",
+      "gender": "M",
+      "category": "Master Veteran",
+      "drag_factor_range": [
+        122,
+        125
+      ],
+      "hr_zone1_cap": 135.0,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:58.2",
+        "2k_reference_watts": 211.9,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:58.2",
+          "watts": 211.9,
+          "notes": "Anonymized benchmark 1:58.2"
+        }
+      ],
+      "hr_max": 180
+    },
+    {
+      "id": "alex_martin",
+      "name": "Alex Martin",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        120,
+        123
+      ],
+      "hr_zone1_cap": 127.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:08.4",
+        "2k_reference_watts": 165.3,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:08.4",
+          "watts": 165.3,
+          "notes": "Anonymized benchmark 2:08.4"
+        }
+      ],
+      "hr_max": 170
+    },
+    {
+      "id": "sophie_dubois",
+      "name": "Sophie Dubois",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        100,
+        103
+      ],
+      "hr_zone1_cap": 131.0,
+      "cross_training": "Avifit (1-2x/week)",
+      "current_benchmark": {
+        "2k_reference_split": "2:16.8",
+        "2k_reference_watts": 136.7,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:16.8",
+          "watts": 136.7,
+          "notes": "Anonymized benchmark 2:16.8"
+        }
+      ],
+      "hr_max": 175
+    },
+    {
+      "id": "florence_moreau",
+      "name": "Florence Moreau",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        103,
+        106
+      ],
+      "hr_zone1_cap": 126.0,
+      "cross_training": "Avifit",
+      "current_benchmark": {
+        "2k_reference_split": "2:24.0",
+        "2k_reference_watts": 117.2,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:24.0",
+          "watts": 117.2,
+          "notes": "Anonymized benchmark 2:24.0"
+        }
+      ],
+      "hr_max": 168
+    },
+    {
+      "id": "lucas_bernard",
+      "name": "Lucas Bernard",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        118,
+        120
+      ],
+      "hr_zone1_cap": 133.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:47.6",
+        "2k_reference_watts": 281.0,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:47.6",
+          "watts": 281.0,
+          "notes": "Anonymized benchmark 1:47.6"
+        }
+      ],
+      "hr_max": 178
+    },
+    {
+      "id": "marie_laurent",
+      "name": "Marie Laurent",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        105,
+        108
+      ],
+      "hr_zone1_cap": 124.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:27.4",
+        "2k_reference_watts": 109.3,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:27.4",
+          "watts": 109.3,
+          "notes": "Anonymized benchmark 2:27.4"
+        }
+      ],
+      "hr_max": 166
+    },
+    {
+      "id": "pierre_simon",
+      "name": "Pierre Simon",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        122,
+        125
+      ],
+      "hr_zone1_cap": 132.0,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:53.0",
+        "2k_reference_watts": 242.6,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:53.0",
+          "watts": 242.6,
+          "notes": "Anonymized benchmark 1:53.0"
+        }
+      ],
+      "hr_max": 176
+    },
+    {
+      "id": "claire_fontaine",
+      "name": "Claire Fontaine",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        103,
+        106
+      ],
+      "hr_zone1_cap": 136.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:04.6",
+        "2k_reference_watts": 180.9,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:04.6",
+          "watts": 180.9,
+          "notes": "Anonymized benchmark 2:04.6"
+        }
+      ],
+      "hr_max": 182
+    },
+    {
+      "id": "guillaume_mercier",
+      "name": "Guillaume Mercier",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        118,
+        120
+      ],
+      "hr_zone1_cap": 123.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:56.2",
+        "2k_reference_watts": 223.1,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:56.2",
+          "watts": 223.1,
+          "notes": "Anonymized benchmark 1:56.2"
+        }
+      ],
+      "hr_max": 165
+    },
+    {
+      "id": "brigitte_roux",
+      "name": "Brigitte Roux",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        105,
+        108
+      ],
+      "hr_zone1_cap": 133.5,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:19.4",
+        "2k_reference_watts": 129.2,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:19.4",
+          "watts": 129.2,
+          "notes": "Anonymized benchmark 2:19.4"
+        }
+      ],
+      "hr_max": 178
+    },
+    {
+      "id": "marc_leroy",
+      "name": "Marc Leroy",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        122,
+        125
+      ],
+      "hr_zone1_cap": 126.0,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:49.8",
+        "2k_reference_watts": 264.4,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:49.8",
+          "watts": 264.4,
+          "notes": "Anonymized benchmark 1:49.8"
+        }
+      ],
+      "hr_max": 168
+    },
+    {
+      "id": "philippe_girard",
+      "name": "Philippe Girard",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        122,
+        125
+      ],
+      "hr_zone1_cap": 129.0,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:41.6",
+        "2k_reference_watts": 333.7,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:41.6",
+          "watts": 333.7,
+          "notes": "Anonymized benchmark 1:41.6"
+        }
+      ],
+      "hr_max": 172
+    },
+    {
+      "id": "romain_bonnet",
+      "name": "Romain Bonnet",
+      "role": "Rower",
+      "gender": "M",
+      "category": "Master",
+      "drag_factor_range": [
+        118,
+        120
+      ],
+      "hr_zone1_cap": 135.0,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "1:44.2",
+        "2k_reference_watts": 309.4,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "1:44.2",
+          "watts": 309.4,
+          "notes": "Anonymized benchmark 1:44.2"
+        }
+      ],
+      "hr_max": 180
+    },
+    {
+      "id": "valerie_caron",
+      "name": "Valérie Caron",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        103,
+        106
+      ],
+      "hr_zone1_cap": null,
+      "cross_training": "Avifit (mode souple)",
+      "current_benchmark": {
+        "2k_reference_split": "2:14.0",
+        "2k_reference_watts": 145.5,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:14.0",
+          "watts": 145.5,
+          "notes": "Anonymized benchmark 2:14.0"
+        }
+      ]
+    },
+    {
+      "id": "sandrine_roche",
+      "name": "Sandrine Roche",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        105,
+        108
+      ],
+      "hr_zone1_cap": null,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:29.2",
+        "2k_reference_watts": 105.4,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:29.2",
+          "watts": 105.4,
+          "notes": "Anonymized benchmark 2:29.2"
+        }
+      ]
+    },
+    {
+      "id": "celine_brun",
+      "name": "Céline Brun",
+      "role": "Rower",
+      "gender": "F",
+      "category": "Master",
+      "drag_factor_range": [
+        103,
+        106
+      ],
+      "hr_zone1_cap": null,
+      "cross_training": "None",
+      "current_benchmark": {
+        "2k_reference_split": "2:21.6",
+        "2k_reference_watts": 123.3,
+        "effective_date": "2026-09-20"
+      },
+      "test_history": [
+        {
+          "date": "2026-09-20",
+          "test_type": "squad_battery_sept2026",
+          "context": "Synthetic Squad Diagnostic",
+          "split": "2:21.6",
+          "watts": 123.3,
+          "notes": "Anonymized benchmark 2:21.6"
+        }
+      ]
+    }
+  ]
+}

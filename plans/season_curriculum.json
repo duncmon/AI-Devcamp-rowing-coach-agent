@@ -1,0 +1,86 @@
+{
+  "season": "2026-2027",
+  "club": "CASC",
+  "target_population": "Masters Rowers (Ages 27 to 70+)",
+  "coaching_vision": "Plaisir, Performance, Zéro Blessure",
+  "periodization_model": "Autonomic-Regulated Nonlinear Block Periodization (3:1 loading:deload)",
+  "competitions": [
+    {
+      "name": "Championnat Régional Indoor (Manosque)",
+      "tier": "Tier 2 (Priority B)",
+      "date": "2026-12-06",
+      "distance_meters": 2000,
+      "modality": "Concept2 Static Ergometer",
+      "taper_protocol": "48-72h active micro-taper (train-through, preserving winter aerobic base)",
+      "role": "Operational Dress Rehearsal for Paris"
+    },
+    {
+      "name": "Championnat de France Indoor (Paris)",
+      "tier": "Tier 1 (Priority A)",
+      "date": "2027-01-30",
+      "distance_meters": 2000,
+      "modality": "Concept2 Static Ergometer",
+      "taper_protocol": "10-14 day exponential taper (40-50% volume drop, high neuromuscular frequency)",
+      "role": "Winter Championship Peak"
+    },
+    {
+      "name": "Circuit Côtier Euromed",
+      "tier": "Tier 2 (Priority B)",
+      "date": "Spring - Mid 2027",
+      "distance_meters": 5000,
+      "modality": "Coastal Rowing (Heavy FISA shells, 4k-6k)",
+      "taper_protocol": "In-stride racing (replaces weekend threshold, no mid-week volume cut)",
+      "role": "Crew Endurance & Rough Water Conditioning"
+    },
+    {
+      "name": "World Rowing Masters Regatta (Varese, Italy)",
+      "tier": "Tier 1 (Priority A)",
+      "date": "2027-09-08",
+      "distance_meters": 1000,
+      "modality": "Fine Olympic River Shells (1000m sprint)",
+      "taper_protocol": "14-day exponential summer taper following 10-week fine-boat conversion",
+      "role": "Annual World Championship Peak"
+    }
+  ],
+  "macro_phases": [
+    {
+      "phase": 1,
+      "name": "Foundation & Manosque Rehearsal",
+      "dates": "2026-09-07 to 2026-12-06",
+      "weeks": 13,
+      "intensity_distribution": "Pyramidal (80% Zone 1 UT2, 15% Zone 2 AT, 5% Zone 3)",
+      "target_drag_factor": {"men": [120, 125], "women": [105, 110]}
+    },
+    {
+      "phase": 2,
+      "name": "Paris 2k Peak & Glycolytic Power",
+      "dates": "2026-12-07 to 2027-01-31",
+      "weeks": 8,
+      "intensity_distribution": "Polarized (75% Zone 1, 5% Zone 2, 20% Zone 3 VO2max/Race Pace)",
+      "target_drag_factor": {"men": [122, 128], "women": [110, 114]}
+    },
+    {
+      "phase": 3,
+      "name": "Coastal Power & Euromed Campaign",
+      "dates": "2027-02-01 to 2027-06-20",
+      "weeks": 20,
+      "intensity_distribution": "Threshold / Race Overload (70% Zone 1, 25% Zone 2, 5% Zone 3)",
+      "target_drag_factor": {"men": [120, 125], "women": [105, 110]}
+    },
+    {
+      "phase": 4,
+      "name": "Sprint Conversion & Varese Peak",
+      "dates": "2027-06-21 to 2027-09-12",
+      "weeks": 12,
+      "intensity_distribution": "High-Cadence Polarized (75% Zone 1, 5% Zone 2, 20% Zone 3)",
+      "target_drag_factor": {"men": [115, 120], "women": [100, 105]}
+    }
+  ],
+  "club_weekly_schedule": {
+    "friday_evening": "Coach Indoor Technical Clinic (PM5 Drag factor check, posture, interval observation)",
+    "saturday_morning": "Club On-Water Crew Session (Matched crew boats, stroke-power development)",
+    "sunday_morning": "Club On-Water Endurance Session (Mixed population, steady aerobic mileage)",
+    "monday_morning": "Autonomous On-Water Session (Approved rowers only, low-rate recovery paddle)",
+    "tuesday_to_thursday": "Independent / Home Ergometer Sessions (Tailored to cross-training loads)"
+  }
+}

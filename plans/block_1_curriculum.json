@@ -1,0 +1,646 @@
+{
+  "block": 1,
+  "title": "Phase 1: Aerobic Base, Technical Sequencing & Manosque Rehearsal",
+  "dates": "2026-09-07 to 2026-12-06",
+  "total_weeks": 13,
+  "competition_target": "Championnat Régional d'Aviron Indoor (Manosque) - Dec 6, 2026",
+  "mesocycles": [
+    {
+      "mesocycle": 1,
+      "name": "Aerobic Base, Technical Sequencing & Diagnostic Battery",
+      "weeks": [1, 2, 3, 4],
+      "deload_week": 4
+    },
+    {
+      "mesocycle": 2,
+      "name": "Anaerobic Threshold Expansion & Rate Modulation",
+      "weeks": [5, 6, 7, 8],
+      "deload_week": 8,
+      "benchmark": "2000m Ergometer Time Trial Benchmark (Week 8)"
+    },
+    {
+      "mesocycle": 3,
+      "name": "Supramaximal Speed-Endurance, Specific Race Pace & Micro-Taper",
+      "weeks": [9, 10, 11, 12, 13],
+      "deload_week": 13,
+      "race_week": 13
+    }
+  ],
+  "weeks": {
+    "1": {
+      "focus": "Baseline Drag Factor Calibration & Rate Floor Adherence",
+      "target_volume_hours": 3.75,
+      "warmup": {
+        "description": "Identique pour toutes les séances sur ergo. Se compose de 2 phases (15 min au total).",
+        "phase_a_ground": {
+          "duration_min": 5,
+          "title": "Phase A : Mobilité Hors-Machine (au sol)",
+          "exercises": [
+            "Cercles de hanches & Bascule pelvienne (1 min) : 10 grands cercles dans chaque sens pour libérer le bassin",
+            "Dorsiflexion chevilles face au mur (1 min) : 10 répétitions lentes par jambe sans décoller le talon",
+            "Ouverture thoracique à quatre pattes (1 min 30) : 8 répétitions lentes par côté (coude vers genou opposé puis ouverture haute)",
+            "Réveil caisson abdominal & fessiers (1 min 30) : 8 Glute Bridges avec arrêt 2s + 6 Bird-Dogs lents"
+          ]
+        },
+        "phase_b_ergo": {
+          "duration_min": 10,
+          "title": "Phase B : Pick Drill + accélérations @26 Ergo",
+          "ergdata_url": "https://workout.ergdata.com/shared/ozwj9kqn",
+          "protocol": [
+            "Min 0:00-0:30 : Bras seuls : Buste gainé à 11h, tirage fluide @ 30-40 SPM",
+            "Min 0:30-1:00 : Bras & Buste : Bascule du bassin (1h) puis tirage (11h) @ 20–40 SPM",
+            "Min 1:00-1:30 : Demi-coulisse : Pousser jambes à mi-rail (angle 90° cuisses/tibia) @ 20 SPM",
+            "Min 1:30-3:30 : Pleine coulisse en Zone 1 : Poussée complète @ 16 SPM allure récup",
+            "Min 3:30-4:00 : 30\" @ 26 SPM, 80% 2k W",
+            "Min 4:00-6:30 : Pleine coulisse en Zone 1 : Poussée complète @ 16 SPM allure récup",
+            "Min 6:30-7:00 : 30\" @ 26 SPM, 80% 2k W",
+            "Min 7:00-10:00 : Pleine coulisse en Zone 1 : Poussée complète @ 16 SPM allure récup"
+          ]
+        }
+      },
+      "cooldown": {
+        "title": "Récupération / Cool-down",
+        "duration_min": 6,
+        "description": "6' @ 14-16 SPM allure récup (identique pour toutes les séances ergo)",
+        "ergdata_url": "https://workout.ergdata.com/shared/dejupam2"
+      },
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Séance Vendredi Club (Séance Club Vendredi)",
+          "type": "ergo",
+          "ergdata_url": "https://workout.ergdata.com/shared/bc5xj0ej",
+          "warmup": "Standard (Phase A au sol 5' + Phase B Pick Drill sur ergo 10')",
+          "main_workout": "Introductory L4: (176, 180 r3') x 2",
+          "intervals": [
+            {
+              "sequence": 176,
+              "duration_min": 10,
+              "structure": "2'@16 / 2'@18 / 2'@20 / 2'@18 / 2'@16"
+            },
+            {
+              "sequence": 180,
+              "duration_min": 10,
+              "structure": "4'@16 / 3'@18 / 2'@20 / 1'@22"
+            }
+          ],
+          "rest_between_sequences": "3 min à allure récupération",
+          "target_watts_pct": "Allures L4 @16, @18, @20, @22 selon tables individuelles",
+          "target_spm": [16, 18, 20, 22],
+          "cooldown": "Standard : 6' @ 14-16 SPM allure récup"
+        },
+        {
+          "priority": 2,
+          "title": "Séance 1 - Aérobie Continue (Caviston Continuous Row)",
+          "type": "ergo",
+          "ergdata_url": "https://workout.ergdata.com/shared/2koabuj5",
+          "warmup": "Standard (Phase A au sol 5' + Phase B Pick Drill sur ergo 10')",
+          "main_workout": "45' continu @ 20-22 SPM à allure fixe = 2k pace x 1.16",
+          "pacing_formula": "2k_pace_sec * 1.16",
+          "target_hr": "Plafond Zone 1 (<75% HRmax)",
+          "target_spm": [20, 22],
+          "cooldown": "Standard : 6' @ 14-16 SPM allure récup"
+        },
+        {
+          "priority": 3,
+          "title": "Séance 2 - Séquences L4 (200 r2'30\") x 3",
+          "type": "ergo",
+          "ergdata_url": "https://workout.ergdata.com/shared/fvl86u0v",
+          "warmup": "Standard (Phase A au sol 5' + Phase B Pick Drill sur ergo 10')",
+          "main_workout": "(200 r2'30\") x 3 (Note: Philippe Girard x 5)",
+          "intervals": [
+            {
+              "sequence": 200,
+              "duration_min": 10,
+              "structure": "4'@18 / 3'@20 / 2'@22 / 1'@24"
+            }
+          ],
+          "rest_between_sequences": "2'30\" à allure récupération",
+          "target_watts_pct": "Allures L4 @18, @20, @22, @24 selon tables individuelles",
+          "target_spm": [18, 20, 22, 24],
+          "cooldown": "Standard : 6' @ 14-16 SPM allure récup"
+        },
+        {
+          "priority": 4,
+          "title": "Séance 3 - Renforcement Postural au Poids de Corps (Circuit Fondamental)",
+          "type": "bodyweight",
+          "ergdata_url": null,
+          "warmup": "5' de mobilité dynamique articulaire (chevilles, hanches, épaules)",
+          "main_workout": "Circuit fermé au poids de corps, 3 tours avec 90\" de repos entre les tours",
+          "circuit_exercises": [
+            "Fentes alternées lentes (focus stabilité genou/hanche) : 12 répétitions par jambe",
+            "Pompes avec temps d'arrêt de 1 seconde en bas : 10-15 répétitions",
+            "Gainage planche ventrale stricte (abdominaux verrouillés, rétroversion du bassin) : 45\"",
+            "Pont fessier unilatéral (Glute Bridge) : 12 répétitions par côté",
+            "Bird-Dog avec extension lente : 10 répétitions contrôlées par diagonale"
+          ],
+          "cooldown": "10' d'étirements passifs des fléchisseurs de hanche et auto-massage au rouleau"
+        }
+      ]
+    },
+    "2": {
+      "focus": "Sam Dutney Diagnostic Testing Battery",
+      "target_volume_hours": 3.5,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney Test 3: 30' Rate 20 Aerobic Benchmark",
+          "warmup": "Protocol A (15 min)",
+          "main_workout": "30-Minute Rate 20 Max Distance Test (strict 20 SPM cap)",
+          "target_watts_pct": "Maximal sustainable aerobic power (determines P(2k) = P(30r20) / 0.725)",
+          "target_spm": [20],
+          "cooldown": "12 min light paddle @ 14-16 SPM (<45% Watts 2k)"
+        },
+        {
+          "priority": 2,
+          "title": "Dutney Tests 1 & 2: Anaerobic Battery & UT3",
+          "warmup": "Protocol B (20 min)",
+          "main_workout": "Test 1: 7-Stroke Peak Power (dead stop) + 10' easy spin + Test 2: 60s All-Out Max (34-38 SPM) + 20 min UT3 easy paddle",
+          "target_watts_pct": "Maximal alactic peak (Test 1), 140-160%+ Watts 2k (Test 2), <50% Watts 2k (UT3)",
+          "target_spm": [34, 38],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "3 rounds of Functional Circuit (Focus on Seated Rockback & glute activation)",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Hamstring and hip decompression"
+        },
+        {
+          "priority": 4,
+          "title": "Active Aerobic Recovery (UT3)",
+          "warmup": "Protocol A",
+          "main_workout": "40 min continuous easy rowing (14-16 SPM, HR < 65% HRmax)",
+          "target_watts_pct": "40% to 48% Watts 2k",
+          "target_spm": [14, 16],
+          "cooldown": "Static stretching"
+        }
+      ]
+    },
+    "3": {
+      "focus": "Peak Volume Block 1 & Introduction to Anaerobic Capacity",
+      "target_volume_hours": 4.0,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney Anaerobic Capacity (AN Power)",
+          "warmup": "Protocol B (22 min)",
+          "main_workout": "5 x 45s max effort (Rest: 6:00 full recovery between reps)",
+          "target_watts_pct": "145% to 155%+ Watts 2k",
+          "target_spm": [32, 36],
+          "cooldown": "10 min light recovery @ 14-16 SPM"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine L4 Continuous Overload",
+          "warmup": "Protocol A",
+          "main_workout": "5 x 10 min continuous unbroken (Sequences 176 / 180 / 184 / 180 / 184 = 50 min)",
+          "target_watts_pct": "58% to 76% Watts 2k (L4 tables)",
+          "target_spm": [16, 18, 20, 22, 24],
+          "cooldown": "10 min Ergometer Flush @ 14-16 SPM"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "4 rounds of Functional Circuit (Seated Rockback layback control)",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Static decompression"
+        },
+        {
+          "priority": 4,
+          "title": "Long Aerobic Base (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "50 min continuous steady rowing (HR < 75% HRmax)",
+          "target_watts_pct": "50% to 60% Watts 2k",
+          "target_spm": [18, 20],
+          "cooldown": "Static mobility"
+        }
+      ]
+    },
+    "4": {
+      "focus": "Assimilation Deload 1 (-30% Volume & Autonomic Recovery)",
+      "target_volume_hours": 2.75,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Aerobic Maintenance & Neural Bursts",
+          "warmup": "Protocol A",
+          "main_workout": "3 x 12 min @ L4 r20 (Rest: 3:00) + 4 x 1 min @ 28 SPM at 100% Watts 2k (Rest: 1:30)",
+          "target_watts_pct": "60-65% Watts 2k (base) / 100% Watts 2k (bursts)",
+          "target_spm": [20, 28],
+          "cooldown": "Ergometer Flush 10 min"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine L4 Deload Sequence",
+          "warmup": "Protocol A",
+          "main_workout": "3 x 10 min continuous (Sequences 180 / 184 / 186 = 30 min unbroken)",
+          "target_watts_pct": "L4 power tables",
+          "target_spm": [16, 18, 20, 22, 24],
+          "cooldown": "Ergometer Flush 10 min"
+        },
+        {
+          "priority": 3,
+          "title": "Postural Mobility & Regeneration",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "2 light rounds of Strength Circuit (30s work / 30s rest) + 25 min deep mobility",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Gentle myofascial release"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Flush (UT3)",
+          "warmup": "Protocol A",
+          "main_workout": "35 min continuous ultra-light rowing (HR < 65% HRmax)",
+          "target_watts_pct": "40% to 45% Watts 2k",
+          "target_spm": [14, 16],
+          "cooldown": "Static stretching"
+        }
+      ]
+    },
+    "5": {
+      "focus": "Sam Dutney Anaerobic Threshold (AT) Introduction",
+      "target_volume_hours": 4.0,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney Anaerobic Threshold (AT) Intro",
+          "warmup": "Protocol C (16 min)",
+          "main_workout": "3 x 7 min @ AT (Rest: 1:00 active paddle)",
+          "target_watts_pct": "78% to 82% Watts 2k",
+          "target_spm": [24, 26],
+          "cooldown": "10 min light paddle @ 14-16 SPM"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine L4 Progressive Overload",
+          "warmup": "Protocol A",
+          "main_workout": "5 x 10 min continuous (Sequences 180 / 184 / 180 / 184 / 186 = 50 min)",
+          "target_watts_pct": "58% to 76% Watts 2k (L4 tables)",
+          "target_spm": [16, 18, 20, 22, 24],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "4 rounds of Functional Circuit",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Spinal decompression"
+        },
+        {
+          "priority": 4,
+          "title": "Continuous Aerobic Base (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "55 min continuous steady rowing (HR < 75% HRmax)",
+          "target_watts_pct": "52% to 58% Watts 2k",
+          "target_spm": [18, 22],
+          "cooldown": "Static mobility"
+        }
+      ]
+    },
+    "6": {
+      "focus": "Full-Format Dutney AT (4x8') & Wolverine L2 (3x2000m)",
+      "target_volume_hours": 4.25,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney Full Anaerobic Threshold (4 x 8 min)",
+          "warmup": "Protocol C (16 min)",
+          "main_workout": "4 x 8 min @ AT (Rest: 1:00 active paddle) = 32 min accumulated at threshold",
+          "target_watts_pct": "80% to 84% Watts 2k",
+          "target_spm": [25, 26],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine Level 2 Long Intervals (3 x 2000m)",
+          "warmup": "Protocol C (16 min)",
+          "main_workout": "3 x 2000m descending splits (Rest: 3:30 active paddle)",
+          "target_watts_pct": "Rep 1 @ 78%, Rep 2 @ 81%, Rep 3 @ 84% Watts 2k",
+          "target_spm": [24, 26],
+          "cooldown": "8 min easy spin"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "4 rounds of Functional Circuit",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Hamstring stretching"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Base Volume (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "50 min continuous steady rowing",
+          "target_watts_pct": "50% to 56% Watts 2k",
+          "target_spm": [18, 19],
+          "cooldown": "Static mobility"
+        }
+      ]
+    },
+    "7": {
+      "focus": "Peak Block 2 Volume & Anaerobic Capacity Overload (6x45s)",
+      "target_volume_hours": 4.5,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney Anaerobic Capacity Overload",
+          "warmup": "Protocol B (22 min)",
+          "main_workout": "6 x 45s maximal effort (Rest: 6:00 mandatory recovery)",
+          "target_watts_pct": "145% to 160% Watts 2k",
+          "target_spm": [34, 38],
+          "cooldown": "12 min light paddle @ 14-16 SPM"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine Level 2 (4 x 1500m)",
+          "warmup": "Protocol C (16 min)",
+          "main_workout": "4 x 1500m descending splits (Rest: 3:00 active paddle)",
+          "target_watts_pct": "82% to 85% Watts 2k",
+          "target_spm": [26, 28],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit (Tapered)",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "3 rounds of Functional Circuit (Reduced volume ahead of testing)",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Mobility"
+        },
+        {
+          "priority": 4,
+          "title": "Wolverine L4 Continuous Steady",
+          "warmup": "Protocol A",
+          "main_workout": "5 x 10 min continuous (Sequences 180 / 186 / 184 / 186 / 190 = 50 min)",
+          "target_watts_pct": "L4 power tables",
+          "target_spm": [16, 18, 20, 22, 24],
+          "cooldown": "Ergometer Flush"
+        }
+      ]
+    },
+    "8": {
+      "focus": "Assimilation Deload 2 & Official 2,000m TT Benchmark",
+      "target_volume_hours": 2.5,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "BENCHMARK: 2,000m Ergometer Time Trial",
+          "warmup": "Full Regatta Warmup: Protocol B (25 min total)",
+          "main_workout": "TEST: 2,000m Max Effort (Championship conditions)",
+          "target_watts_pct": "Maximal 2,000m capacity (establishes definitive Block 3 power base)",
+          "target_spm": [30, 34],
+          "cooldown": "15 min light flush (<40% Watts 2k)"
+        },
+        {
+          "priority": 2,
+          "title": "Pre-Test Neuromuscular Priming (48h Pre-Test)",
+          "warmup": "Protocol A",
+          "main_workout": "15 min UT2 + 2 x 250m @ projected 2k pace/cadence (Rest: 2:00)",
+          "target_watts_pct": "Projected 100% Watts 2k",
+          "target_spm": [28, 30],
+          "cooldown": "5 min light spin"
+        },
+        {
+          "priority": 3,
+          "title": "Postural Alignment & Joint Mobility",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "2 light rounds of Strength Circuit + 25 min passive stretching",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Foam rolling"
+        },
+        {
+          "priority": 4,
+          "title": "Post-Test Active Flush (UT3)",
+          "warmup": "Protocol A",
+          "main_workout": "35 min continuous very easy spinning @ 14-16 SPM (48h post-TT)",
+          "target_watts_pct": "40% to 45% Watts 2k",
+          "target_spm": [14, 16],
+          "cooldown": "Static stretching"
+        }
+      ]
+    },
+    "9": {
+      "focus": "Wolverine Level 1 Supramaximal Speed Endurance (8 x 500m)",
+      "target_volume_hours": 4.0,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Wolverine Level 1: 8 x 500m Supramaximal",
+          "warmup": "Protocol B (22 min)",
+          "main_workout": "8 x 500m (Rest: 3:30 active paddle) - Strict even or negative split",
+          "target_watts_pct": "102% to 108% Watts 2k",
+          "target_spm": [30, 32],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 2,
+          "title": "Wolverine L4 Active Reset",
+          "warmup": "Protocol A",
+          "main_workout": "4 x 10 min continuous (Sequences 176 / 180 / 184 / 180 = 40 min)",
+          "target_watts_pct": "Updated L4 power targets from Week 8 TT",
+          "target_spm": [16, 18, 20, 22],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "4 rounds of Functional Circuit",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Hamstring and hip stretch"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Foundation Volume (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "50 min continuous steady rowing",
+          "target_watts_pct": "50% to 56% Watts 2k",
+          "target_spm": [18, 19],
+          "cooldown": "Static mobility"
+        }
+      ]
+    },
+    "10": {
+      "focus": "Race-Pace Rhythm (4 x 1000m) & Extended Anaerobic Capacity (5x60s)",
+      "target_volume_hours": 4.25,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Wolverine Level 1: 4 x 1000m Race Rhythm",
+          "warmup": "Protocol B (22 min)",
+          "main_workout": "4 x 1000m (Rest: 3:30 active paddle) - Reps 1-3 @ 102-105% W2k, Rep 4 Maximal",
+          "target_watts_pct": "102% to 105% Watts 2k (Reps 1-3) / Maximal (Rep 4)",
+          "target_spm": [30, 32],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 2,
+          "title": "Dutney Extended Anaerobic Capacity",
+          "warmup": "Protocol B (20 min)",
+          "main_workout": "5 x 1 min (Rest: 6:00 full recovery)",
+          "target_watts_pct": "140% to 150% Watts 2k",
+          "target_spm": [32, 36],
+          "cooldown": "10 min light spin @ 14-16 SPM"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "3 rounds of Functional Circuit",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Postural decompression"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Regeneration Volume (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "55 min continuous steady rowing",
+          "target_watts_pct": "50% to 55% Watts 2k",
+          "target_spm": [18, 19],
+          "cooldown": "Static stretching"
+        }
+      ]
+    },
+    "11": {
+      "focus": "Critical Aerobic Power (Sam Dutney Tabata) & Race Repetitions",
+      "target_volume_hours": 4.25,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Dutney / Izumi Tabata High-Intensity Protocol",
+          "warmup": "Protocol B (22 min thorough)",
+          "main_workout": "8 x (20s all-out / 10s rest) = Exactly 4 minutes total work",
+          "target_watts_pct": "140% to 160% Watts 2k (repeatable high power)",
+          "target_spm": [32, 36],
+          "cooldown": "12 min light paddle @ 14-16 SPM"
+        },
+        {
+          "priority": 2,
+          "title": "Race-Pace Repetitions (4 x 1000m)",
+          "warmup": "Protocol B (20 min)",
+          "main_workout": "4 x 1000m (Rest: 4:00 active paddle) - elevating critical power",
+          "target_watts_pct": "102% to 105% Watts 2k",
+          "target_spm": [30, 32],
+          "cooldown": "Ergometer Flush"
+        },
+        {
+          "priority": 3,
+          "title": "Bodyweight Functional Stability Circuit",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "3 rounds of Functional Circuit (40s work / 20s rest)",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Thoracic mobility"
+        },
+        {
+          "priority": 4,
+          "title": "Wolverine L4 Aerobic",
+          "warmup": "Protocol A",
+          "main_workout": "50 min continuous (Sequences 180 / 184 / 180 / 184 / 186)",
+          "target_watts_pct": "L4 power tables",
+          "target_spm": [16, 18, 20, 22, 24],
+          "cooldown": "Ergometer Flush"
+        }
+      ]
+    },
+    "12": {
+      "focus": "Race Start Mechanics & Pacing Precision",
+      "target_volume_hours": 4.0,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "Micro-Intervals & Race Starts",
+          "warmup": "Protocol B (20 min)",
+          "main_workout": "6 x 250m (Rest: 2:00 active paddle) + 3 x Race Starts (5 strokes: 1/2, 1/2, 3/4, full, full slide to 38 SPM)",
+          "target_watts_pct": "105% to 110% Watts 2k (250m) / Maximal (starts)",
+          "target_spm": [32, 34, 38],
+          "cooldown": "10 min light spin"
+        },
+        {
+          "priority": 2,
+          "title": "Controlled Race-Power Pieces (2 x 1250m)",
+          "warmup": "Protocol B (18 min)",
+          "main_workout": "2 x 1250m (Rest: 4:00 active paddle) - Rep 1 @ 98% W2k, Rep 2 @ exact 100% W2k",
+          "target_watts_pct": "98% (Rep 1) / 100% (Rep 2) Watts 2k",
+          "target_spm": [30],
+          "cooldown": "8 min easy spin"
+        },
+        {
+          "priority": 3,
+          "title": "Postural Alignment & Joint Mobility",
+          "warmup": "Universal Mobility Routine",
+          "main_workout": "2 light rounds of Strength Circuit + 25 min passive stretching",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Diaphragmatic breathing"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Regeneration (UT2)",
+          "warmup": "Protocol A",
+          "main_workout": "50 min continuous steady rowing",
+          "target_watts_pct": "50% to 55% Watts 2k",
+          "target_spm": [18, 19],
+          "cooldown": "Static stretching"
+        }
+      ]
+    },
+    "13": {
+      "focus": "Competition Week: 48-72h Micro-Taper & Manosque Regional 2000m",
+      "target_volume_hours": 2.0,
+      "sessions": [
+        {
+          "priority": 1,
+          "title": "COMPETITION: Championnat Régional Indoor (Manosque) 2,000m",
+          "warmup": "Full Regatta Warmup: Protocol B (25 min total, finish 10 min pre-race)",
+          "main_workout": "2,000m Championship Race (Sunday, Dec 6, 2026)",
+          "target_watts_pct": "Maximal competitive output (Even split or controlled negative split)",
+          "target_spm": [30, 34],
+          "cooldown": "15 min light flush (<40% Watts 2k)"
+        },
+        {
+          "priority": 2,
+          "title": "Pre-Race Neural Opener (Friday, J-2)",
+          "warmup": "10 min steady paddle",
+          "main_workout": "10 min UT2 + 3 x 1 min @ 2k race power/cadence (Rest: 2:00 very light paddle)",
+          "target_watts_pct": "Exact 100% Watts 2k",
+          "target_spm": [30, 32],
+          "cooldown": "5 min light spin"
+        },
+        {
+          "priority": 3,
+          "title": "Postural Activation & Mobility (Tuesday, J-5)",
+          "warmup": "Universal Mobility Routine (5 min)",
+          "main_workout": "2 light rounds of Strength Circuit (Squats, Seated Rockbacks, Bridges) + 15 min mobility",
+          "target_watts_pct": "N/A",
+          "target_spm": [],
+          "cooldown": "Hydration emphasis"
+        },
+        {
+          "priority": 4,
+          "title": "Aerobic Flush & Rhythm Touch (Thursday, J-3)",
+          "warmup": "None (starts light)",
+          "main_workout": "20 min continuous very easy rowing (UT3) + 3 gentle 5-stroke builds @ 24 SPM",
+          "target_watts_pct": "40% to 48% Watts 2k",
+          "target_spm": [14, 16],
+          "cooldown": "Static stretch"
+        }
+      ]
+    }
+  }
+}
