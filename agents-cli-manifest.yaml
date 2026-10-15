@@ -1,0 +1,7 @@
+name: 'rowing-coach-agent'
+agent_directory: 'rowing_coach'
+region: 'us-central1'
+create_params:
+  root_agent_name: 'rowing_coach'
+  deployment_target: 'agent_runtime'
+  is_a2a: false

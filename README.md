@@ -6,7 +6,7 @@
 [![FastMCP](https://img.shields.io/badge/FastMCP-3.4.4-orange.svg)]()
 
 > **GDG London AI Devcamp Submission**  
-> An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)**, implementing exercise scientist **Sam Dutney's rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
+> An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)**, implementing an **evidence-based masters rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
 
 ---
 
@@ -19,7 +19,7 @@
 3. **Macrocycle Progression & Deload Enforcement:** Enforces strict periodization rules across a 13-week Phase 1 season curriculum, guarding deload weeks (-30% volume) and distinct competition targets (Manosque Tier 2 rehearsal vs Paris Tier 1 national peak).
 4. **Bilingual Squad Documentation Generator:** Automatically outputs French squad fiches matching official club card formats and English technical methodology analysis notes with coaching checkpoints.
 5. **Human-in-the-Loop Wearable & Calendar MCP Integration:** Connects to Intervals.icu via a local FastMCP server (`intervals_server.py`) to query resting heart rate, HRV (rMSSD), and fatigue (ATL/CTL), with confirmation-gated calendar workout scheduling (`require_confirmation=True`).
-6. **Isolated Web Research Sub-Agent:** Delegates live weather, water conditions (Étang de Berre, Lac des Buissonnets), and official regatta calendars (Ligue Sud PACA, FFAviron) to an isolated sub-agent equipped with Google Search.
+6. **Isolated Web Research Sub-Agent:** Delegates live weather, water conditions (Base Nautique du Lac, Lac des Buissonnets), and official regatta calendars (Ligue Sud PACA, FFAviron) to an isolated sub-agent equipped with Google Search.
 
 ---
 
@@ -37,7 +37,7 @@ flowchart TD
     end
     
     subgraph AgenticModules["ADK Specialized Toolsets"]
-        Skill["SkillToolset: masters-rowing-rules<br/>(Sam Dutney Rules & 3R System)"]
+        Skill["SkillToolset: masters-rowing-rules<br/>(Evidence-Based Rules & 3R System)"]
         SubAgent["AgentTool: rowing_researcher<br/>(Google Search, Weather & Regatta Rules)"]
         MCP["McpToolset: Intervals.icu Server<br/>(FastMCP stdio, require_confirmation=True)"]
     end
@@ -61,7 +61,7 @@ All squad member names and benchmark metrics in this repository are **completely
 
 ## 🛠️ Tech Stack
 
-Python 3.14, Google ADK (Agent Development Kit 2.4.0), Google GenAI SDK, Vertex AI (Gemini 2.5 Flash & Gemini 2.5 Flash Lite), FastMCP (3.4.4), Intervals.icu REST API, Concept2 Ergometer Physics Engine, Wolverine Plan L4 Model, Sam Dutney Rowing Physiology System, Pytest (9.1.1), UV (Package & Environment Manager), HTTPX (0.28.1), Markdown & JSON Datastore.
+Python 3.14, Google ADK (Agent Development Kit 2.4.0), Google GenAI SDK, Vertex AI (Gemini 2.5 Flash & Gemini 2.5 Flash Lite), FastMCP (3.4.4), Intervals.icu REST API, Concept2 Ergometer Physics Engine, Wolverine Plan L4 Model, Evidence-Based Masters Rowing Physiology System, Pytest (9.1.1), UV (Package & Environment Manager), HTTPX (0.28.1), Markdown & JSON Datastore.
 
 ---
 
@@ -123,9 +123,9 @@ AI-Devcamp-rowing-coach-agent/
 │   └── tools.py                # Custom physics, pacing, and sheet generation tools
 ├── skills/
 │   └── masters-rowing-rules/
-│       ├── SKILL.md            # Sam Dutney rules, 3R system & warmup architecture
+│       ├── SKILL.md            # Masters rowing rules, 3R system & warmup architecture
 │       └── references/
-│           └── the_sam_dutney_rowing_training_system_distillation_and_implementation_guide.md # Primary source reference
+│           └── evidence_based_masters_rowing_training_system_distillation_and_implementation_guide.md # Primary source reference
 ├── tests/
 │   ├── test_agent.py           # Agent structure, toolset and gate verification
 │   └── test_tools.py           # Physics, pacing, curriculum, and sheet unit tests

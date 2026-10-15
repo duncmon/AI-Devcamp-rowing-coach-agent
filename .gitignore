@@ -40,10 +40,11 @@ htmlcov/
 *.env
 !.env.example
 
-# Local ADK database / state
+# Local ADK database / state & deployment metadata
 .adk/
 *.db
 *.sqlite
+deployment_metadata.json
 
 # IDE & OS
 .DS_Store
