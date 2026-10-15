@@ -182,7 +182,7 @@ def test_generate_weekly_sheet_and_coach_notes(tmp_path, monkeypatch):
     notes_path = generate_coach_notes(
         week_number=5,
         block_name="Anaerobic Threshold Expansion",
-        methodology_focus="Introduction to Sam Dutney AT intervals.",
+        methodology_focus="Introduction to evidence-based AT intervals.",
         athlete_checkpoints={"alex_martin": "Monitor threshold drift.", "david_montgamery": "Check 78-82% power lock."},
     )
     assert os.path.exists(notes_path)

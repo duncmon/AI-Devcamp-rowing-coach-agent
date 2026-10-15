@@ -117,7 +117,7 @@ def schedule_workout(
     
     Args:
         workout_date: Target date in 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SS' format.
-        title: Workout title (e.g. 'P1 - Dutney AT 3x7 min (1:00 rest)').
+        title: Workout title (e.g. 'P1 - AT 3x7 min (1:00 rest)').
         description: Full structured session description (Warmup, main set paces, rest intervals, cool-down).
         duration_minutes: Estimated total workout duration in minutes.
         workout_type: Activity type (default 'Rowing').

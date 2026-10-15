@@ -1,22 +1,22 @@
-# The Sam Dutney Rowing Training System
+# Evidence-Based Masters Rowing Training System
 ## Macro Principles, Diagnostic Testing, and Weekly Programming Architecture
 
 ---
 
 ### Executive Summary & System Philosophy
 
-The training methodology developed by exercise scientist and rowing coach Sam Dutney departs fundamentally from traditional rowing dogma. Traditional rowing culture frequently defaults to two flawed paradigms:
+Contemporary endurance physiology and applied sports science demonstrate that traditional rowing dogma frequently fails master and time-constrained athletes. Traditional rowing culture frequently defaults to two flawed paradigms:
 1. **The "Pull Hard Every Stroke" Myth:** Treating every session as a maximum effort where only the stroke rate changes, driving amateur and masters athletes into chronic sympathetic overtraining and autonomic fatigue.
 2. **The Elite Template Trap:** Prescribing 10 to 12 sessions a week with double days, or offering the vague, unhelpful meme of "just do more steady state"—neither of which serves rowers with professional, family, or age-related recovery constraints.
 
 #### The Three Traps of the Busy Rower
-Dutney identifies three recurring traps that leave amateur and masters rowers plateaued despite enormous work ethic:
-1. **The "More is More" Trap:** Assuming that more volume, more sessions, and more intensity will brute-force improvement. While this can work for 20-year-old collegiate athletes with 20–30 hours of training and zero life responsibilities, rowers with jobs, mortgages, and families suffer autonomic exhaustion and injury.
-2. **The "Cookie-Cutter Program" Trap:** Downloading online PDF templates designed for elite university crews or national teams. These programs were built for an entirely different physiological baseline, chronological age, and recovery environment.
+Applied exercise physiology identifies three recurring traps that leave amateur and masters rowers plateaued despite enormous work ethic:
+1. **The "More is More" Trap:** Assuming that more volume, more sessions, and more intensity will brute-force improvement. While this can work for 20-year-old collegiate athletes with 20–30 hours of training and zero life responsibilities, rowers with careers and family responsibilities suffer autonomic exhaustion, endocrine disruption, and injury.
+2. **The "Cookie-Cutter Program" Trap:** Downloading online training templates designed for elite university crews or national teams. These programs were built for an entirely different physiological baseline, chronological age, and recovery environment.
 3. **The "Show Up and Wing It" Trap:** Arriving at the boathouse or gym without an adaptation-driven plan, doing whatever "feels hard" on the day. Effort without direction reliably produces fatigue rather than performance.
 
 #### The 3R Architecture: Reveal, Refine, Repeat
-Dutney’s **3R System** (*Reveal, Refine, Repeat*) reframes training as a high-precision diagnostic and prescriptive loop:
+The **3R System** (*Reveal, Refine, Repeat*) reframes training as a high-precision diagnostic and prescriptive loop grounded in clean-room exercise science:
 * **Reveal:** Uncover the exact physiological limiting factor via a 3-test battery that isolates individual energy pathways.
 * **Refine:** Focus adaptive reserves on the single identified constraint for a dedicated 4-to-6-week block, programming exactly 1 to 2 targeted high-intensity sessions while keeping the remainder of the week strictly low-intensity (UT2) and supportive.
 * **Repeat:** Retest every 4 to 8 weeks. Because bottlenecks move as adaptations occur, the training focus must dynamically shift rather than remaining static.
@@ -34,7 +34,7 @@ Dutney’s **3R System** (*Reveal, Refine, Repeat*) reframes training as a high-
 └──────────────────────┴──────────────────────┴───────────────────────────────┘
 ```
 
-* **Demand-Driven Architecture (Dr. Dan Plews Principle):** Every workout must have a specific physiological job. Before programming any piece, the coach or athlete must answer one fundamental question: *"What cellular or mechanical adaptation am I trying to create?"*
+* **Demand-Driven Architecture (Plews Principle):** Every workout must have a specific physiological job. Before programming any piece, the coach or athlete must answer one fundamental question: *"What cellular or mechanical adaptation am I trying to create?"*
 * **The "Top-Down" Principle (Ceiling Determines Floor):** Endurance rowing is performed at a submaximal percentage of an athlete's absolute physical ceiling. Increasing an athlete's peak mechanical power or $\text{VO}_2\text{ max}$ automatically elevates the absolute wattage of their submaximal splits. For example, sustaining $50\%$ of a $500\text{ W}$ ceiling ($250\text{ W}$) yields a vastly faster split than $50\%$ of a $400\text{ W}$ ceiling ($200\text{ W}$).
 
 ---
@@ -63,19 +63,19 @@ A frequent mistake made by developing rowers and coaches is **"workout hoarding"
 
 ---
 
-### The Four Systemic Obsessions
+### The Four Foundational Pillars
 
-Rather than chasing "a million 1% marginal gains" or copying elite national team volume, Dutney attributes world records, national titles, and lifetime personal bests in masters rowers to mastery over **four foundational obsessions**:
+Rather than chasing superficial marginal gains or copying elite national team volume, masters rowing performance relies on mastery over **four foundational pillars**:
 
 ```
                       ┌────────────────────────────────────────┐
-                      │      THE 4 FOUNDATIONAL OBSESSIONS     │
+                      │      THE 4 FOUNDATIONAL PILLARS        │
                       └───────────────────┬────────────────────┘
                                           │
          ┌──────────────────┬─────────────┴──────────────┬──────────────────┐
          ▼                  ▼                            ▼                  ▼
 ┌──────────────────┐┌──────────────────┐      ┌──────────────────┐┌──────────────────┐
-│   OBSESSION 1    ││   OBSESSION 2    │      │   OBSESSION 3    ││   OBSESSION 4    │
+│     PILLAR 1     ││     PILLAR 2     │      │     PILLAR 3     ││     PILLAR 4     │
 │  Energy Systems  ││ Polarized Base & │      │ Simplified 4-Cue ││  Maximum Force   │
 │   & Gap Testing  ││ Intensity Shield │      │ Technical Model  ││Potential (Gym)   │
 └──────────────────┘└──────────────────┘      └──────────────────┘└──────────────────┘
@@ -85,7 +85,7 @@ Rather than chasing "a million 1% marginal gains" or copying elite national team
 ```
 
 1. **Testing Energy Systems & Performance Gaps:** Rowers rarely have a work ethic problem; they have a diagnosis problem. Testing isolates the exact physiological limiting factor so training addresses the real bottleneck.
-2. **Polarization & Protecting Intensity:** Progress dies in the middle "gray zone." True polarized training is not a trend; it is a mechanism to shield autonomic recovery so that high-intensity sessions can be executed with maximal output.
+2. **Polarization & Protecting Intensity (Seiler Model):** Progress dies in the middle "gray zone." True polarized training is not a trend; it is a mechanism to shield autonomic recovery so that high-intensity sessions can be executed with maximal output.
 3. **A Simplified High-Yield Technical Model:** Focusing on excessive technical minutiae fails under race pressure and fatigue. A robust technical model uses four high-leverage cues to capture $95\%$ of maximal boat speed.
 4. **Maximum Force Potential (Targeted Strength):** Strength training is not about mimicking rowing cardio in the gym; it is about raising absolute peak force capacity so every submaximal stroke requires a smaller percentage of maximal output.
 
@@ -137,19 +137,19 @@ A performance gap occurs when an imbalance exists between an athlete's physical 
 * **Physiological Basis:** The anaerobic glycolytic energy pathway cannot produce high-intensity power in the 30-to-90-second duration or shuttle/buffer lactate rapidly during repeated efforts.
 * **Diagnostic & Field Symptoms:**
   * **The 3rd 500m Fallacy (Power Deficit vs. Lactic Tolerance):** A classic symptom is severe pacing collapse during the 3rd 500m ($1000\text{m}\text{--}1500\text{m}$) of a 2000m race (or the 2nd 500m of a 1k race). Coaches traditionally diagnose this as a lack of "mental toughness" or "lactic tolerance," prescribing grueling sessions like $8 \times 500\text{m}$ with 1-minute rest.
-  * **The True Mechanism:** Dutney proves this is usually **an anaerobic power ceiling failure, not a tolerance failure**. Because the athlete's anaerobic power ceiling is too low, the target race split requires an unsustainably high percentage of their maximal anaerobic power from the start. They spike lactate and hydrogen ions excessively in the first 1000m. By the 3rd 500m, metabolic acidosis causes unavoidable mechanical failure.
+  * **The True Mechanism:** Clinical exercise testing proves this is usually **an anaerobic power ceiling failure, not a tolerance failure**. Because the athlete's anaerobic power ceiling is too low, the target race split requires an unsustainably high percentage of their maximal anaerobic power from the start. They spike lactate and hydrogen ions excessively in the first 1000m. By the 3rd 500m, metabolic acidosis causes unavoidable mechanical failure.
   * **The Training "Smoking Gun":** Athletes with this gap almost always possess a history of high-volume steady-state and threshold-only training. When they did perform intervals, they were done with short rest for "survival," training them to pace conservatively rather than generate true maximal anaerobic power.
 * **The Solution:** Repeated high-intensity bouts ($30\text{--}60\text{s}$ max efforts) with **wide work-to-rest ratios ($1:6\text{ to }1:10$, or $5\text{ to }7\text{ minutes}$ of active recovery)**. This ensures near-complete phosphocreatine ($\text{PCr}$) resynthesis and $\text{H}^+$ clearance, allowing the rower to hit true maximal anaerobic power on every rep to lift the ceiling, rather than surviving in a compromised state.
 
 #### Gap 4: The Technical Gap (Fragility under Fatigue)
 * **Physiological & Biomechanical Basis:** A technical gap does not mean the rower does not understand rowing geometry. It means their technical model is **fragile** and collapses under race pressure, high stroke rate, or severe physical fatigue.
 * **Root Cause:** Excessive cognitive complexity. Rowers coached with dozens of micro-cues suffer from mental overload ("paralysis by analysis"). Under acute lactic acidosis, the brain cannot process complex motor sequences.
-* **The Solution:** Eliminate technical clutter. Replace multi-point checklists with Dutney's **4-Cue High-Yield Technical Model**, ensuring stroke mechanics remain robust even under extreme fatigue.
+* **The Solution:** Eliminate technical clutter. Replace multi-point checklists with the **4-Cue High-Yield Technical Model**, ensuring stroke mechanics remain robust even under extreme fatigue.
 
 #### Gap 5: The Strength Gap (Mechanical vs. Metabolic Failure)
 * **Physiological Basis:** The athlete lacks absolute contractile force to make race splits energetically cheap, causing them to fatigue *mechanically* before they fatigue *metabolically*.
 * **Diagnostic & Field Symptoms:**
-  * **Mechanical Exhaustion:** The athlete stops or drops off during intervals not because their heart and lungs are maxed out, but because their local muscles (legs, hips, back) physically fail to maintain posture and handle force.
+  * **Mechanical Exhaustion:** The athlete stops or drops off during intervals not because their cardiovascular system is maxed out, but because their local muscles (legs, hips, back) physically fail to maintain posture and handle force.
   * **The UT2 Decoupling Marker:** The rower struggles to hit target UT2 splits at their prescribed low heart rate. To hit the split, their heart rate spikes into the threshold zone because each stroke requires too high a fraction of their maximum force.
   * Peak power stalls on the ergometer even after targeted neuromuscular training.
   * The athlete struggles to rate high on the water due to an inability to accelerate the oar handle through the water column against hull drag.
@@ -157,7 +157,7 @@ A performance gap occurs when an imbalance exists between an athlete's physical 
 
 ---
 
-### Dutney's Law: The Anti-Pattern of "Fixing Everything at Once"
+### The Singular Targeting Law: The Anti-Pattern of "Fixing Everything at Once"
 
 When athletes are presented with these five gaps, their instinctive reaction is to try fixing all five simultaneously:
 * They add sprint intervals, increase threshold volume, cram extra steady-state on the weekend, attempt complex technical drills, and lift heavy in the gym.
@@ -166,7 +166,7 @@ When athletes are presented with these five gaps, their instinctive reaction is 
 
 ---
 
-### Core Structural Rules for Busy & Masters Rowers
+### Core Structural Rules for Masters and Time-Constrained Rowers
 
 | Rule | Parameter | Physiological & Practical Rationale |
 | :--- | :--- | :--- |
@@ -202,10 +202,10 @@ A primary reason amateur rowers plateau is that their easy sessions are too hard
 * **The "Happy Hurt" Illusion:** Training at moderate intensities (FFAviron B1/B2, UT1 tempo) feels satisfyingly difficult and gives the illusion of a productive workout. 
 * **The Autonomic Cost:** Chronic moderate-intensity training keeps blood lactate constantly elevated ($2.0\text{--}4.0\text{ mmol/L}$) and triggers sustained sympathetic nervous system activation. This induces persistent autonomic fatigue ("forever fatigue").
 * **The Consequence:** When the athlete reaches their designated high-intensity or threshold workout, their central nervous system and glycogen reserves are compromised. They cannot hit the required target wattages, diluting the training stimulus.
-* **The Dutney Fix:** Make UT2 genuine recovery and base work ($<2.0\text{ mmol/L}$ lactate, fully conversational, $60\%\text{--}70\%$ HRR). This leaves the rower fresh, energized, and capable of producing maximal power during key sessions.
+* **The Polarized Solution:** Enforce genuine UT2 recovery and base work ($<2.0\text{ mmol/L}$ lactate, fully conversational, $60\%\text{--}70\%$ HRR). This leaves the rower fresh, energized, and capable of producing maximal power during key sessions.
 
 #### Tactical Exceptions: When Moderate Intensity (UT1) IS Appropriate
-Dutney emphasizes that moderate-intensity (UT1 / B1/B2) training is not inherently evil; rather, the error lies in living there by default. Moderate training serves three clear strategic functions:
+Moderate-intensity (UT1 / B1/B2) training is not inherently counterproductive; rather, the error lies in living there by default. Moderate training serves three clear strategic functions:
 1. **Pre-Session Priming:** Light exposure the day before a supramaximal or race-pace test to activate neuromuscular motor patterns without metabolic drainage.
 2. **Technical Force Loading:** Teaching developing rowers how to apply firm handle force and connect through the trunk without the breakdown associated with maximal sprint pieces.
 3. **Controlled Competitive Preparation:** Introducing competitive match pieces on the water ("battle paddling") where boat-on-boat pressure is introduced gradually.
@@ -214,7 +214,7 @@ Dutney emphasizes that moderate-intensity (UT1 / B1/B2) training is not inherent
 
 ### Internal Load Calibration: The Karvonen HRR Standard & UT2 Execution
 
-Dutney strictly rejects general population formulas (such as $220 - \text{Age}$) because rowers exhibit substantially higher stroke volumes and altered cardiac autonomic profiles. Training intensities must be calculated using **Heart Rate Reserve (HRR)**:
+Evidence-based sports science rejects general population age formulas (such as $220 - \text{Age}$) because trained rowers exhibit substantially higher stroke volumes and altered autonomic profiles. Training intensities must be calibrated using **Heart Rate Reserve (HRR)**:
 
 $$\text{HRR} = \text{HR}_{\max} - \text{HR}_{\text{rest}}$$
 
@@ -226,7 +226,7 @@ $$\text{Target HR} = \text{HR}_{\text{rest}} + (\% \times \text{HRR})$$
 * **UT2 Wattage Boundary:** **$50\%\text{--}60\%$ of $2\text{k Watts}$** on the Concept2 ergometer.
 
 #### 1. The Triangulation Triad: Cross-Checking UT2 Without Lab Testing
-Because laboratory blood lactate testing is inaccessible to most amateur rowers, Dutney uses three cross-referenced metrics to verify that an athlete is training below $\text{LT1}$:
+Because laboratory blood lactate testing is inaccessible to most amateur rowers, field monitoring relies on three cross-referenced metrics to verify that an athlete is training below $\text{LT1}$:
 
 ```
                       ┌────────────────────────────────────────┐
@@ -293,11 +293,11 @@ A warm-up is not merely an injury-prevention routine; its primary purpose is to 
 #### 1. The Physiology of Warm-Ups: Solving the "Crossover Pinch Point"
 * **The 350m–600m Pinch Point:** In racing and high-intensity intervals, initial power is produced via the anaerobic alactic and lactic systems. As time elapses, the sustainable aerobic system must take over. The transition phase ($350\text{--}600\text{m}$) represents a critical pinch point where metabolic byproducts ($\text{H}^+$, lactate) surge before oxygen uptake reaches its maximum.
 * **The "Second Interval" Phenomenon:** Rowers often experience an awful first interval, while the second interval feels smoother and faster. In masters racing, the second race of a day often feels dramatically better than the first. This is direct proof that the athlete was under-primed: their first piece was spent forcing oxygen uptake kinetics to ramp up.
-* **Debunking the "Energy Depletion" Myth:** Rowers frequently undertrain their warm-up fearing they will "waste energy." However, a 2k race consumes very little total caloric energy (e.g., Fiona Murtagh's RP3 2k world record burned only $\sim 79\text{ kcal}$). Athletes do not deplete glycogen during a warm-up; performance only suffers if they accumulate unbuffered lactate without adequate recovery.
+* **Debunking the "Energy Depletion" Myth:** Rowers frequently undertrain their warm-up fearing they will "waste energy." However, a 2k race consumes very little total caloric energy (e.g., high-performance 2k tests typically burn only $\sim 75\text{--}90\text{ kcal}$). Athletes do not deplete glycogen during a warm-up; performance only suffers if they accumulate unbuffered lactate without adequate recovery.
 
 #### 2. The $\text{VO}_2$ Priming Protocol: The Pre-Race 1-Minute Effort
 * **The Mechanism:** Performing a high-intensity bout at $95\%\text{--}100\%$ of $\text{VO}_2\text{ max}$ (equivalent to **2k target race pace**, or $1\text{k pace} + 5\text{s}$) fully primes aerobic enzymes, dilates active muscle capillary beds, and accelerates oxygen kinetics. At the start of the race, the athlete reaches peak oxygen uptake substantially faster, blunting early anaerobic fatigue.
-* **The 15-to-20-Minute Clearance Window:** This priming piece must conclude **$15\text{ to }20\text{ minutes}$ prior to race start** (or test start). Literature confirms this duration is optimal: it provides ample time for complete blood lactate clearance and $\text{H}^+$ buffering while preserving the intracellular $\text{VO}_2$ priming effect.
+* **The 15-to-20-Minute Clearance Window:** This priming piece must conclude **$15\text{ to }20\text{ minutes}$ prior to race start** (or test start). Exercise physiology literature confirms this duration is optimal: it provides ample time for complete blood lactate clearance and $\text{H}^+$ buffering while preserving the intracellular $\text{VO}_2$ priming effect.
 * **Performance Return:** Proper priming yields up to a **$3\%$ performance enhancement**—equivalent to nearly a full split second or $\sim 4\text{ seconds}$ over a 2000m race ($\sim 2$ boat lengths in an eight).
 
 #### 3. Land-Based RAMP Exercise Selection Matrix
@@ -336,7 +336,7 @@ Drills executed early in a warm-up do not "warm up" muscle tissue; their purpose
 | **Pick Drill**<br>*(Off the Back)* | 10 strokes each: Arms Only $\rightarrow$ Arms & Back $\rightarrow$ 1/4 Slide $\rightarrow$ 1/2 Slide $\rightarrow$ 3/4 Slide $\rightarrow$ Full Slide. | • Hands move before shoulders.<br>• Set the body before the knees break.<br>• Still bodies into the catch. | Excellent with square blades (requires strict handle height). Recommended feet out of shoes. |
 | **Reverse Pick Drill**<br>*(Off the Front)* | 5 strokes 2-inch legs-only $\rightarrow$ 10 strokes 1/2-leg drive (body locked) $\rightarrow$ 10 strokes legs-only $\rightarrow$ 10 strokes legs & back $\rightarrow$ 10 strokes full slide. | • Connect through the feet.<br>• Head up, hands up, chest up.<br>• Shoulders loose; legs drive hips.<br>• "Legs-only" feeling. | Directs focus to front-end connection. Square blades or advanced feet-out execution. |
 | **Rock & Row** | 10 strokes pausing on every stroke at Hands Away and Body Rock (or 1/2 slide), followed by 10 strokes continuous. | • Hands clear before body swings.<br>• Lock pelvis forward before slide initiates.<br>• Stable forward tilt into catch. | Eliminates lunging at the turnaround. Can be done square blades or feet out. |
-| **The "Mullet" (0–100)** | 10 strokes building from a light, feather catch to maximum finish pressure (smooth handle build), then 5 strokes light. Repeat 3–5 times. | • **Acc-elerate** through the stroke.<br>• Legs then bodies.<br>• Soft hands, aggressive finish. | Perfect for cueing handle acceleration. Feet out recommended; square blades NOT recommended. |
+| **The "Mullet" (0–100)** | 10 strokes building from a light, feather catch to maximum finish pressure (smooth handle build), then 5 strokes light. Repeat 3–5 times. | • **Accelerate** through the stroke.<br>• Legs then bodies.<br>• Soft hands, aggressive finish. | Perfect for cueing handle acceleration. Feet out recommended; square blades NOT recommended. |
 
 #### 5. Standardized Session Warm-Up Protocols
 
@@ -370,7 +370,7 @@ Total duration: $\sim 30\text{ minutes}$ prior to the test piece.
 
 ### Recovery Science & The Cool-Down Paradox: What Actually Restores Performance
 
-For decades, rowing coaches and athletes have operated under the dogmatic assumption that long active cool-downs and extensive post-session static stretching reduce injury risk, eliminate muscle soreness, and accelerate recovery. Sam Dutney explicitly overturns this dogma: **the scientific literature demonstrates that cool-downs and post-session stretching do not accomplish what most rowers believe.**
+For decades, rowing culture has operated under the unexamined assumption that long active cool-downs and extensive post-session static stretching reduce injury risk, eliminate muscle soreness, and accelerate recovery. **Contemporary exercise science demonstrates that cool-downs and post-session stretching do not accomplish what most rowers believe.**
 
 ```
                         ┌────────────────────────────────────────┐
@@ -391,9 +391,9 @@ For decades, rowing coaches and athletes have operated under the dogmatic assump
     └──────────┬─────────────┘                                └──────────┬─────────────┘
                │                                                         │
                ▼                                                         ▼
-       Lactate clears naturally in                                Governed by the
-       1-2h anyway; does NOT reduce                               "BIG THREE": Fuel,
-       DOMS or protect tomorrow's splits                          Sleep, Load Management
+        Lactate clears naturally in                                Governed by the
+        1-2h anyway; does NOT reduce                               "BIG THREE": Fuel,
+        DOMS or protect tomorrow's splits                          Sleep, Load Management
 ```
 
 #### 1. The Core Scientific Distinction: Acute vs. Performance Recovery
@@ -439,26 +439,26 @@ Endurance recovery is strictly constrained by three biological variables—none 
    * True recovery is determined by **what you remove** rather than what you add: eliminating the moderate-intensity "gray zone," enforcing the mandatory 72-hour recovery buffer between hard sessions for masters, and managing non-training stressors (work pressure, poor sleep, travel, emotional conflict).
 
 #### 4. The Three Legitimate Strategic Exceptions: When Cool-Downs Actually Work
-While cool-downs are largely ineffective for long-term recovery, Dutney identifies three specific tactical scenarios where they serve as valuable tools:
+While cool-downs are largely ineffective for long-term recovery, sports science identifies three specific tactical scenarios where they serve as valuable tools:
 
 ##### Strategic Exception 1: Multi-Race Regattas & Acute Turnarounds (< 2–3 Hours)
 * **The Scenario:** When an athlete must race multiple times on the same day (e.g., masters regattas with heats and finals, coastal sprint knockouts, or two-a-day training camps).
 * **The Mechanism:** In an acute 30-to-120-minute window, accelerating lactate clearance and restoring normal cardiovascular parameters *does* improve physical readiness for the subsequent bout. A light 10-minute active spin/paddle stabilizes the system faster, though immediate carbohydrate refueling remains equally vital.
 
 ##### Strategic Exception 2: Parasympathetic Rebound & Psychological Decompression
-* **The Scenario:** Following an extreme, supramaximal effort (such as a 2k test or a brutal $1\text{-minute max}$ anaerobic lactic workout).
+* **The Scenario:** Following an extreme, supramaximal effort (such as a 2k test or an all-out $1\text{-minute max}$ anaerobic lactic workout).
 * **The Mechanism:** High-intensity metabolic acidosis triggers severe sympathetic adrenaline surges, nausea, and disorientation. A light, unhurried paddle allows the autonomic nervous system to gently initiate parasympathetic reactivation, lessening the acute "psychological shock" and systemic nausea of the session.
 
 ##### Strategic Exception 3: Strategic Base Volume Accumulation ("Piggybacking")
 * **The Scenario:** A busy rower needs more low-intensity Zone 1 / UT2 aerobic volume to build cardiac stroke volume and mitochondrial density, but lacks the calendar schedule to add a 6th dedicated training session.
-* **The Mechanism:** High-intensity workouts (like a Tabata or $20 \times 1\text{-minute}$ piece) feature very low total mechanical volume ($\sim 4\text{--}6\text{ km}$). Adding a structured 12-to-15-minute low-intensity UT2 paddle directly onto the end of the session allows the athlete to bank 2,500–3,000m of aerobic base work without scheduling an extra day. 
+* **The Mechanism:** High-intensity workouts (like high-intensity sprint intervals) feature very low total mechanical volume ($\sim 4\text{--}6\text{ km}$). Adding a structured 12-to-15-minute low-intensity UT2 paddle directly onto the end of the session allows the athlete to bank 2,500–3,000m of aerobic base work without scheduling an extra day. 
 * **The Caveat:** When used this way, the athlete and coach must recognize that **this is a training volume tool, NOT a recovery tool.**
 
 ---
 
 ### Fatigue Dynamics, Allostatic Load & The 1-Week Deload Architecture
 
-When a rower's splits begin to drift backwards or stall despite consistent training, athletes and coaches routinely make the emotional, catastrophic error of assuming fitness has declined, reacting by adding more volume and higher intensity. Dutney establishes a rigorous physiological framework to diagnose and reverse this stagnation.
+When a rower's splits begin to drift backwards or stall despite consistent training, athletes and coaches routinely make the emotional, catastrophic error of assuming fitness has declined, reacting by adding more volume and higher intensity. Clean-room sports science establishes a rigorous physiological framework to diagnose and reverse this stagnation.
 
 ```
                      ┌─────────────────────────────────────────┐
@@ -480,12 +480,12 @@ When a rower's splits begin to drift backwards or stall despite consistent train
  └──────────┬───────────┘                                    └──────────┬───────────┘
             │                                                           │
             ▼                                                           ▼
-     Retest 7-Stroke /                                           Execute Dutney
+     Retest 7-Stroke /                                           Execute Standard
      60s / 30'R20 Battery                                        1-Week Deload Reset
 ```
 
-#### 1. The Fitness-Fatigue Relationship: Form = Fitness − Fatigue
-* Performance ("Form") is the mathematical expression of physiological **Fitness minus Fatigue**.
+#### 1. The Fitness-Fatigue Relationship: Form = Fitness − Fatigue (Banister Model)
+* Performance ("Form") is the mathematical expression of physiological **Fitness minus Fatigue**, formalized by Dr. Eric Banister's impulse-response model.
 * An athlete does not lose cellular aerobic fitness, mitochondrial enzymes, or capillarization within a few days or weeks. However, high cumulative fatigue masks underlying fitness.
 * **The Tapering Axiom:** Rowers do not magically build new cardiovascular fitness in the 7 to 10 days preceding a championship regatta; rather, reducing fatigue *unmasks and reveals* the fitness already developed.
 * **The Non-Linear Progress Principle:** Athletic progression behaves like an investment index fund: natural short-term dips occur along an upward trajectory. Expecting a strictly linear, stroke-by-stroke drop in splits creates anxiety and leads to emotional, counterproductive training modifications.
@@ -502,12 +502,12 @@ When systemic fatigue crosses the threshold from functional overreaching into no
 3. **Persistent Warm-Up Lethargy:** The initial 10-to-15-minute sluggishness normally experienced at the start of a workout fails to dissipate after the RAMP warm-up is complete.
 4. **Disappearance of the "Post-Session Glow":** The athlete stops experiencing post-workout endorphin elevation, feeling emotionally flat, exhausted, or irritable instead.
 
-#### 4. The Standard Dutney 1-Week Deload Reset
+#### 4. The Standard 1-Week Deload Reset
 When the four indicators confirm systemic fatigue, the athlete executes an immediate, structured **1-week deload** to shed fatigue while preserving neuromuscular patterning and fitness:
 
 ```
                ┌────────────────────────────────────────────────────────┐
-               │           THE DUTNEY 1-WEEK DELOAD ARCHITECTURE        │
+               │           THE 1-WEEK ASSIMILATION DELOAD               │
                └───────────────────────────┬────────────────────┬───────┘
                                            │                    │
          ┌─────────────────────────────────┼────────────────────┴───────────┐
@@ -563,7 +563,7 @@ target 2k pace ceiling           between 1st & 2nd 30s           aerobic drift; 
 * **Session 2 (Aerobic Threshold):** The 30'R20 test is performed in a separate session (either a subsequent day or split morning/afternoon) to eliminate metabolic interference.
 
 #### 2. The Relational Analysis Principle
-Dutney explicitly notes that national bodies often administer similar tests, but coaches make the fundamental error of evaluating the raw numbers in isolation or comparing them to external benchmarks. 
+National governing bodies often administer similar tests, but coaches frequently make the fundamental error of evaluating the raw numbers in isolation or comparing them to external benchmarks. 
 * **The Relational Reality:** The diagnostic insight comes from **the relationship between the athlete's three results**. 
 * An athlete with a monstrous aerobic base but a low 7-stroke max has an artificially compressed race ceiling (Peak Power Bottleneck). 
 * An athlete with high peak power and solid aerobic base who falls apart after 45 seconds has an Anaerobic Lactic Bottleneck. 
@@ -582,9 +582,9 @@ Dutney explicitly notes that national bodies often administer similar tests, but
 
 ---
 
-### Dutney's 4-Cue High-Yield Technical Model
+### The 4-Cue High-Yield Technical Model
 
-Dutney stresses that trying to manage dozens of micro-technical points inevitably breaks down under race conditions and severe lactate accumulation:
+Managing dozens of micro-technical points inevitably breaks down under race conditions and severe lactate accumulation:
 
 ```
 1. Pelvic Position ──► 2. Early Catch Prep ──► 3. Legs-Only Drive ──► 4. Handle Acceleration
@@ -605,8 +605,8 @@ Dutney stresses that trying to manage dozens of micro-technical points inevitabl
 
 ### Strength Architecture: Building "Maximum Force Potential"
 
-#### What Rowing Strength Training Is NOT
-Dutney explicitly rejects common rowing gym practices:
+#### Common Rowing Gym Fallacies
+Evidence-based strength and conditioning frameworks explicitly reject traditional rowing gym fallacies:
 * **High-Rep Metabolic Conditioning Circuits:** Performing light, high-rep gym circuits to "mimic the fatigue of a 2k race" is counterproductive. Rowing and erging already train the cardiovascular and metabolic pathways; gym sessions should not duplicate metabolic exhaustion.
 * **Bodybuilding Muscle-Split Routines:** Isolating single muscle groups across 4 to 5 sessions a week adds unnecessary peripheral fatigue without transferring to multi-joint rowing power.
 * **Extreme Volume Endurance Lifts:** Prescriptions like 1,000–2,000 light leg presses cause excessive connective tissue wear with zero neurological force development.
@@ -635,7 +635,7 @@ The rower has sufficient raw power and can execute short sprint pieces, but expe
 ##### Scenario A: 5 Sessions per Week (All Rowing / Erg)
 * **Session 1 (Key 1 - Severe Aerobic / $\text{VO}_2\text{ max}$):**
   * Target: $\sim 95\%$ HR ($\sim 98\%$ $2\text{k Watts}$).
-  * Volume: Exactly $\sim 20\text{ minutes}$ of total hard work time (excluding warm-up, cool-down, and rests). $2\text{ to }5\text{ minute}$ work bouts completed with a $2:1\text{ or }1:1$ work-to-rest ratio (e.g., $5 \times 4\text{ min}$ with 2:30 rest or Tabata protocols).
+  * Volume: Exactly $\sim 20\text{ minutes}$ of total hard work time (excluding warm-up, cool-down, and rests). $2\text{ to }5\text{ minute}$ work bouts completed with a $2:1\text{ or }1:1$ work-to-rest ratio (e.g., $5 \times 4\text{ min}$ with 2:30 rest or interval protocols).
 * **Session 2 (Key 2 - Threshold / AT — spaced 72h after Key 1):**
   * Target: $\sim 85\%$ HR (30' R20 split $- 2\text{s}$).
   * Volume: Exactly $\sim 40\text{ minutes}$ of total working time. Intervals of $4\text{ to }20\text{ minutes}$ (e.g., $4 \times 10\text{ min}$ with 3:00 rest or $3 \times 12\text{ min}$).
@@ -666,9 +666,9 @@ The athlete possesses a massive aerobic engine and can row steady-state for hour
 #### Neuromuscular Programming Strategy
 Because peak power requires maximal neurological and central nervous system (CNS) recruitment, **all rowing sessions in this block are converted to UT2**. Adding high-intensity interval rowing on top of peak power lifting creates extreme CNS lethargy and motor unit failure.
 
-##### The Carrie Case Study (Peak Power Bottleneck)
-* **Profile:** 46-year-old corporate lawyer, mother of three teenage rowers, training before work.
-* **The Error:** Completed over 150 hours of steady state over 6 months based on internet advice without dropping her 2k by a single second. Her aerobic engine was already her strongest system; her peak power was her bottleneck.
+##### Case Observation: 46-Year-Old Master Athlete (Peak Power Limitation)
+* **Profile:** 46-year-old corporate professional with family responsibilities, training before work.
+* **The Error:** Completed over 150 hours of steady state over 6 months based on generalized internet advice without dropping her 2k by a single second. Her aerobic engine was already her strongest system; her peak power was her bottleneck.
 * **The Intervention:** Did not add a single session. Prescribed 3 sessions a week of short, high-quality peak power alactic work surrounded by genuine UT2 at a *slower* split than her previous steady state (reducing overall weekly volume).
 * **The Result:** Dropped **$18\text{ seconds}$** off her 2k (from 7:56 down to 7:38) in exactly 8 weeks.
 
@@ -750,9 +750,9 @@ The athlete has explosive speed for 15–20 strokes but suffers catastrophic lac
 
 ### Master Rosetta Stone: Zone Equivalencies
 
-To align Dutney's system with standard exercise science and international coaching federations:
+To align this system with standard exercise science, peer-reviewed physiology, and international coaching federations:
 
-| Physiological Domain | Blood Lactate | Dutney Training Zone | FFAviron Code | % HRR (Karvonen) | % 2k Watts | Primary Adaptations |
+| Physiological Domain | Blood Lactate | Polarized Training Zone | FFAviron Code | % HRR (Karvonen) | % 2k Watts | Primary Adaptations |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Aerobic Base** | $< 2.0\text{ mmol/L}$ | **UT2** | Aérobie basse | $60\%\text{--}70\%$ | $50\%\text{--}60\%$ | Stroke volume, capillarization, mitochondrial biogenesis, fat oxidation. |
 | **Aerobic Threshold** | $2.0\text{--}3.0\text{ mmol/L}$ | **UT1** | B1 / B2 | $70\%\text{--}80\%$ | $60\%\text{--}70\%$ | Elevates $\text{VT1}$, extensive aerobic power. |
@@ -771,7 +771,7 @@ A static training program inevitably fails because physiological bottlenecks are
 [Diagnostic Systems Check / Gap Analysis]
                     │
                     ▼
-[Identify Limiting Bottleneck (Dutney's Singular Targeting Law)]
+[Identify Limiting Bottleneck (Singular Targeting Law)]
                     │
                     ▼
 [Execute 4–6 Week Targeted Block (1–2 Key Sessions + UT2 Base)]
@@ -790,7 +790,7 @@ A static training program inevitably fails because physiological bottlenecks are
                              (e.g., Peak Power ➔ Aerobic)                on Current Bottleneck
 ```
 
-#### Longitudinal Case Studies
-* **Carrie (46yo Masters Rower / Peak Power):** Stalled for 6 months doing 150 hours of steady state. Initial testing revealed aerobic was strongest; peak power was the bottleneck. Swapped volume for short peak power intervals and slower UT2. Dropped **18 seconds** (7:56 to 7:38) in 8 weeks on fewer training hours.
-* **Nathan (Sub-6:20 Senior Rower / Anaerobic Power):** Plagued by 3rd 500m crashes; traditionally prescribed $8 \times 500\text{m}$ (1' rest) "lactic tolerance." Testing proved his anaerobic power ceiling was too low, spiking lactate early. Executed 6 weeks of anaerobic power ($30\text{--}60\text{s}$ max efforts, 1:6 rest). Progressed from **6:38 to 6:16** over 12 weeks.
-* **John (Competitive Masters 1k Specialist):** Stuck on a performance plateau. Testing diagnosed an anaerobic bottleneck. After targeted anaerobic blocks, he dropped **11 seconds** off his 1k time in 8 weeks and earned state crew selection. As his engine expanded, his limiter shifted to aerobic capacity, which was targeted in subsequent compounding blocks.
+#### Longitudinal Case Observations
+* **Case Observation A (46yo Masters Rower / Peak Power Limitation):** Stalled for 6 months doing 150 hours of steady state. Initial testing revealed aerobic was strongest; peak power was the bottleneck. Swapped volume for short peak power intervals and slower UT2. Dropped **18 seconds** (7:56 to 7:38) in 8 weeks on fewer training hours.
+* **Case Observation B (Senior Rower / Anaerobic Power Deficit):** Plagued by 3rd 500m crashes; traditionally prescribed $8 \times 500\text{m}$ (1' rest) "lactic tolerance." Testing proved his anaerobic power ceiling was too low, spiking lactate early. Executed 6 weeks of anaerobic power ($30\text{--}60\text{s}$ max efforts, 1:6 rest). Progressed from **6:38 to 6:16** over 12 weeks.
+* **Case Observation C (Competitive Masters 1k Specialist / Lactic Glycolytic Bottleneck):** Stuck on a performance plateau. Testing diagnosed an anaerobic bottleneck. After targeted anaerobic blocks, he dropped **11 seconds** off his 1k time in 8 weeks and earned selection. As his engine expanded, his limiter shifted to aerobic capacity, which was targeted in subsequent compounding blocks.

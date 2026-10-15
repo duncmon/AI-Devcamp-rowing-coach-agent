@@ -11,7 +11,7 @@ from rowing_coach.agent import intervals_toolset, research_agent, root_agent, sk
 def test_root_agent_structure():
     assert isinstance(root_agent, Agent)
     assert root_agent.name == "rowing_coach"
-    assert "Sam Dutney" in root_agent.instruction
+    assert "evidence-based" in root_agent.instruction.lower()
     assert "masters-rowing-rules" in root_agent.instruction
 
 
@@ -40,7 +40,7 @@ def test_subagent_researcher():
     assert isinstance(research_agent, Agent)
     assert research_agent.name == "rowing_researcher"
     assert "google_search" in [t.name if hasattr(t, "name") else str(t) for t in research_agent.tools]
-    assert "Saint-Chamas" in research_agent.instruction
+    assert "Base Nautique du Lac" in research_agent.instruction
     assert "avironsudpaca" in research_agent.instruction
 
 

@@ -139,12 +139,12 @@
       ]
     },
     "2": {
-      "focus": "Sam Dutney Diagnostic Testing Battery",
+      "focus": "Diagnostic Testing Battery",
       "target_volume_hours": 3.5,
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney Test 3: 30' Rate 20 Aerobic Benchmark",
+          "title": "Diagnostic Test 3: 30' Rate 20 Aerobic Benchmark",
           "warmup": "Protocol A (15 min)",
           "main_workout": "30-Minute Rate 20 Max Distance Test (strict 20 SPM cap)",
           "target_watts_pct": "Maximal sustainable aerobic power (determines P(2k) = P(30r20) / 0.725)",
@@ -153,7 +153,7 @@
         },
         {
           "priority": 2,
-          "title": "Dutney Tests 1 & 2: Anaerobic Battery & UT3",
+          "title": "Diagnostic Tests 1 & 2: Anaerobic Battery & UT3",
           "warmup": "Protocol B (20 min)",
           "main_workout": "Test 1: 7-Stroke Peak Power (dead stop) + 10' easy spin + Test 2: 60s All-Out Max (34-38 SPM) + 20 min UT3 easy paddle",
           "target_watts_pct": "Maximal alactic peak (Test 1), 140-160%+ Watts 2k (Test 2), <50% Watts 2k (UT3)",
@@ -186,7 +186,7 @@
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney Anaerobic Capacity (AN Power)",
+          "title": "Anaerobic Capacity (AN Power)",
           "warmup": "Protocol B (22 min)",
           "main_workout": "5 x 45s max effort (Rest: 6:00 full recovery between reps)",
           "target_watts_pct": "145% to 155%+ Watts 2k",
@@ -265,12 +265,12 @@
       ]
     },
     "5": {
-      "focus": "Sam Dutney Anaerobic Threshold (AT) Introduction",
+      "focus": "Anaerobic Threshold (AT) Introduction",
       "target_volume_hours": 4.0,
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney Anaerobic Threshold (AT) Intro",
+          "title": "Anaerobic Threshold (AT) Intro",
           "warmup": "Protocol C (16 min)",
           "main_workout": "3 x 7 min @ AT (Rest: 1:00 active paddle)",
           "target_watts_pct": "78% to 82% Watts 2k",
@@ -307,12 +307,12 @@
       ]
     },
     "6": {
-      "focus": "Full-Format Dutney AT (4x8') & Wolverine L2 (3x2000m)",
+      "focus": "Full-Format AT (4x8') & Wolverine L2 (3x2000m)",
       "target_volume_hours": 4.25,
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney Full Anaerobic Threshold (4 x 8 min)",
+          "title": "Full Anaerobic Threshold (4 x 8 min)",
           "warmup": "Protocol C (16 min)",
           "main_workout": "4 x 8 min @ AT (Rest: 1:00 active paddle) = 32 min accumulated at threshold",
           "target_watts_pct": "80% to 84% Watts 2k",
@@ -354,7 +354,7 @@
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney Anaerobic Capacity Overload",
+          "title": "Anaerobic Capacity Overload",
           "warmup": "Protocol B (22 min)",
           "main_workout": "6 x 45s maximal effort (Rest: 6:00 mandatory recovery)",
           "target_watts_pct": "145% to 160% Watts 2k",
@@ -489,7 +489,7 @@
         },
         {
           "priority": 2,
-          "title": "Dutney Extended Anaerobic Capacity",
+          "title": "Extended Anaerobic Capacity",
           "warmup": "Protocol B (20 min)",
           "main_workout": "5 x 1 min (Rest: 6:00 full recovery)",
           "target_watts_pct": "140% to 150% Watts 2k",
@@ -517,12 +517,12 @@
       ]
     },
     "11": {
-      "focus": "Critical Aerobic Power (Sam Dutney Tabata) & Race Repetitions",
+      "focus": "Critical Aerobic Power (High-Intensity Tabata) & Race Repetitions",
       "target_volume_hours": 4.25,
       "sessions": [
         {
           "priority": 1,
-          "title": "Dutney / Izumi Tabata High-Intensity Protocol",
+          "title": "Tabata High-Intensity Protocol (8x20/10)",
           "warmup": "Protocol B (22 min thorough)",
           "main_workout": "8 x (20s all-out / 10s rest) = Exactly 4 minutes total work",
           "target_watts_pct": "140% to 160% Watts 2k (repeatable high power)",
