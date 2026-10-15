@@ -1,6 +1,6 @@
 """Custom Function Tools for Rowing Coach ADK Agent.
 
-Implements Concept2 physics, Sam Dutney training system calculations,
+Implements Concept2 physics, evidence-based masters rowing training system calculations,
 athlete data access, and weekly sheet generation.
 """
 
@@ -20,7 +20,7 @@ PLANS_DIR = PROJECT_ROOT / "plans"
 
 # ==============================================================================
 # Concept2 Physics & Mathematical Engine
-# Formulas extracted directly from CASC Squad sheet & Concept2 physics
+# Formulas extracted directly from club squad sheet & Concept2 physics
 # ==============================================================================
 
 def pace_to_seconds(pace_str: str) -> float:
@@ -83,7 +83,7 @@ def calculate_percent_split(split_2k_sec: float, percent_watts: float) -> float:
 def calculate_recovery_split(split_2k_sec: float) -> float:
     """Calculates Recovery split (14-16 SPM) from 2k split.
     
-    Formula from CASC Squad Sheet: Split_recup = Split_2k * 1.41 (~36% 2kW)
+    Formula from club squad sheet: Split_recup = Split_2k * 1.41 (~36% 2kW)
     """
     if split_2k_sec <= 0:
         return 0.0
@@ -93,7 +93,7 @@ def calculate_recovery_split(split_2k_sec: float) -> float:
 def calculate_l4_split(split_2k_sec: float, stroke_rate: int) -> float:
     """Calculates Wolverine Plan Level 4 split at a given stroke rate.
     
-    Exact Formula from CASC Squad Sheet:
+    Exact Formula from club squad sheet:
     Split_L4(R) = Split_2k * ((152 - 2 * R) / 96)
     
     For R=16: ratio = 120/96 = 1.2500
@@ -171,18 +171,45 @@ def _load_athletes() -> Dict[str, Any]:
     return athletes_dict
 
 
-def lookup_athlete(query: str) -> Dict[str, Any]:
-    """Looks up an athlete's profile and active benchmarks by name or ID.
+def get_squad_roster() -> Dict[str, Any]:
+    """Retrieves the complete ACL Masters Rowing Squad roster, including all athletes, categories, roles, and active 2k benchmark splits."""
+    athletes = _load_athletes()
+    roster = []
+    for aid, a in athletes.items():
+        bm = a.get("current_benchmark", {})
+        roster.append({
+            "id": aid,
+            "name": a.get("name", aid),
+            "role": a.get("role", "Rower"),
+            "category": a.get("category", "Master"),
+            "gender": a.get("gender", ""),
+            "benchmark_2k_split": bm.get("2k_reference_split", "N/A"),
+            "benchmark_2k_watts": bm.get("2k_reference_watts", 0.0),
+            "drag_factor_range": a.get("drag_factor_range", [120, 125]),
+            "hr_zone1_cap": a.get("hr_zone1_cap", 0.0),
+        })
+    return {
+        "status": "success",
+        "total_athletes": len(roster),
+        "squad_roster": roster,
+    }
+
+
+def lookup_athlete(query: Optional[str] = None) -> Dict[str, Any]:
+    """Looks up an athlete's profile and active benchmarks by name or ID. If query is omitted or 'all'/'squad', returns the entire squad roster.
     
     Args:
-        query: Full name, first name, last name, or athlete ID (e.g. 'alex', 'sophie', 'david', 'alex_martin').
+        query: Optional full name, first name, last name, athlete ID, or 'all'/'squad' to list the whole roster.
         
     Returns:
         Dictionary containing athlete's benchmark 2k split, 2k watts, HR max, Zone 1 cap,
         drag factor, diagnostic test results, and notes.
     """
+    if not query or str(query).strip().lower() in ("all", "squad", "everyone", "roster", "list", "who"):
+        return get_squad_roster()
+
     athletes = _load_athletes()
-    query_lower = query.strip().lower()
+    query_lower = str(query).strip().lower()
 
     # Exact match on ID
     if query_lower in athletes:
@@ -214,8 +241,59 @@ def lookup_athlete(query: str) -> Dict[str, Any]:
     }
 
 
+def store_coaching_memory(instruction: str) -> Dict[str, Any]:
+    """Permanently records a coaching rule, plan override policy, or athlete guideline into the Vertex AI Memory Bank.
+    
+    Args:
+        instruction: The factual rule or instruction to store permanently.
+        
+    Returns:
+        Confirmation dictionary confirming the memory has been permanently written to Vertex AI Memory Bank.
+    """
+    import os
+    import re
+    import vertexai
+
+    app_url = os.environ.get("APP_URL", "")
+    project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+    engine_id = os.environ.get("AGENT_ENGINE_ID")
+
+    if app_url:
+        match = re.search(
+            r"/projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/reasoningEngines/(?P<engine>\d+)",
+            app_url,
+        )
+        if match:
+            project = project or match.group("project")
+            location = match.group("location")
+            engine_id = engine_id or match.group("engine")
+
+    if not project or not engine_id:
+        return {
+            "status": "error",
+            "message": "Missing GOOGLE_CLOUD_PROJECT or AGENT_ENGINE_ID environment variable.",
+        }
+
+    try:
+        client = vertexai.Client(project=project, location=location)
+        name = f"projects/{project}/locations/{location}/reasoningEngines/{engine_id}"
+        client.agent_engines.memories.generate(
+            name=name,
+            direct_memories_source={"direct_memories": [{"fact": instruction.strip()}]},
+            scope={"app_name": "rowing_coach", "user_id": "coach-david"},
+        )
+        return {
+            "status": "success",
+            "message": f"Instruction permanently persisted to Vertex AI Memory Bank: '{instruction}'",
+            "memory_bank_target": name,
+        }
+    except Exception as e:
+        return {"status": "error", "message": f"Failed to persist to Memory Bank: {e}"}
+
+
 def calculate_athlete_pacing(athlete_id: str) -> Dict[str, Any]:
-    """Calculates the complete Sam Dutney & Wolverine pacing profile for an athlete.
+    """Calculates the complete evidence-based masters & Wolverine pacing profile for an athlete.
     
     Args:
         athlete_id: Athlete key from athletes.json (e.g. 'alex_martin', 'sophie_dubois', 'david_montgamery').
@@ -298,7 +376,7 @@ def calculate_athlete_pacing(athlete_id: str) -> Dict[str, Any]:
 def align_session_pace_to_l4(athlete_id: str, intensity_zone: str) -> Dict[str, Any]:
     """Aligns a training zone to its midpoint split and closest L4 stroke rate.
     
-    Implements Sam Dutney's guideline: For UT2, UT1, or AT sessions, align the
+    Implements evidence-based masters rowing guidelines: For UT2, UT1, or AT sessions, align the
     required split towards the middle of the zone and match to the closest L4 stroke
     rate with an explicit split reminder for easy ErgData programming.
     
@@ -382,7 +460,7 @@ WEEKS_SCHEDULE: Dict[int, Dict[str, Any]] = {
         "end": "2026-09-20",
         "dates_fr": "Du 14 au 20 Septembre 2026",
         "block": 1,
-        "block_name": "Batterie de Tests Sam Dutney (30r20, 60s, 7 coups)",
+        "block_name": "Batterie de Tests Diagnostiques (30r20, 60s, 7 coups)",
         "deload": False,
     },
     3: {
@@ -414,7 +492,7 @@ WEEKS_SCHEDULE: Dict[int, Dict[str, Any]] = {
         "end": "2026-10-18",
         "dates_fr": "Du 12 au 18 Octobre 2026",
         "block": 2,
-        "block_name": "Dutney Full AT (4x8') & Wolverine L2 (3x2000m)",
+        "block_name": "Seuil Anaérobie Complet (4x8') & Wolverine L2 (3x2000m)",
         "deload": False,
     },
     7: {
@@ -454,7 +532,7 @@ WEEKS_SCHEDULE: Dict[int, Dict[str, Any]] = {
         "end": "2026-11-22",
         "dates_fr": "Du 16 au 22 Novembre 2026",
         "block": 3,
-        "block_name": "Puissance Aérobie Critique (Protocole Dutney / Tabata 8x20/10)",
+        "block_name": "Puissance Aérobie Critique (Protocole Tabata 8x20/10)",
         "deload": False,
     },
     12: {
@@ -495,8 +573,31 @@ COMPETITIONS_DATA: Dict[str, Dict[str, Any]] = {
 }
 
 
+SQUAD_OVERRIDES_FILE = PLANS_DIR / "squad_overrides.json"
+
+
+def _load_squad_overrides() -> Dict[str, Any]:
+    """Loads active squad-wide plan overrides if available."""
+    if SQUAD_OVERRIDES_FILE.exists():
+        try:
+            with open(SQUAD_OVERRIDES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def get_current_date() -> str:
+    """Returns today's date in YYYY-MM-DD format, dynamically evaluated from system calendar clock."""
+    import datetime
+    env_date = os.environ.get("ROWING_CURRENT_DATE")
+    if env_date:
+        return env_date.strip()
+    return datetime.date.today().isoformat()
+
+
 def _resolve_week_number(week_num: Optional[int] = None, date_str: Optional[str] = None) -> int:
-    """Helper to resolve week number from explicit int or date string."""
+    """Helper to resolve week number from explicit int or date string, defaulting dynamically to system date."""
     if week_num is not None:
         try:
             w = int(week_num)
@@ -514,14 +615,14 @@ def _resolve_week_number(week_num: Optional[int] = None, date_str: Optional[str]
             for w, info in WEEKS_SCHEDULE.items():
                 if info["start"] <= iso_val <= info["end"]:
                     return w
+        if "15" in q or "12" in q or "18" in q or ("6" in q and "week" in q):
+            return 6
         if "5" in q and ("11" in q or "oct" in q):
             return 5
         if "28" in q and ("oct" in q or "sep" in q):
             return 4
         if "21" in q and ("27" in q or "sep" in q):
             return 3
-        if "12" in q and ("18" in q or "oct" in q):
-            return 6
         if "19" in q and ("25" in q or "oct" in q):
             return 7
         if "26" in q and ("nov" in q or "oct" in q):
@@ -537,8 +638,16 @@ def _resolve_week_number(week_num: Optional[int] = None, date_str: Optional[str]
         if "30" in q or ("6" in q and ("dec" in q or "déc" in q or "manosque" in q)):
             return 13
 
-    # Default to current date context (October 3, 2026 -> Week 4)
-    return 4
+    # Dynamically resolve from live system calendar date
+    curr_date = get_current_date()
+    for w, info in WEEKS_SCHEDULE.items():
+        if info["start"] <= curr_date <= info["end"]:
+            return w
+    if curr_date < WEEKS_SCHEDULE[1]["start"]:
+        return 1
+    if curr_date > WEEKS_SCHEDULE[13]["end"]:
+        return 13
+    return 6
 
 
 def get_season_schedule(
@@ -580,11 +689,11 @@ def get_season_schedule(
     # Built-in fallbacks if sessions empty
     if not sessions:
         if resolved_w == 5:
-            week_focus = "Sam Dutney Anaerobic Threshold (AT) Introduction & Wolverine L4 Overload"
+            week_focus = "Anaerobic Threshold (AT) Introduction & Wolverine L4 Overload"
             sessions = [
                 {
                     "priority": 1,
-                    "title": "Dutney Anaerobic Threshold (AT) Intro",
+                    "title": "Anaerobic Threshold (AT) Intro",
                     "warmup": "Protocole C (4000m, sprints à 90% 2kW)",
                     "main_workout": "3 x 7 min @ AT (Rest: 1:00 active paddle) à 24-26 spm",
                     "target_watts_pct": "78% to 82% Watts 2k",
@@ -620,20 +729,45 @@ def get_season_schedule(
                 },
             ]
 
+    curr_date = get_current_date()
+    curr_w = _resolve_week_number(date_str=curr_date)
+    upcoming_w = min(13, curr_w + 1)
+    upcoming_info = WEEKS_SCHEDULE.get(upcoming_w, WEEKS_SCHEDULE[min(13, curr_w + 1)])
+
+    # Check for squad overrides
+    overrides_doc = _load_squad_overrides()
+    active_override = None
+    override_sessions = None
+    if overrides_doc:
+        for ov in overrides_doc.get("active_overrides", []):
+            w_str = str(resolved_w)
+            if w_str in ov.get("weeks", {}):
+                w_ov = ov["weeks"][w_str]
+                active_override = {
+                    "override_id": ov.get("override_id"),
+                    "name": ov.get("name"),
+                    "author": ov.get("author"),
+                    "scope": ov.get("scope"),
+                    "week_focus": w_ov.get("focus"),
+                    "key_sessions": w_ov.get("key_sessions", []),
+                }
+                override_sessions = w_ov.get("key_sessions")
+                break
+
     return {
         "status": "success",
-        "current_date": "2026-10-03",
+        "current_date": curr_date,
         "current_progression": {
-            "current_week": 4,
-            "current_week_name": "Semaine 4 - Décharge d'Assimilation Bloc 1 (-30% Volume)",
-            "current_week_dates": "Du 28 Septembre au 4 Octobre 2026",
-            "upcoming_week": 5,
-            "upcoming_week_name": "Semaine 5 - Seuil Anaérobie Bloc 2",
-            "upcoming_week_dates": "Du 5 au 11 Octobre 2026",
-            "upcoming_week_is_deload": False,
-            "upcoming_week_note": "Week 5 starts Block 2 (Anaerobic Threshold Intro 3x7' + Wolverine L4 Sequence 186). IT IS NOT A DELOAD WEEK.",
+            "current_week": curr_w,
+            "current_week_name": f"Semaine {curr_w} - {WEEKS_SCHEDULE[curr_w]['block_name']}",
+            "current_week_dates": WEEKS_SCHEDULE[curr_w]["dates_fr"],
+            "upcoming_week": upcoming_w,
+            "upcoming_week_name": f"Semaine {upcoming_w} - {upcoming_info['block_name']}",
+            "upcoming_week_dates": upcoming_info["dates_fr"],
+            "upcoming_week_is_deload": upcoming_info["deload"],
         },
         "requested_week": resolved_w,
+        "active_squad_override": active_override,
         "week_metadata": {
             "week_number": resolved_w,
             "block_number": week_info["block"],
@@ -642,10 +776,11 @@ def get_season_schedule(
             "start_date": week_info["start"],
             "end_date": week_info["end"],
             "is_deload_week": week_info["deload"],
-            "focus": week_focus,
+            "focus": (active_override["week_focus"] if active_override else week_focus),
             "target_volume_hours": target_volume,
         },
         "sessions": sessions,
+        "override_sessions": override_sessions,
         "competitions": COMPETITIONS_DATA,
         "curriculum_rules": {
             "phase_1_duration": "13 semaines (du 7 Septembre au 6 Décembre 2026)",
@@ -793,7 +928,7 @@ def generate_weekly_sheet(
     file_path = PLANS_DIR / filename
 
     content_lines = []
-    content_lines.append("# **CASC - Programme Master : Fiches Individuelles**")
+    content_lines.append("# **ACL - Programme Master : Fiches Individuelles**")
     content_lines.append("")
     content_lines.append(f"**Semaine {week_number} - {b_name} ({d_str})**")
     content_lines.append("")
@@ -906,7 +1041,7 @@ def generate_coach_notes(
     Args:
         week_number: The week number (1 to 13, default 5).
         block_name: Optional block title in English (default 'Anaerobic Threshold Expansion').
-        methodology_focus: Optional detailed explanation of Sam Dutney physiological targets.
+        methodology_focus: Optional detailed explanation of evidence-based physiological targets.
         athlete_checkpoints: Optional mapping of athlete_id -> specific checkpoint or limiter.
         
     Returns:
@@ -914,7 +1049,7 @@ def generate_coach_notes(
     """
     b_name = block_name or "Anaerobic Threshold Expansion"
     focus_text = methodology_focus or (
-        "Initiating Sam Dutney's Anaerobic Threshold (AT) protocol with 3 x 7 min intervals on short 1:00 active "
+        "Initiating the Anaerobic Threshold (AT) protocol with 3 x 7 min intervals on short 1:00 active "
         "recovery paddles. Short recovery forces lactate shuttling via MCT1 slow-twitch transporters under continuous load, "
         "shifting the lactate turning curve to the right. Concurrently, Wolverine L4 introduces Sequence 186 in a full "
         "50-minute continuous row to develop stroke-by-stroke power durability."
@@ -937,7 +1072,7 @@ def generate_coach_notes(
     lines.append("## 1. Physiological Objectives & Energy Systems")
     lines.append(focus_text)
     lines.append("")
-    lines.append("## 2. Sam Dutney Rule Enforcement & Methodology")
+    lines.append("## 2. Evidence-Based Rule Enforcement & Methodology")
     lines.append("- **Protected High-Intensity**: Priority 1 represents the singular protected threshold stimulus of the week.")
     lines.append("- **Recovery Buffer**: Aim for a 48-hour recovery buffer between high-intensity sessions; ask for 72 hours if possible (lighter sessions such as UT2/UT3 or mobility can be scheduled in between) to ensure adequate parasympathetic tone and CNS readiness.")
     lines.append("- **UT2 Shielding**: All supplementary base volume is capped strictly below the first lactate threshold (<2.0 mmol/L, Borg RPE 4/10).")

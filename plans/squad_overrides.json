@@ -1,0 +1,88 @@
+{
+  "active_overrides": [
+    {
+      "override_id": "anaerobic_block_2026_w5_w8",
+      "name": "4-Week High-Intensity Anaerobic / Lactate Tolerance Block",
+      "author": "Coach David Montgamery",
+      "created_at": "2026-10-05",
+      "scope": "squad_wide",
+      "description": "Coach David modification overriding default Phase 1 schedule for Weeks 5 to 8 with progressive anaerobic / alactic sprints and full recovery intervals.",
+      "weeks": {
+        "5": {
+          "week_number": 5,
+          "dates": "2026-10-05 to 2026-10-11",
+          "focus": "Anaerobic Block Week 1: Alactic & Short Glycolytic Intro",
+          "key_sessions": [
+            {
+              "session_code": "AN1",
+              "name": "5 x 45s (r6')",
+              "intensity": "Maximal / Supramaximal (>110% 2k Watts)",
+              "work_interval": "45s",
+              "rest_interval": "6 min active paddle / passive recovery",
+              "description": "Explosive drive mechanics, maintaining stroke length under acute acidosis."
+            },
+            {
+              "session_code": "AN2",
+              "name": "7 x 30s (r5')",
+              "intensity": "All-out sprint cadence (32-36 spm)",
+              "work_interval": "30s",
+              "rest_interval": "5 min recovery",
+              "description": "Neuromuscular rate firing and instantaneous peak wattage output."
+            }
+          ]
+        },
+        "6": {
+          "week_number": 6,
+          "dates": "2026-10-12 to 2026-10-18",
+          "current_week": true,
+          "focus": "Anaerobic Block Week 2: Volume Overload on 45s Sprints",
+          "key_sessions": [
+            {
+              "session_code": "AN1_W6",
+              "name": "6 x 45s (r6')",
+              "intensity": "Maximal (>110% 2k Watts, 32-34 spm)",
+              "work_interval": "45s",
+              "rest_interval": "6 min active paddle / passive recovery",
+              "description": "Progressive overload from Week 5 (added 6th rep) with strict 6-minute recovery."
+            },
+            {
+              "session_code": "UT2_AERO",
+              "name": "Wolverine L4 / Steady Aerobic 60 min",
+              "intensity": "UT2 (70-75% HRmax, 16-20 spm)",
+              "description": "Aerobic buffering and metabolic flush."
+            }
+          ]
+        },
+        "7": {
+          "week_number": 7,
+          "dates": "2026-10-19 to 2026-10-25",
+          "focus": "Anaerobic Block Week 3: Extension to 60s Glycolytic Power",
+          "key_sessions": [
+            {
+              "session_code": "AN1_W7",
+              "name": "6 x 1min (r6')",
+              "intensity": "Maximal Anaerobic Capacity (105-110% 2k Watts)",
+              "work_interval": "1 min (60s)",
+              "rest_interval": "6 min active paddle / passive recovery",
+              "description": "Severe lactate accumulation tolerance; sustaining speed across the final 20 seconds."
+            }
+          ]
+        },
+        "8": {
+          "week_number": 8,
+          "dates": "2026-10-26 to 2026-11-01",
+          "focus": "Assimilation Deload 2 & Benchmark Official 2000m Time Trial",
+          "deload": true,
+          "key_sessions": [
+            {
+              "session_code": "2K_TEST",
+              "name": "Official Benchmark 2000m Chrono",
+              "intensity": "Race Pace 100% 2k",
+              "description": "Formal baseline test following the 4-week anaerobic block to recalibrate splits."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
