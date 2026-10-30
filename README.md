@@ -10,7 +10,20 @@
 > **GDG London AI DevCamp Hackathon Submission (31 October 2026)**  
 > An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Agent Runtime** with **Agent Identity**, **Vertex AI Memory Bank**, **Model Armor regional screening**, **Pure-ASGI PII redaction**, and an **Architectural Blueprint v0.2 multi-region router**. It implements an **evidence-based masters rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
 
-📖 **[Read the Full Documentation & Architecture Site](docs/index.html)** | 📄 **[Submission Critique & Design Rationale](docs/ARCHITECTURE_AND_SUBMISSION.md)**
+📖 **[Live Documentation Site (GitHub Pages)](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/)** | 🏃 **[4-Pillar Walkthrough & Run-Through](docs/walkthrough.html)** | 🛡️ **[Governance & PII Architecture](docs/governance-and-pii.html)** | 💰 **[Unit Economics & Telemetry](docs/cost-economics.html)** | 📄 **[Submission Design Critique](docs/ARCHITECTURE_AND_SUBMISSION.md)**
+
+---
+
+## 🏛️ The 4 Platform Pillars: Walkthrough & Verification
+
+Following the structure established in the DevCamp reference project (`ai-devcamp-labs`), the complete implementation and verification evidence is documented across the four Google Agent Platform pillars:
+
+| Platform Pillar | Scope & Capabilities | Verification & Walkthrough Proof | Core Architectural Invariants |
+| :--- | :--- | :--- | :--- |
+| **Pillar 1: Build** | Deterministic Physics, Progressive Skills & FastMCP | [**Pillar 1 Walkthrough**](docs/walkthrough.html#pillar-1) | Concept2 equations ($W = 2.80 / (s/500)^3$), Wolverine L4 stroke grid (@16-@28), 13-week Phase 1 curriculum, human confirmation gate (`require_confirmation=True`). |
+| **Pillar 2: Scale** | Agent Runtime, Durable Sessions & Memory Bank | [**Pillar 2 Walkthrough**](docs/walkthrough.html#pillar-2) | Vertex AI Reasoning Engine (`5062846700507365376`), Agent Identity (workload identity), persistent multi-turn sessions, scale-to-zero memory distillation callback. |
+| **Pillar 3: Govern** | Dedicated Model Armor & Reversible PII Vault | [**Governance & PII Deep-Dive**](docs/governance-and-pii.html) | Dedicated `rowing-coach-guardrails` in `us-central1`, Cloud DLP domestic phone regexes, Gate 1 & Gate 2 reversible token vault (`[ATHLETE_NAME_1]`), fail-closed orphan assertion (`VaultSafetyError`). |
+| **Pillar 4: Optimise** | Golden Evals, Fail-Closed Deploy Gate & Telemetry | [**Cost Economics & Eval Gate**](docs/cost-economics.html) | Golden eval suite (`refuse_dangerous_training_load`), mandatory tool rubrics (`rubric_based_tool_use_quality_v1`), exit-code 0 defense, and $0.00/mo cost floor under GCP Free Tier. |
 
 ---
 

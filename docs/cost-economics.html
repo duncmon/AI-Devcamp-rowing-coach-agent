@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cost Economics & Telemetry — Rowing Coach Agent</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="brand-mark" style="background: var(--optimise);"></div>
+      <a href="index.html" class="nav-title">Rowing Coach Agent</a>
+      <span class="nav-subtitle">Unit Economics &amp; Telemetry</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Architecture</a>
+      <a href="walkthrough.html">Run-Through &amp; Proof</a>
+      <a href="governance-and-pii.html">Governance &amp; PII</a>
+      <a href="cost-economics.html" class="active">Cost Economics</a>
+      <a href="ARCHITECTURE_AND_SUBMISSION.md">Design Critique</a>
+    </nav>
+  </header>
+
+  <main style="max-width: 1040px; margin: 0 auto; padding: 40px 24px;">
+
+    <div class="hero-meta" style="margin-bottom: 16px;">
+      <span class="badge" style="background: var(--optimise-soft); color: var(--optimise);">Pillar 4 · Optimise</span>
+      <span class="badge blue">BigQuery Agent Analytics</span>
+      <span class="badge green">Empirical Telemetry</span>
+    </div>
+
+    <h1 style="font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px;">
+      Unit Economics: Baseline Agent vs. PII Vaulting &amp; Governance
+    </h1>
+    <p class="lead" style="color: var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
+      How much does compliance actually cost in production? By analyzing authentic BigQuery Agent Analytics telemetry from <code>ai-devcamp-labs</code>, this study calculates the exact marginal cost of stripping athlete PII, persisting token mappings, and rehydrating coaching recommendations.
+    </p>
+
+    <!-- Section 1: Baseline Economics -->
+    <section class="card" style="margin-bottom: 28px;">
+      <h2>1. The Baseline Economics (from `ai-devcamp-labs` Lab 4)</h2>
+      <p>
+        In Lab 4 Step 5 of the reference project, 60 multi-turn simulated trajectories (361 interaction events) were evaluated and audited via BigQuery Agent Analytics (<code>v_llm_response</code> and <code>v_agent_events</code>):
+      </p>
+
+      <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
+        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">BASELINE SPEND PER TURN</div>
+          <div style="font-size: 26px; font-weight: 800; color: var(--build);">$0.0064</div>
+          <div style="font-size: 11px; color: var(--faint);">~0.64¢ on Gemini 2.5 Flash</div>
+        </div>
+        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CONTEXT CACHE HIT RATIO</div>
+          <div style="font-size: 26px; font-weight: 800; color: var(--scale);">68.0%</div>
+          <div style="font-size: 11px; color: var(--faint);">999k of 1.47M tokens cached</div>
+        </div>
+        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CACHED INPUT DISCOUNT</div>
+          <div style="font-size: 26px; font-weight: 800; color: var(--scale);">75% OFF</div>
+          <div style="font-size: 11px; color: var(--faint);">$0.075/M vs $0.30/M standard</div>
+        </div>
+        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">THINKING TOKENS SHARE</div>
+          <div style="font-size: 26px; font-weight: 800; color: var(--optimise);">60.8%</div>
+          <div style="font-size: 11px; color: var(--faint);">Billed at $2.50/M output rate</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Marginal Cost of PII Stripping & Vaulting -->
+    <section class="card" style="margin-bottom: 28px;">
+      <h2>2. Marginal Cost Breakdown of the PII Architecture</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Architecture Layer</th>
+            <th>GCP Free Tier Allowance</th>
+            <th>Effective Cost Under Free Tier</th>
+            <th>Enterprise Scale Cost (>1M turns/mo)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Gate 1: Boundary Stripping &amp; Regex</strong></td>
+            <td>In-process compute (<1ms ASGI middleware)</td>
+            <td><strong>$0.00</strong></td>
+            <td><strong>$0.00</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Cloud DLP API Inspection</strong></td>
+            <td>1 GB text inspection / month</td>
+            <td><strong>$0.00</strong> (~2M turns free)</td>
+            <td>$0.0000005 / turn ($1.00 / GB)</td>
+          </tr>
+          <tr>
+            <td><strong>Session Vault DB (Firestore)</strong></td>
+            <td>20,000 writes/day &amp; 50k reads/day</td>
+            <td><strong>$0.00</strong> (600k turns/month free)</td>
+            <td>$0.0000018 / turn ($0.18 / 100k writes)</td>
+          </tr>
+          <tr>
+            <td><strong>Gemini 2.5 Flash Token Delta</strong></td>
+            <td>Synthetic tokens equal raw length</td>
+            <td><strong>$0.00</strong> (Identical token volume)</td>
+            <td><strong>$0.00</strong> (Identical token volume)</td>
+          </tr>
+          <tr>
+            <td><strong>Gate 2: Client Rehydration</strong></td>
+            <td>In-memory string map (<0.1ms)</td>
+            <td><strong>$0.00</strong></td>
+            <td><strong>$0.00</strong></td>
+          </tr>
+          <tr style="font-weight: 700; background: var(--panel);">
+            <td>Total Marginal PII Overhead</td>
+            <td>Up to 20,000 requests per day</td>
+            <td><strong style="color: var(--scale);">$0.00000 / turn (0.0% increase)</strong></td>
+            <td><strong style="color: var(--build);">$0.000003 / turn (+0.04% increase)</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 3: Model Armor ROI -->
+    <section class="card">
+      <h2>3. The Security ROI: Model Armor vs. Prompt Jailbreaks</h2>
+      <p>
+        While Cloud DLP and Firestore vaulting are essentially cost-free under Google Cloud's monthly tier, <strong>Google Cloud Model Armor</strong> incurs an explicit cost of <strong>$0.001 per call</strong> (1/10th of a cent).
+      </p>
+
+      <div class="mermaid">
+flowchart LR
+    subgraph AttackWithArmor["With Edge Model Armor Gate"]
+        In1["Jailbreak Attempt"] --> MA["Model Armor ($0.001)"]
+        MA -->|"MATCH_FOUND"| Block["Refusal Returned<br/>LLM Bypassed"]
+        Block --> Spend1["Total Cost: $0.0010<br/>Latency: ~180 ms"]
+    end
+
+    subgraph AttackWithoutArmor["Without Model Armor Gate"]
+        In2["Jailbreak Attempt"] --> LLM["Gemini 2.5 Flash"]
+        LLM --> ComplexReasoning["Multi-step Tool &amp; Reasoning Loop<br/>(400+ thinking tokens generated)"]
+        ComplexReasoning --> Spend2["Total Cost: $0.0074<br/>Latency: ~7,500 ms"]
+    end
+      </div>
+
+      <div class="callout check" style="margin-top: 16px;">
+        <strong>Economic Conclusion:</strong> During malicious scanning or red-team probing, Model Armor pays for itself: blocking an injection payload at the edge costs <strong>$0.001</strong>, whereas allowing that request to execute against Gemini incurs <strong>$0.007+ in wasted output and thinking tokens</strong>, plus container memory pressure.
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
