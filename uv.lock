@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -45,6 +45,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "google-adk", extra = ["a2a", "eval"] },
+    { name = "google-cloud-dlp" },
+    { name = "google-cloud-modelarmor" },
     { name = "google-genai" },
     { name = "httpx" },
     { name = "python-dotenv" },
@@ -59,6 +61,8 @@ dev = [
 requires-dist = [
     { name = "fastmcp", specifier = "==3.4.4" },
     { name = "google-adk", extras = ["a2a", "eval"], specifier = "==2.4.0" },
+    { name = "google-cloud-dlp", specifier = ">=3.40.0" },
+    { name = "google-cloud-modelarmor", specifier = ">=0.7.4" },
     { name = "google-genai", specifier = "==2.11.0" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "python-dotenv", specifier = "==1.2.2" },
@@ -1104,6 +1108,38 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/71/d6081acadf55d4233271c39860f0d140ef61fbdb4bceb2075e9c2905d947/google_cloud_core-2.8.0.tar.gz", hash = "sha256:365f8e4518ae81c8101b8dea5fc1c32a960badedb8b511f19db2843cbbd285d2", size = 36605, upload-time = "2026-09-29T19:25:59.275Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/12/ed/1b09640a565e5d34d4e517463f65a67a11f9dcdeb6b6e8220f2d06aaf489/google_cloud_core-2.8.0-py3-none-any.whl", hash = "sha256:e235b0952f7ffe7b9c71a4cf96b506d9cfb557e22557c412f0df9b7068b5d007", size = 31048, upload-time = "2026-09-29T19:25:35.361Z" },
+]
+
+[[package]]
+name = "google-cloud-dlp"
+version = "3.40.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", extra = ["grpc"] },
+    { name = "google-auth" },
+    { name = "grpcio" },
+    { name = "proto-plus" },
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c5/cb/a32cab31feba7b60dad41dedbdc1d5445d39fa151761e6730a7782fee036/google_cloud_dlp-3.40.0.tar.gz", hash = "sha256:f2a42ab5c59a14f487b2c6e2a9d4c090c6a8bd2f58c5fbb0387dcfe9fb2beae7", size = 291646, upload-time = "2026-10-01T18:16:19.151Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/2e/c4fecdaf110cddb43fd96dbf88dc6a38ed13accf8c0cffe0719ee5047ebf/google_cloud_dlp-3.40.0-py3-none-any.whl", hash = "sha256:ba99d17d9b2e95b00d1c30e5dd82e755538353ac46e93ef01db4fb616ad0e0ef", size = 232514, upload-time = "2026-10-01T18:09:58.35Z" },
+]
+
+[[package]]
+name = "google-cloud-modelarmor"
+version = "0.7.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "google-api-core", extra = ["grpc"] },
+    { name = "google-auth" },
+    { name = "grpcio" },
+    { name = "proto-plus" },
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/95/67be1911bb63a9f8d30544b555d7ee0655466e116190abc8b79d1ab4ea0e/google_cloud_modelarmor-0.7.4.tar.gz", hash = "sha256:5939319aaa547a8d982dd316827f73e134c189565f55106553938ed50f027879", size = 172887, upload-time = "2026-10-29T17:20:47.131Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/f0/16cd2011491d316075b0caa0dd0831c4c3db201fe10864f053e1bdfe6887/google_cloud_modelarmor-0.7.4-py3-none-any.whl", hash = "sha256:d621d9fe83afe625dc4c05b165bb8b1a79f3c87b23bc1400ea496034fbd53460", size = 148392, upload-time = "2026-10-29T17:20:27.094Z" },
 ]
 
 [[package]]

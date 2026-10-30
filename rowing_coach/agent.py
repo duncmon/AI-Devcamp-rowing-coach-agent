@@ -26,6 +26,7 @@ from google.adk.tools.skill_toolset import SkillToolset
 from google.adk.tools.tool_context import ToolContext
 from mcp import StdioServerParameters
 
+from .guardrails import content_config, friendly_block, model
 from .tools import (
     align_session_pace_to_l4,
     calculate_athlete_pacing,
@@ -78,7 +79,7 @@ RESEARCH_MODEL = os.environ.get("RESEARCH_MODEL", "gemini-2.5-flash-lite")
 # ------------------------------------------------------------------------------
 research_agent = Agent(
     name="rowing_researcher",
-    model=RESEARCH_MODEL,
+    model=model(RESEARCH_MODEL),
     description="Researches weather, regattas (Ligue Sud PACA, FFAviron), coastal/river boat rigging, and coaching literature.",
     instruction="""You are a specialized rowing researcher assisting Coach David Montgamery at ACL (Aviron Club du Lac).
 Your research domains include:
@@ -89,6 +90,8 @@ Your research domains include:
 
 Search the web and provide concise, factual, actionable summaries with dates, conditions, or numerical specifications.""",
     tools=[google_search],
+    generate_content_config=content_config(screen_input=False),
+    after_model_callback=friendly_block,
 )
 
 # ------------------------------------------------------------------------------
@@ -152,7 +155,7 @@ tools = [
 
 root_agent = Agent(
     name="rowing_coach",
-    model=ROOT_MODEL,
+    model=model(ROOT_MODEL),
     description="ACL Masters Squad Coach Assistant implementing an evidence-based rowing training system.",
     instruction="""You are the AI Coach Assistant for Coach David Montgamery and the ACL Masters Rowing Squad, strictly implementing an evidence-based masters rowing training system.
 You plan sessions, calculate precision training splits, generate weekly squad sheets, and stage workouts on Intervals.icu.
@@ -188,7 +191,9 @@ Core Rules & Workflow:
    - Note that Intervals.icu operations require human confirmation before running.
 9. Communication style: Clear, encouraging, rigorous exercise science, bilingual (French for rower cards and fiches; English for coach analysis).""",
     tools=tools,
+    generate_content_config=content_config(screen_input=True),
     before_agent_callback=_init_stage,
+    after_model_callback=friendly_block,
     after_tool_callback=_track_stage,
     after_agent_callback=_stage_after_agent,
 )
