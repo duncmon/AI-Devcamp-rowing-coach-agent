@@ -89,6 +89,18 @@ class ReversiblePiiVault:
                 tok = self.vault_value(session_id, name, "ATHLETE_NAME")
                 text = text.replace(name, tok)
 
+        # 4. Dynamic athlete name detection (quoted names or athlete/rower introductions)
+        quoted_patterns = [
+            r'["\']([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)["\']',
+            r'(?:rower|athlete|coach|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)',
+        ]
+        for pat in quoted_patterns:
+            for match in re.findall(pat, text):
+                if match not in squad_names and not match.startswith("["):
+                    tok = self.vault_value(session_id, match, "ATHLETE_NAME")
+                    text = re.sub(rf'["\']{re.escape(match)}["\']', tok, text)
+                    text = text.replace(match, tok)
+
         return text
 
     def rehydrate(self, text: str, session_id: str) -> str:

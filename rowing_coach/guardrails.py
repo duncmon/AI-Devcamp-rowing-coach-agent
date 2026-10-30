@@ -21,6 +21,7 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import Gemini
 from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
+from google.api_core.client_options import ClientOptions
 from google.cloud import dlp_v2
 from google.genai import types as genai_types
 
@@ -37,9 +38,11 @@ if not DLP_PROJECT or DLP_PROJECT.isdigit():
             DLP_PROJECT = adc_project
     except Exception:
         pass
+if not DLP_PROJECT:
+    DLP_PROJECT = "ai-devcamp-duncan-395792"
 
 # Template region: defaults to europe-west1 for EU sovereignty, with us-central1 fallback
-MA_REGION = os.environ.get("MODEL_ARMOR_REGION", "europe-west1")
+MA_REGION = os.environ.get("MODEL_ARMOR_REGION", "us-central1")
 MA_TEMPLATE = os.environ.get("MODEL_ARMOR_TEMPLATE_ID", "")
 if MA_TEMPLATE.strip().lower() in ("off", "none", "disabled"):
     MA_TEMPLATE = ""
@@ -69,7 +72,8 @@ _dlp_client = None
 def _dlp() -> dlp_v2.DlpServiceClient:
     global _dlp_client
     if _dlp_client is None:
-        _dlp_client = dlp_v2.DlpServiceClient()
+        opts = ClientOptions(quota_project_id=DLP_PROJECT) if DLP_PROJECT else None
+        _dlp_client = dlp_v2.DlpServiceClient(client_options=opts)
     return _dlp_client
 
 

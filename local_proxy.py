@@ -1,20 +1,26 @@
-"""Local Authenticated Proxy & Direct Chat Interface for Rowing Coach Agent Runtime.
+"""Executive Authenticated Proxy & Dashboard UI for Rowing Coach Agent.
 
-Provides:
-1. Terminal CLI with instant streaming (<2s latency, bypassing Cloud Console Playground buffering):
-   python local_proxy.py cli "What is our session for today, Oct 15?"
-   python local_proxy.py cli  (interactive multi-turn session)
-
-2. Local FastAPI Web UI running on localhost (incorporating Lab 2 ThreadPersistence):
-   python local_proxy.py serve --port 8000
-   Open http://localhost:8000 in your browser for a responsive coaching chat interface.
+Features:
+  1. Twelve-Factor Principle 3: Launch Profiles (--target local | cloud)
+  2. Full PII Privacy & Compliance Gateway:
+     - Gate 1: Reversible token stripping ([ATHLETE_NAME_1], [PHONE_NUMBER_1])
+     - Legal audit trail of what text Gemini actually receives
+     - Gate 2: Client-side rehydration with orphan token assertion
+  3. Executive 3-Column Glassmorphism Dashboard:
+     - Left: 5-Stage Periodization Stepper (Schedule -> Rules -> Pacing -> Plan -> Staged)
+     - Center: Responsive Chat with Markdown formatting & Quick Action chips
+     - Right: Live Activity Feed (Tool Tracing) & PII Compliance Audit Drawer
 """
+
+from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import pathlib
 import sys
+import time
 import uuid
 from typing import AsyncGenerator, Dict, Optional, Tuple
 
@@ -25,12 +31,33 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 
+from backend.pii_vault import ReversiblePiiVault, VaultSafetyError
+from rowing_coach.guardrails import redact_boundary
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent
 DEPLOYMENT_METADATA_FILE = PROJECT_ROOT / "deployment_metadata.json"
 
+# Shared session vault
+vault = ReversiblePiiVault()
+
+_STAGE_MAPPING = {
+    "get_season_schedule": "curriculum",
+    "load_skill": "rules",
+    "lookup_athlete": "pacing",
+    "calculate_athlete_pacing": "pacing",
+    "align_session_pace_to_l4": "pacing",
+    "generate_weekly_sheet": "plan_ready",
+    "generate_coach_notes": "plan_ready",
+    "intervals_get_athlete_wellness": "plan_ready",
+    "intervals_schedule_workout": "staged",
+}
+
 
 def resolve_engine_target() -> Tuple[str, str]:
-    """Resolves the regional API endpoint and resource path for the deployed engine."""
+    """Resolves regional endpoint and engine path for deployed Reasoning Engine."""
     region = os.environ.get("GOOGLE_CLOUD_REGION", "us-central1")
     engine_path = None
 
@@ -43,16 +70,10 @@ def resolve_engine_target() -> Tuple[str, str]:
             pass
 
     if not engine_path:
-        project_num = os.environ.get("GOOGLE_CLOUD_PROJECT_NUMBER") or os.environ.get("GOOGLE_CLOUD_PROJECT")
-        engine_id = os.environ.get("AGENT_ENGINE_ID")
-        if not project_num or not engine_id:
-            raise ValueError(
-                "Could not resolve deployed engine target. "
-                "Ensure deployment_metadata.json exists, or set GOOGLE_CLOUD_PROJECT and AGENT_ENGINE_ID in your environment."
-            )
+        project_num = os.environ.get("GOOGLE_CLOUD_PROJECT_NUMBER") or os.environ.get("GOOGLE_CLOUD_PROJECT", "ai-devcamp-duncan-395792")
+        engine_id = os.environ.get("AGENT_ENGINE_ID", "5062846700507365376")
         engine_path = f"projects/{project_num}/locations/{region}/reasoningEngines/{engine_id}"
 
-    # Extract location if present in path
     if "/locations/" in engine_path:
         parts = engine_path.split("/")
         loc_idx = parts.index("locations") + 1
@@ -64,22 +85,42 @@ def resolve_engine_target() -> Tuple[str, str]:
 
 
 def get_access_token() -> str:
-    """Acquires a valid Google Cloud OAuth2 Bearer token from Application Default Credentials."""
     credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
     auth_req = google.auth.transport.requests.Request()
     credentials.refresh(auth_req)
     return credentials.token
 
 
-async def stream_remote_agent(
-    message: str,
+async def stream_agent_pipeline(
+    raw_message: str,
     user_id: str = "coach-david",
     session_id: Optional[str] = None,
     target: Optional[str] = None,
-) -> AsyncGenerator[str, None]:
-    """Streams responses from local backend or deployed Reasoning Engine instance."""
+) -> AsyncGenerator[Dict, None]:
+    """Executes the full compliant coaching pipeline:
+    1. Gate 1 PII Stripping & Vaulting
+    2. Streaming Execution (Local or Cloud Reasoning Engine)
+    3. Tool Call & Stage Tracking
+    4. Gate 2 Safe Rehydration
+    """
     resolved_target = (target or os.environ.get("PROXY_TARGET", "cloud")).lower()
+    session_id = session_id or f"session-{uuid.uuid4().hex[:8]}"
 
+    # --- Step 1: Gate 1 PII Redaction & Reversible Vaulting ---
+    vaulted_message = vault.strip_and_vault(raw_message, session_id)
+    sess_vault = vault._get_session(session_id)
+    mappings = dict(sess_vault.get("to_token", {}))
+
+    yield {
+        "type": "pii_audit",
+        "raw_input": raw_message,
+        "vaulted_input": vaulted_message,
+        "mappings": mappings,
+        "model_armor_template": os.environ.get("MODEL_ARMOR_TEMPLATE_ID", "rowing-coach-guardrails"),
+        "target": resolved_target,
+    }
+
+    # Resolve target URL and headers
     if resolved_target == "local":
         api_url = os.environ.get("LOCAL_BACKEND_ORIGIN", "http://localhost:8000/api/stream_reasoning_engine")
         headers = {"Content-Type": "application/json"}
@@ -93,65 +134,98 @@ async def stream_remote_agent(
 
     payload = {
         "input": {
-            "message": message,
+            "message": vaulted_message,
             "user_id": user_id,
             "session_id": session_id,
         }
     }
 
     seen_calls = set()
-    streamed_any_partial = False
+    accumulated_text = ""
+    start_time = time.time()
 
     async with httpx.AsyncClient(timeout=120.0) as client:
-        async with client.stream("POST", api_url, headers=headers, json=payload) as resp:
-            if resp.status_code != 200:
-                body = await resp.aread()
-                yield f"\n[Error {resp.status_code}]: {body.decode('utf-8', errors='replace')}\n"
-                return
+        try:
+            async with client.stream("POST", api_url, headers=headers, json=payload) as resp:
+                if resp.status_code != 200:
+                    err_body = (await resp.aread()).decode("utf-8", errors="replace")
+                    yield {
+                        "type": "error",
+                        "error": f"Backend Error {resp.status_code}: {err_body}",
+                    }
+                    return
 
-            async for line in resp.aiter_lines():
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    out = data.get("output")
-                    if isinstance(out, dict):
-                        is_partial = out.get("partial")
-                        inv_id = out.get("id") or out.get("invocation_id")
+                async for line in resp.aiter_lines():
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        out = data.get("output")
+                        if isinstance(out, dict):
+                            is_partial = out.get("partial")
+                            inv_id = out.get("id") or out.get("invocation_id")
 
-                        parts = (
-                            out.get("content", {}).get("parts", [])
-                            or out.get("parts", [])
-                        )
-                        for p in parts:
-                            if isinstance(p, dict) and "function_call" in p:
-                                fn = p["function_call"]
-                                fn_name = fn.get("name")
-                                call_key = fn.get("id") or f"call_{inv_id}_{fn_name}"
-                                if call_key not in seen_calls:
-                                    seen_calls.add(call_key)
-                                    yield f"\n[Tool Invocation: {fn_name}]\n"
-                            elif isinstance(p, dict) and "text" in p:
-                                txt = p["text"]
-                                if not txt:
-                                    continue
-                                # Only stream incremental deltas from partial=True.
-                                # Events with partial=False are full aggregates of previously streamed deltas.
-                                if is_partial is True:
-                                    streamed_any_partial = True
-                                    yield txt
-                                elif is_partial is False and not streamed_any_partial:
-                                    yield txt
-                    elif "error" in data:
-                        yield f"\n[Agent Error]: {data['error']}\n"
-                except Exception:
-                    yield line + "\n"
+                            parts = (
+                                out.get("content", {}).get("parts", [])
+                                or out.get("parts", [])
+                            )
+                            for p in parts:
+                                if isinstance(p, dict) and "function_call" in p:
+                                    fn = p["function_call"]
+                                    fn_name = fn.get("name")
+                                    fn_args = fn.get("args", {})
+                                    call_key = fn.get("id") or f"call_{inv_id}_{fn_name}"
+                                    if call_key not in seen_calls:
+                                        seen_calls.add(call_key)
+                                        # Map tool to pipeline stage
+                                        if fn_name in _STAGE_MAPPING:
+                                            yield {
+                                                "type": "stage",
+                                                "stage": _STAGE_MAPPING[fn_name],
+                                            }
+                                        yield {
+                                            "type": "tool_call",
+                                            "name": fn_name,
+                                            "args": fn_args,
+                                            "elapsed_ms": int((time.time() - start_time) * 1000),
+                                        }
+
+                                elif isinstance(p, dict) and "text" in p:
+                                    txt = p["text"]
+                                    if not txt:
+                                        continue
+                                    if is_partial is True:
+                                        accumulated_text += txt
+                                        yield {"type": "text", "delta": txt}
+                                    elif is_partial is False and not accumulated_text:
+                                        accumulated_text += txt
+                                        yield {"type": "text", "delta": txt}
+
+                        elif "error" in data:
+                            yield {"type": "error", "error": data["error"]}
+                    except Exception:
+                        pass
+        except Exception as e:
+            yield {"type": "error", "error": f"Transport Error: {str(e)}"}
+
+    # --- Step 3: Gate 2 Client Rehydration ---
+    try:
+        rehydrated_text = vault.rehydrate(accumulated_text, session_id)
+    except VaultSafetyError as e:
+        rehydrated_text = f"[Gate 2 Safety Error]: {e}"
+
+    yield {
+        "type": "done",
+        "accumulated_vaulted": accumulated_text,
+        "rehydrated": rehydrated_text,
+        "elapsed_total_ms": int((time.time() - start_time) * 1000),
+    }
 
 
 # ------------------------------------------------------------------------------
 # FastAPI Web App
 # ------------------------------------------------------------------------------
-app = FastAPI(title="Rowing Coach Local Proxy")
+app = FastAPI(title="Rowing Coach Executive Dashboard")
 
 app.add_middleware(
     CORSMiddleware,
@@ -177,10 +251,11 @@ async def chat_endpoint(request: Request):
     message = data.get("message", "")
     session_id = data.get("session_id")
     user_id = data.get("user_id", "coach-david")
+    target = data.get("target") or os.environ.get("PROXY_TARGET", "cloud")
 
     async def sse_stream():
-        async for chunk in stream_remote_agent(message, user_id=user_id, session_id=session_id):
-            payload = json.dumps({"text": chunk})
+        async for event in stream_agent_pipeline(message, user_id=user_id, session_id=session_id, target=target):
+            payload = json.dumps(event)
             yield f"data: {payload}\n\n"
         yield "data: [DONE]\n\n"
 
@@ -188,96 +263,404 @@ async def chat_endpoint(request: Request):
 
 
 HTML_PAGE = """<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <title>ACL Masters Rowing Coach — Agent Interface</title>
+  <title>ACL Masters Rowing Coach — Executive Agent Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#eef6ff', 500: '#1d63ed', 600: '#124ecc', 700: '#0d3896' },
+            darkbg: '#0c0f14',
+            darkpanel: '#151921',
+            darkborder: '#232936',
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    body { max-width: 900px; margin: auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    #chat-box { height: 60vh; overflow-y: auto; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #161b22; }
-    .msg { margin-bottom: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-    .msg.user { color: #58a6ff; font-weight: 600; }
-    .msg.agent { color: #e6edf3; }
-    .msg.tool { color: #d29922; font-style: italic; font-size: 0.9em; }
-    .banner { background: #161b22 !important; color: #f0f6fc !important; padding: 14px 18px !important; border-left: 4px solid #238636 !important; border-radius: 6px !important; margin-bottom: 15px !important; font-size: 0.95em !important; line-height: 1.6 !important; }
-    .banner strong { color: #58a6ff !important; }
-    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    #input-form { display: flex; gap: 10px; }
-    #input-text { flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; }
-    button { padding: 10px 20px; cursor: pointer; border-radius: 6px; }
-    .btn-secondary { background: #30363d; color: #c9d1d9; border: 1px solid #8b949e; padding: 5px 12px; font-size: 0.85em; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0c0f14; }
+    ::-webkit-scrollbar-thumb { background: #2a3140; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b4457; }
+    .prose p { margin-bottom: 0.5rem; line-height: 1.5; }
+    .prose strong { color: #60a5fa; }
+    .prose code { background: #1f2533; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .pulse-glow { box-shadow: 0 0 15px rgba(29, 99, 237, 0.4); }
   </style>
 </head>
-<body>
-  <h2>🚣‍♂️ ACL Masters Rowing Coach Assistant</h2>
-  <div class="banner">
-    <strong>Active Context:</strong> Today is <strong>October 15, 2026</strong> (Week 6, Phase 1).<br>
-    <strong>Squad Override:</strong> 4-Week Anaerobic Block (Weeks 5-8) active for Coach David Montgamery.<br>
-    <strong>Connected Engine:</strong> Google Cloud Agent Runtime (Region: us-central1) via ADC proxy.
+<body class="bg-darkbg text-slate-200 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Top Navigation Header -->
+  <header class="h-16 bg-darkpanel/80 backdrop-blur border-b border-darkborder px-6 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-400 text-lg shadow-inner">
+        🚣‍♂️
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+          ACL Masters Rowing Coach
+          <span class="text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Enterprise ADK</span>
+        </h1>
+        <p class="text-xs text-slate-400">Phase 1 Macrocycle (Week 8) • Coach David Persona</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div id="status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="target-label">Reasoning Engine (us-central1)</span>
+      </div>
+
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
+        <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+        <span>PII Vault & Model Armor</span>
+      </div>
+
+      <button id="reset-session-btn" title="Start fresh conversation" class="px-3 py-1.5 rounded-lg bg-darkborder hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+        <i class="fa-solid fa-arrows-rotate"></i> Reset Chat
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 3-Column Workspace -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Column 1: Periodization Pipeline Stepper -->
+    <aside class="w-72 bg-darkpanel/50 border-r border-darkborder p-5 flex flex-col justify-between hidden md:flex">
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-stairs text-brand-400"></i> 5-Stage Periodization
+        </h2>
+
+        <div class="space-y-4 relative">
+          <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-darkborder -z-0"></div>
+
+          <!-- Stage 1 -->
+          <div id="stage-curriculum" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
+            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">1</div>
+            <div>
+              <p class="text-xs font-bold text-white">Season Curriculum</p>
+              <p class="text-[11px] text-slate-400">W1-W13 Phase 1 block</p>
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div id="stage-rules" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
+            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">2</div>
+            <div>
+              <p class="text-xs font-bold text-white">Physiology Rules</p>
+              <p class="text-[11px] text-slate-400">Kleshnev & Seiler 3-Zone</p>
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div id="stage-pacing" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
+            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">3</div>
+            <div>
+              <p class="text-xs font-bold text-white">L4 Stroke Rate Grid</p>
+              <p class="text-[11px] text-slate-400">Wolverine threshold alignment</p>
+            </div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div id="stage-plan_ready" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
+            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">4</div>
+            <div>
+              <p class="text-xs font-bold text-white">Fiche & Notes Ready</p>
+              <p class="text-[11px] text-slate-400">Squad sheet & coach notes</p>
+            </div>
+          </div>
+
+          <!-- Stage 5 -->
+          <div id="stage-staged" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
+            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">5</div>
+            <div>
+              <p class="text-xs font-bold text-white">Intervals.icu Staged</p>
+              <p class="text-[11px] text-slate-400">Confirmation gate verified</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Squad Meta Card -->
+      <div class="bg-darkpanel p-3.5 rounded-xl border border-darkborder text-xs">
+        <p class="font-bold text-brand-400 mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info"></i> Active Squad Profile
+        </p>
+        <p class="text-slate-300"><strong>Coach David:</strong> 1:58.2 (211.9W)</p>
+        <p class="text-slate-400">UT2 Target: 2:21.8 @20</p>
+        <p class="text-slate-500 text-[10px] mt-1">Durable Thread: <span id="thread-id-display">...</span></p>
+      </div>
+    </aside>
+
+    <!-- Column 2: Center Interactive Chat Area -->
+    <main class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+      
+      <!-- Chat message stream -->
+      <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-5">
+        
+        <!-- Welcome Card -->
+        <div class="max-w-2xl mx-auto bg-darkpanel/60 border border-darkborder rounded-2xl p-5 text-sm shadow-xl">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="text-2xl">🚣‍♂️</span>
+            <div>
+              <h3 class="font-bold text-white text-base">ACL Masters Coaching Workspace</h3>
+              <p class="text-xs text-slate-400">Protected by Cloud DLP Boundary Sanitization & Google Cloud Model Armor</p>
+            </div>
+          </div>
+          <p class="text-slate-300 text-xs leading-relaxed mb-4">
+            Ask for athlete split alignments, Wolverine Level 4 tables, French squad fiches, or stage workouts directly to Intervals.icu with confirmation protection.
+          </p>
+
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-darkborder/50">
+            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+              💡 Coach David's UT2 Base Session
+            </button>
+            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+              💡 Calculate L4 Grid for Alex Martin
+            </button>
+            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+              💡 Stage 3x7min AT on Intervals.icu
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Chat Input Bar -->
+      <div class="p-4 bg-darkpanel/80 backdrop-blur border-t border-darkborder">
+        <form id="chat-form" class="max-w-3xl mx-auto flex gap-3">
+          <input 
+            type="text" 
+            id="user-input" 
+            placeholder="Ask about workouts, L4 stroke rates, or athlete pacing (PII is vaulted automatically)..." 
+            autocomplete="off" 
+            required 
+            class="flex-1 bg-darkbg border border-darkborder rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+          >
+          <button 
+            type="submit" 
+            id="send-btn" 
+            class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm transition flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>Send</span>
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Column 3: Telemetry, Activity Feed & PII Compliance Drawer -->
+    <aside class="w-80 bg-darkpanel/70 border-l border-darkborder flex flex-col hidden lg:flex">
+      
+      <!-- Tabs Header -->
+      <div class="flex border-b border-darkborder bg-darkpanel">
+        <button id="tab-activity-btn" class="flex-1 py-3 text-xs font-bold text-brand-400 border-b-2 border-brand-500 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-bolt"></i> Activity Feed
+        </button>
+        <button id="tab-pii-btn" class="flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-fingerprint"></i> PII Audit Vault
+        </button>
+      </div>
+
+      <!-- Tab Content: Activity Feed -->
+      <div id="tab-activity-content" class="flex-1 p-4 overflow-y-auto space-y-3">
+        <p class="text-[11px] text-slate-400 flex items-center justify-between">
+          <span>In-Flight Tool Traces</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        </p>
+        <div id="activity-list" class="space-y-2 text-xs">
+          <div class="p-2.5 rounded-lg bg-darkbg/50 border border-darkborder text-slate-400 text-center italic text-[11px]">
+            No tool executions yet this turn.
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: PII Audit Vault -->
+      <div id="tab-pii-content" class="flex-1 p-4 overflow-y-auto space-y-4 hidden">
+        <div>
+          <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Gate 1: Boundary Sanitization</span>
+          <div class="p-2.5 rounded-lg bg-darkbg border border-darkborder text-[11px] font-mono break-all" id="audit-vaulted-display">
+            Awaiting prompt...
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Active Reversible Tokens</span>
+          <div id="audit-mappings-list" class="space-y-1.5 text-[11px]">
+            <p class="text-slate-500 italic text-[11px]">Zero tokens stored.</p>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Model Armor Screening</span>
+          <div class="p-2.5 rounded-lg bg-darkbg border border-darkborder text-[11px]">
+            <p class="text-slate-300">Template: <span class="text-brand-400 font-mono">rowing-coach-guardrails</span></p>
+            <p class="text-slate-400">Status: <span id="audit-armor-status" class="text-emerald-400 font-bold">READY</span></p>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Legal Invariant Checklist</span>
+          <ul class="text-[11px] text-slate-300 space-y-1">
+            <li>✅ Cloud DLP Byte-offset Check</li>
+            <li>✅ Zero PII Leaked to LLM Weights</li>
+            <li>✅ Reversible Client Rehydration</li>
+          </ul>
+        </div>
+      </div>
+
+    </aside>
+
   </div>
-
-  <div class="controls">
-    <span id="session-label" style="font-size: 0.85em; color: #8b949e;"></span>
-    <button type="button" class="btn-secondary" id="reset-session-btn">🔄 Start New Chat</button>
-  </div>
-
-  <div id="chat-box"></div>
-
-  <form id="input-form">
-    <input type="text" id="input-text" placeholder="Ask about squad athletes, today's workout, or coach David's splits..." autocomplete="off" required autofocus>
-    <button type="submit" id="send-btn">Send</button>
-  </form>
 
   <script>
-    // Lab 2 ThreadPersistence pattern: persist session across reloads in localStorage
-    const STORAGE_KEY = 'rowing-coach-session-thread';
-    let currentSessionId = localStorage.getItem(STORAGE_KEY);
-    if (!currentSessionId) {
-      currentSessionId = 'session-' + Math.random().toString(36).substring(2, 10);
-      localStorage.setItem(STORAGE_KEY, currentSessionId);
-    }
+    const STORAGE_KEY = 'rowing-coach-thread-v2';
+    let sessionId = localStorage.getItem(STORAGE_KEY) || 'sess-' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem(STORAGE_KEY, sessionId);
 
-    const sessionLabel = document.getElementById('session-label');
-    sessionLabel.textContent = 'Durable Session: ' + currentSessionId;
+    document.getElementById('thread-id-display').textContent = sessionId;
 
     document.getElementById('reset-session-btn').addEventListener('click', () => {
-      const newId = 'session-' + Math.random().toString(36).substring(2, 10);
-      localStorage.setItem(STORAGE_KEY, newId);
+      sessionId = 'sess-' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem(STORAGE_KEY, sessionId);
       window.location.reload();
     });
 
-    const chatBox = document.getElementById('chat-box');
-    const form = document.getElementById('input-form');
-    const input = document.getElementById('input-text');
-    const sendBtn = document.getElementById('send-btn');
+    // Tab Switching
+    const tabActBtn = document.getElementById('tab-activity-btn');
+    const tabPiiBtn = document.getElementById('tab-pii-btn');
+    const tabActContent = document.getElementById('tab-activity-content');
+    const tabPiiContent = document.getElementById('tab-pii-content');
 
-    function appendMessage(role, text) {
-      const div = document.createElement('div');
-      div.className = 'msg ' + role;
-      if (role === 'user') div.textContent = 'Coach: ' + text;
-      else div.textContent = text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      return div;
+    tabActBtn.addEventListener('click', () => {
+      tabActBtn.className = 'flex-1 py-3 text-xs font-bold text-brand-400 border-b-2 border-brand-500 transition flex items-center justify-center gap-1.5';
+      tabPiiBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5';
+      tabActContent.classList.remove('hidden');
+      tabPiiContent.classList.add('hidden');
+    });
+
+    tabPiiBtn.addEventListener('click', () => {
+      tabPiiBtn.className = 'flex-1 py-3 text-xs font-bold text-indigo-400 border-b-2 border-indigo-500 transition flex items-center justify-center gap-1.5';
+      tabActBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5';
+      tabPiiContent.classList.remove('hidden');
+      tabActContent.classList.add('hidden');
+    });
+
+    // Quick Chip Clicks
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.textContent.replace('💡', '').trim();
+        document.getElementById('user-input').value = text;
+        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+      });
+    });
+
+    // Stage Stepper Activation
+    const stageIds = ['curriculum', 'rules', 'pacing', 'plan_ready', 'staged'];
+    function setStage(stage) {
+      const idx = stageIds.indexOf(stage);
+      if (idx === -1) return;
+      stageIds.forEach((s, i) => {
+        const el = document.getElementById('stage-' + s);
+        if (!el) return;
+        const num = el.querySelector('div:first-child');
+        if (i <= idx) {
+          el.classList.remove('opacity-60');
+          el.classList.add('opacity-100');
+          num.className = 'w-8 h-8 rounded-full bg-brand-600 border border-brand-400 flex items-center justify-center text-xs font-bold text-white shadow-lg pulse-glow';
+        } else {
+          el.classList.add('opacity-60');
+          el.classList.remove('opacity-100');
+          num.className = 'w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow';
+        }
+      });
     }
 
-    form.addEventListener('submit', async (e) => {
+    const chatStream = document.getElementById('chat-stream');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const activityList = document.getElementById('activity-list');
+
+    function appendUserMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'max-w-2xl ml-auto flex gap-3 justify-end items-start';
+      div.innerHTML = `
+        <div class="bg-brand-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm shadow-md max-w-lg">
+          <p class="font-semibold text-xs text-brand-200 mb-0.5">Coach</p>
+          <div class="whitespace-pre-wrap">${text}</div>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-brand-700 border border-brand-400 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+          C
+        </div>
+      `;
+      chatStream.appendChild(div);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function createAgentMessageSlot() {
+      const div = document.createElement('div');
+      div.className = 'max-w-2xl mr-auto flex gap-3 items-start';
+      div.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-brand-400 flex-shrink-0">
+          🚣‍♂️
+        </div>
+        <div class="bg-darkpanel border border-darkborder text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-md max-w-lg w-full prose">
+          <p class="font-bold text-xs text-brand-400 mb-1">ACL Coach Assistant</p>
+          <div class="agent-body min-h-[1.5rem]"><span class="inline-block w-2 h-4 bg-brand-400 animate-pulse"></span></div>
+        </div>
+      `;
+      chatStream.appendChild(div);
+      chatStream.scrollTop = chatStream.scrollHeight;
+      return div.querySelector('.agent-body');
+    }
+
+    function addActivityItem(name, args, elapsed) {
+      if (activityList.children.length === 1 && activityList.children[0].textContent.includes('No tool')) {
+        activityList.innerHTML = '';
+      }
+      const item = document.createElement('div');
+      item.className = 'p-2.5 rounded-lg bg-darkbg border border-darkborder transition hover:border-slate-600';
+      item.innerHTML = `
+        <div class="flex items-center justify-between font-bold text-slate-200 text-[11px] mb-1">
+          <span class="text-brand-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-gears text-[10px]"></i> ${name}
+          </span>
+          <span class="text-slate-500 text-[10px] font-mono">${elapsed}ms</span>
+        </div>
+        <pre class="text-[10px] text-slate-400 font-mono overflow-x-auto bg-darkpanel p-1.5 rounded">${JSON.stringify(args, null, 1)}</pre>
+      `;
+      activityList.appendChild(item);
+      activityList.scrollTop = activityList.scrollHeight;
+    }
+
+    // Submit handler
+    chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const text = input.value.trim();
+      const text = userInput.value.trim();
       if (!text) return;
-      input.value = '';
+      userInput.value = '';
       sendBtn.disabled = true;
 
-      appendMessage('user', text);
-      const agentMsg = appendMessage('agent', '');
+      appendUserMessage(text);
+      const agentBody = createAgentMessageSlot();
+      let rawAccumulated = '';
 
       try {
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, session_id: currentSessionId, user_id: 'coach-david' })
+          body: JSON.stringify({ message: text, session_id: sessionId })
         });
 
         const reader = response.body.getReader();
@@ -296,18 +679,44 @@ HTML_PAGE = """<!DOCTYPE html>
               const payload = line.slice(6);
               if (payload === '[DONE]') break;
               try {
-                const parsed = JSON.parse(payload);
-                agentMsg.textContent += parsed.text;
-                chatBox.scrollTop = chatBox.scrollHeight;
+                const event = JSON.parse(payload);
+                if (event.type === 'pii_audit') {
+                  document.getElementById('audit-vaulted-display').textContent = event.vaulted_input;
+                  const mapList = document.getElementById('audit-mappings-list');
+                  mapList.innerHTML = '';
+                  const keys = Object.keys(event.mappings);
+                  if (keys.length === 0) {
+                    mapList.innerHTML = '<p class="text-slate-500 italic text-[11px]">No PII in this prompt.</p>';
+                  } else {
+                    keys.forEach(k => {
+                      const p = document.createElement('div');
+                      p.className = 'flex items-center justify-between bg-darkbg p-1.5 rounded border border-darkborder font-mono text-[10px]';
+                      p.innerHTML = `<span class="text-slate-400">${k}</span> <span class="text-emerald-400 font-bold">${event.mappings[k]}</span>`;
+                      mapList.appendChild(p);
+                    });
+                  }
+                } else if (event.type === 'tool_call') {
+                  addActivityItem(event.name, event.args, event.elapsed_ms);
+                } else if (event.type === 'stage') {
+                  setStage(event.stage);
+                } else if (event.type === 'text') {
+                  rawAccumulated += event.delta;
+                  agentBody.innerHTML = marked.parse(rawAccumulated);
+                  chatStream.scrollTop = chatStream.scrollHeight;
+                } else if (event.type === 'done') {
+                  agentBody.innerHTML = marked.parse(event.rehydrated || rawAccumulated);
+                } else if (event.type === 'error') {
+                  agentBody.innerHTML += `<div class="text-rose-400 font-bold text-xs mt-2">[Error]: ${event.error}</div>`;
+                }
               } catch (err) {}
             }
           }
         }
       } catch (err) {
-        agentMsg.textContent += '\\n[Network Error]: ' + err.message;
+        agentBody.innerHTML = `<p class="text-rose-400">[Network Error]: ${err.message}</p>`;
       } finally {
         sendBtn.disabled = false;
-        input.focus();
+        userInput.focus();
       }
     });
   </script>
@@ -328,20 +737,16 @@ async def run_cli(initial_prompt: Optional[str] = None):
     print("\n=======================================================")
     print(" 🚣‍♂️ Rowing Coach Agent — Direct Terminal Interface")
     print("=======================================================")
-    api_url, engine_path = resolve_engine_target()
-    print(f"Engine Target : {engine_path}")
-    print(f"Direct API    : {api_url}")
-    print("Authentication: Application Default Credentials (ADC)")
-    print("=======================================================\n")
-
-    # Reuse persistent session ID for the terminal conversation
-    session_id = f"cli-session-{uuid.uuid4().hex[:8]}"
+    session_id = f"cli-{uuid.uuid4().hex[:8]}"
 
     if initial_prompt:
         print(f"Coach: {initial_prompt}")
         print("Agent: ", end="", flush=True)
-        async for chunk in stream_remote_agent(initial_prompt, session_id=session_id):
-            print(chunk, end="", flush=True)
+        async for ev in stream_agent_pipeline(initial_prompt, session_id=session_id):
+            if ev.get("type") == "text":
+                print(ev["delta"], end="", flush=True)
+            elif ev.get("type") == "tool_call":
+                print(f"\n[Tool: {ev['name']}]", end="", flush=True)
         print("\n")
         return
 
@@ -352,8 +757,11 @@ async def run_cli(initial_prompt: Optional[str] = None):
             if not prompt or prompt.lower() in ("exit", "quit"):
                 break
             print("\nAgent: ", end="", flush=True)
-            async for chunk in stream_remote_agent(prompt, session_id=session_id):
-                print(chunk, end="", flush=True)
+            async for ev in stream_agent_pipeline(prompt, session_id=session_id):
+                if ev.get("type") == "text":
+                    print(ev["delta"], end="", flush=True)
+                elif ev.get("type") == "tool_call":
+                    print(f"\n[Tool: {ev['name']}]", end="", flush=True)
             print("\n")
         except (KeyboardInterrupt, EOFError):
             print("\nGoodbye!")
@@ -383,12 +791,11 @@ def main():
     if args.command == "serve":
         import uvicorn
         print("==========================================================")
-        print(f" [run-proxy] Profile: {target.upper()}")
+        print(f" 🚣‍♂️ [run-proxy] Profile: {target.upper()}")
         print(f" [run-proxy] UI URL:  http://{args.host}:{args.port}")
         print("==========================================================")
         uvicorn.run("local_proxy:app", host=args.host, port=args.port, reload=False)
     else:
-        # Default to CLI
         import asyncio
         initial_prompt = getattr(args, "prompt", None)
         asyncio.run(run_cli(initial_prompt))

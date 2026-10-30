@@ -10,7 +10,8 @@ COPY skills ./skills
 COPY plans ./plans
 COPY data ./data
 COPY mcp ./mcp
-COPY main.py memory_bank_config.py ./
+COPY backend ./backend
+COPY main.py memory_bank_config.py pii_middleware.py governance.py ./
 
 RUN uv sync --frozen --no-dev
 
