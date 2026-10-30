@@ -29,8 +29,13 @@ if os.environ.get("APP_URL"):
     os.environ.setdefault("GOOGLE_API_PREVENT_AGENT_TOKEN_SHARING_FOR_GCP_SERVICES", "false")
 
 from rowing_coach.agent import root_agent  # noqa: E402
+from pii_middleware import RedactUserMessages
 
 app = FastAPI(title="rowing-coach-agent runtime backend")
+
+if os.environ.get("PII_REDACTION", "off").strip().lower() in ("on", "true", "1"):
+    app.add_middleware(RedactUserMessages)
+    log.info("Pure-ASGI RedactUserMessages PII middleware enabled.")
 
 app.add_middleware(
     CORSMiddleware,
