@@ -75,15 +75,22 @@ async def stream_remote_agent(
     message: str,
     user_id: str = "coach-david",
     session_id: Optional[str] = None,
+    target: Optional[str] = None,
 ) -> AsyncGenerator[str, None]:
-    """Streams responses from the deployed Reasoning Engine instance with deduplication."""
-    api_url, _ = resolve_engine_target()
-    token = get_access_token()
+    """Streams responses from local backend or deployed Reasoning Engine instance."""
+    resolved_target = (target or os.environ.get("PROXY_TARGET", "cloud")).lower()
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
+    if resolved_target == "local":
+        api_url = os.environ.get("LOCAL_BACKEND_ORIGIN", "http://localhost:8000/api/stream_reasoning_engine")
+        headers = {"Content-Type": "application/json"}
+    else:
+        api_url, _ = resolve_engine_target()
+        token = get_access_token()
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+
     payload = {
         "input": {
             "message": message,
@@ -156,8 +163,12 @@ app.add_middleware(
 
 @app.get("/healthz")
 def healthz():
+    target = os.environ.get("PROXY_TARGET", "cloud").lower()
+    if target == "local":
+        origin = os.environ.get("LOCAL_BACKEND_ORIGIN", "http://localhost:8000/api/stream_reasoning_engine")
+        return {"status": "ok", "target": "local", "api_url": origin}
     api_url, engine_path = resolve_engine_target()
-    return {"status": "ok", "target_engine": engine_path, "api_url": api_url}
+    return {"status": "ok", "target": "cloud", "target_engine": engine_path, "api_url": api_url}
 
 
 @app.post("/api/chat")
@@ -350,23 +361,31 @@ async def run_cli(initial_prompt: Optional[str] = None):
 
 
 def main():
+    default_target = os.environ.get("PROXY_TARGET", "cloud").lower()
     parser = argparse.ArgumentParser(description="Rowing Coach Local Proxy & UI")
     subparsers = parser.add_subparsers(dest="command", help="Subcommand to run")
 
     # CLI subcommand
     cli_parser = subparsers.add_parser("cli", help="Run interactive terminal chat")
     cli_parser.add_argument("prompt", nargs="?", default=None, help="Optional one-shot prompt")
+    cli_parser.add_argument("--target", "-t", choices=["local", "cloud"], default=default_target, help="Target backend (default: cloud)")
 
     # Serve subcommand
     serve_parser = subparsers.add_parser("serve", help="Run local web server and UI")
-    serve_parser.add_argument("--port", type=int, default=8000, help="Local port (default 8000)")
+    serve_parser.add_argument("--port", type=int, default=8080, help="Local port (default 8080)")
     serve_parser.add_argument("--host", type=str, default="127.0.0.1", help="Host interface (default 127.0.0.1)")
+    serve_parser.add_argument("--target", "-t", choices=["local", "cloud"], default=default_target, help="Target backend (default: cloud)")
 
     args = parser.parse_args()
+    target = getattr(args, "target", default_target)
+    os.environ["PROXY_TARGET"] = target
 
     if args.command == "serve":
         import uvicorn
-        print(f"Starting Rowing Coach Local Proxy UI on http://{args.host}:{args.port}")
+        print("==========================================================")
+        print(f" [run-proxy] Profile: {target.upper()}")
+        print(f" [run-proxy] UI URL:  http://{args.host}:{args.port}")
+        print("==========================================================")
         uvicorn.run("local_proxy:app", host=args.host, port=args.port, reload=False)
     else:
         # Default to CLI

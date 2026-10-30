@@ -1,15 +1,38 @@
 # AI-Devcamp-rowing-coach-agent 🚣‍♂️
 
-[![Tests](https://img.shields.io/badge/pytest-14%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/pytest-33%20passed-brightgreen.svg)]()
 [![Python](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)]()
 [![Google ADK](https://img.shields.io/badge/Google%20ADK-2.4.0-4285F4.svg)]()
 [![Agent Runtime](https://img.shields.io/badge/Google%20Cloud-Agent%20Runtime-blue.svg)]()
 [![FastMCP](https://img.shields.io/badge/FastMCP-3.4.4-orange.svg)]()
+[![CI/CD](https://img.shields.io/badge/eval--gate-fail--closed%20verified-success.svg)]()
 
-> **GDG London AI Devcamp Submission**  
-> An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Agent Runtime** with **Agent Identity** and **Vertex AI Memory Bank**. It implements an **evidence-based masters rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
+> **GDG London AI DevCamp Hackathon Submission (31 October 2026)**  
+> An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Agent Runtime** with **Agent Identity**, **Vertex AI Memory Bank**, **Model Armor regional screening**, **Pure-ASGI PII redaction**, and an **Architectural Blueprint v0.2 multi-region router**. It implements an **evidence-based masters rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
 
-📖 **[Read the Full System Architecture, Design Rationale & Critique](docs/ARCHITECTURE_AND_SUBMISSION.md)**
+📖 **[Read the Full Documentation & Architecture Site](docs/index.html)** | 📄 **[Submission Critique & Design Rationale](docs/ARCHITECTURE_AND_SUBMISSION.md)**
+
+---
+
+## ⚡ Quick Start: Invoking Local or Cloud Execution
+
+Following Twelve-Factor Principle 3 (Deterministic Launch Profiles), the frontend launcher accepts explicit CLI flags:
+
+```bash
+# 1. Start Local Backend (:8000)
+./run-backend.sh
+
+# 2. Launch Frontend UI bound to Local Backend (:8080)
+./run-frontend.sh --local
+
+# 3. OR Launch Frontend UI bound directly to Cloud Vertex AI Reasoning Engine (:8080)
+./run-frontend.sh --cloud
+```
+
+*Terminal CLI mode is also available for instant streaming:*
+```bash
+uv run python local_proxy.py cli "What is today's workout progression?"
+```
 
 ---
 
@@ -21,9 +44,11 @@
 2. **Dynamic L4 Pacing Alignment:** Automatically snaps aerobic and threshold target intensities (55% 2kW for UT2, 65% for UT1, 80% for AT) to the closest Wolverine L4 stroke rate with explicit split reminders (e.g. `allure L4 @20 (2:31.7)`).
 3. **Macrocycle Progression & Deload Enforcement:** Enforces strict periodization rules across a 13-week Phase 1 season curriculum, guarding deload weeks (-30% volume) and distinct competition targets (Manosque Tier 2 rehearsal vs Paris Tier 1 national peak).
 4. **Vertex AI Memory Bank Persistence:** Consigns formal coaching directives, athlete injury notes, and squad overrides permanently into long-term memory via the `store_coaching_memory` tool and automatic session distillation.
-5. **Dynamic Calendar Progression & Squad Overrides:** Automatically evaluates current calendar progression (Week 6) and overlays active multi-week training blocks (e.g. 4-Week Anaerobic Block) over the base curriculum.
+5. **Dynamic Calendar Progression & Squad Overrides:** Automatically evaluates live calendar progression dynamically and overlays active multi-week training blocks over the base curriculum.
 6. **Human-in-the-Loop Wearable & Calendar MCP Integration:** Connects to Intervals.icu via a local FastMCP server (`intervals_server.py`) to query resting heart rate, HRV (rMSSD), and fatigue (ATL/CTL), with confirmation-gated calendar workout scheduling (`require_confirmation=True`).
-7. **Isolated Web Research Sub-Agent:** Delegates live weather, water conditions, and official regatta calendars (Ligue Sud PACA, FFAviron) to an isolated sub-agent equipped with Google Search.
+7. **Enterprise Governance (Lab 3):** Boundary PII redaction via pure-ASGI middleware (`pii_middleware.py`), Google Cloud Model Armor regional prompt screening (`guardrails.py`), and Agent Registry CLI (`governance.py`).
+8. **Architectural Blueprint v0.2:** Decoupled sovereign EU boundary (`europe-west1`), multi-region fallback router on HTTP 429 (`backend/llm_router.py`), reversible bracketed PII vault (`backend/pii_vault.py`), and dual-backend zero-cost persistence (`backend/db.py`).
+9. **Quality Flywheel & Gated Release (Lab 4):** Golden evaluation suite (`evals/golden.json`), mandatory tool-use rubrics (`evals/eval_config.json`), and fail-closed release gate script (`evals/verify_eval_gate.sh`).
 
 ---
 
