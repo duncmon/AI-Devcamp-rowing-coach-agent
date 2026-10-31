@@ -21,6 +21,7 @@ import os
 import pathlib
 import sys
 import time
+import urllib.parse
 import uuid
 from typing import AsyncGenerator, Dict, Optional, Tuple
 
@@ -133,6 +134,19 @@ async def stream_agent_pipeline(
             "Content-Type": "application/json",
         }
 
+    # Prepare message for engine (translate pseudonyms to athlete keys understood by remote engine)
+    engine_message = vaulted_message
+    pseudo_to_engine = {
+        "[ATHLETE_ath_5a77195e]": "david_montgamery",
+        "ath_5a77195e": "david_montgamery",
+        "[ATHLETE_ath_db95573a]": "alex_martin",
+        "ath_db95573a": "alex_martin",
+        "[ATHLETE_ath_8d369eef]": "sophie_dubois",
+        "ath_8d369eef": "sophie_dubois",
+    }
+    for p_tok, eng_id in pseudo_to_engine.items():
+        engine_message = engine_message.replace(p_tok, eng_id)
+
     if confirmation:
         call_id = confirmation.get("id", "call_adk_request_confirmation")
         is_confirmed = bool(confirmation.get("confirmed", True))
@@ -157,7 +171,7 @@ async def stream_agent_pipeline(
     else:
         payload = {
             "input": {
-                "message": vaulted_message,
+                "message": engine_message,
                 "user_id": user_id,
                 "session_id": session_id,
             }
@@ -226,7 +240,7 @@ async def stream_agent_pipeline(
                                                     "type": "plan_generated",
                                                     "tool": fn_name,
                                                     "filename": fname,
-                                                    "download_url": f"/api/plans/{fname}",
+                                                    "download_url": f"/api/plans/{urllib.parse.quote(fname)}",
                                                 }
                                             except Exception as err:
                                                 log.warning("Local plan mirroring error: %s", err)
@@ -262,8 +276,13 @@ async def stream_agent_pipeline(
             yield {"type": "error", "error": f"Transport Error: {str(e)}"}
 
     # --- Step 3: Gate 2 Client Rehydration ---
+    raw_coach = mappings.get("[ATHLETE_ath_5a77195e]") or mappings.get("[ATHLETE_david_montgamery]") or "Coach David"
+    pre_rehydrated = accumulated_text
+    pre_rehydrated = re.sub(r"\bDavid Montgamery\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
+    pre_rehydrated = re.sub(r"\bdavid_montgamery\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
+
     try:
-        rehydrated_text = vault.rehydrate(accumulated_text, session_id)
+        rehydrated_text = vault.rehydrate(pre_rehydrated, session_id)
     except VaultSafetyError as e:
         rehydrated_text = f"[Gate 2 Safety Error]: {e}"
 
@@ -298,14 +317,27 @@ def healthz():
     return {"status": "ok", "target": "cloud", "target_engine": engine_path, "api_url": api_url}
 
 
-@app.get("/api/plans/{filename}")
+@app.get("/api/plans/{filename:path}")
 def download_plan_endpoint(filename: str):
-    from fastapi.responses import FileResponse, HTTPException
-    clean_name = pathlib.Path(filename).name
-    p_path = PROJECT_ROOT / "plans" / clean_name
-    if not p_path.exists():
-        raise HTTPException(status_code=404, detail=f"Plan file '{clean_name}' not found on local disk.")
-    return FileResponse(p_path, filename=clean_name, media_type="text/markdown")
+    from fastapi import HTTPException
+    from fastapi.responses import FileResponse
+    clean_name = pathlib.Path(urllib.parse.unquote(filename)).name
+    potential_dirs = [
+        PROJECT_ROOT / "plans",
+        pathlib.Path("plans"),
+        pathlib.Path("/code/plans"),
+        pathlib.Path("/tmp/plans"),
+    ]
+    for d in potential_dirs:
+        p_path = d / clean_name
+        if p_path.exists():
+            return FileResponse(
+                p_path,
+                filename=clean_name,
+                media_type="text/markdown",
+                headers={"Content-Disposition": f'attachment; filename="{urllib.parse.quote(clean_name)}"'}
+            )
+    raise HTTPException(status_code=404, detail=f"Plan file '{clean_name}' not found on server.")
 
 
 @app.post("/api/chat")
@@ -405,6 +437,10 @@ HTML_PAGE = """<!DOCTYPE html>
 
       <button id="reset-session-btn" title="Start fresh conversation" class="px-3 py-1.5 rounded-lg bg-darkborder hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
         <i class="fa-solid fa-arrows-rotate"></i> Reset Chat
+      </button>
+
+      <button id="theme-toggle-btn" type="button" title="Toggle Light / Dark Mode" class="px-3 py-1.5 rounded-lg bg-darkborder hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700 cursor-pointer">
+        <i id="theme-icon" class="fa-solid fa-moon text-blue-400"></i> <span id="theme-text">Dark</span>
       </button>
     </div>
   </header>
@@ -614,6 +650,37 @@ HTML_PAGE = """<!DOCTYPE html>
       window.location.reload();
     });
 
+    // Theme Toggle Handler
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    let currentTheme = localStorage.getItem('rowing-coach-theme') || 'dark';
+
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('bg-darkbg', 'text-slate-200');
+        document.body.classList.add('bg-slate-100', 'text-slate-900');
+        if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
+        if (themeText) themeText.textContent = 'Light';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.body.classList.remove('bg-slate-100', 'text-slate-900');
+        document.body.classList.add('bg-darkbg', 'text-slate-200');
+        if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-blue-400';
+        if (themeText) themeText.textContent = 'Dark';
+      }
+      localStorage.setItem('rowing-coach-theme', theme);
+    }
+    applyTheme(currentTheme);
+
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(currentTheme);
+      });
+    }
+
     // Tab Switching
     const tabActBtn = document.getElementById('tab-activity-btn');
     const tabPiiBtn = document.getElementById('tab-pii-btn');
@@ -812,7 +879,7 @@ HTML_PAGE = """<!DOCTYPE html>
                         <div class="text-[10px] text-brand-400">Saved to local repository (plans/)</div>
                       </div>
                     </div>
-                    <a href="${event.download_url}" download="${event.filename}" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow transition">
+                    <a href="${event.download_url}" download="${event.filename.replace(/"/g, '&quot;')}" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow transition">
                       <i class="fa-solid fa-download"></i> Download Plan
                     </a>
                   `;
