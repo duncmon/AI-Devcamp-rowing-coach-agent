@@ -181,6 +181,16 @@ flowchart LR
           <strong>⚠️ Checkpoint ③ is the #1 blind spot in modern agent architectures:</strong> Most developer quickstarts only protect ① &amp; ④, leaving the agent completely vulnerable to indirect prompt injection from fetched training logs, external RSS feeds, or calendar payloads.
         </div>
 
+        <p>
+          In modern agentic architectures, vulnerabilities shift from the user prompt boundary to external tool outputs and autonomous mutations:
+        </p>
+        <ul style="margin-left: 20px; margin-bottom: 16px; font-size: 13.5px; line-height: 1.6;">
+          <li><strong>Checkpoint ① (Ingress Boundary):</strong> Evaluates direct user input at the edge before container execution using regional Model Armor templates (<code>rowing-coach-guardrails</code>). Detects adversarial jailbreaks (PI/JB v1.2) and malicious URLs, immediately returning a friendly squad refusal without consuming LLM inference tokens.</li>
+          <li><strong>Checkpoint ② (Tool Call Gate):</strong> Intercepts mutating actions on external systems (e.g., <code>intervals_schedule_workout</code>). Enforces strict parameter schema verification and interactive human confirmation (<code>require_confirmation=True</code>), preventing unauthorized calendar mutations.</li>
+          <li><strong>Checkpoint ③ (Tool Output Shield):</strong> Screens data fetched by external tools (e.g. Intervals.icu wellness logs, Concept2 workout history, FFAviron regatta calendars, or Google Search snippets) before it is appended to conversation history. Without this shield, untrusted external content containing embedded injection instructions can hijack model context (OWASP LLM01). In ADK 2.12+, this is handled natively via <code>tool_output_template_name</code>; in ADK 2.4.0, sub-agent architectural isolation (<code>research_agent</code> via <code>AgentTool</code>) and <code>friendly_block</code> provide inline protection.</li>
+          <li><strong>Checkpoint ④ (Egress Boundary):</strong> Evaluates outbound model completions using a dedicated template (<code>rowing-coach-guardrails-output</code>). Enforces Sensitive Data Protection (SDP) to mask inadvertent PII or credential leakage, while deliberately disabling PI/JB filters on egress so that discussing safety rules never causes self-censorship false blocks. Finally, Gate 2 client rehydration verifies zero orphan token leakage (<code>VaultSafetyError</code>).</li>
+        </ul>
+
         <h3 style="margin-top: 28px;">Decoupled Asymmetric Templates &amp; Confidence Tuning</h3>
         <p>
           Following Google Cloud enterprise best practices, we decouple inbound threat detection from outbound data protection, applying asymmetric filtering rules and confidence tuning:
@@ -291,6 +301,48 @@ app = App(
           <li><strong>Algorithmic Tool Unwrapping:</strong> When the orchestrator delegates to deterministic physics or Wolverine L4 calculation tools (<code>calculate_athlete_pacing</code>, <code>align_session_pace_to_l4</code>), the tool code unwraps the pseudonym to access benchmark splits, returning calibrated target wattages and splits to the model.</li>
           <li><strong>Gate 2 Reversible Client Rehydration:</strong> On the egress boundary, Gate 2 restores the athlete's friendly name for the coach's browser display, while asserting zero unmapped orphan tokens (<code>VaultSafetyError</code>).</li>
         </ol>
+
+        <h3 id="athlete-id-translation" style="margin-top: 24px;">The 3-Tier Athlete Identity Resolution Hierarchy</h3>
+        <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 16px;">
+          When sovereign boundaries separate the client browser, the local proxy, and the remote reasoning engine, identity representations diverge across execution tiers. The agent solves this with an explicit 3-tier translation hierarchy:
+        </p>
+
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Identity Representation</th>
+                <th>Scope &amp; Storage Boundary</th>
+                <th>Example Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tier 1: Client Raw Persona</strong></td>
+                <td>Natural user-provided athlete or coach name</td>
+                <td>Client browser DOM &amp; local session state only; never sent over cloud network unredacted.</td>
+                <td><code>"Coach David Montgomery"</code> / <code>"Coach David"</code></td>
+              </tr>
+              <tr>
+                <td><strong>Tier 2: Gate 1 Cryptographic Vault Token</strong></td>
+                <td>Deterministic SHA-256 pseudonym token</td>
+                <td>Pure-ASGI proxy network boundary; ensures GDPR Art. 9 compliance without leaking PII.</td>
+                <td><code>"[ATHLETE_ath_5a77195e]"</code></td>
+              </tr>
+              <tr>
+                <td><strong>Tier 3: Reasoning Engine Internal Roster Key</strong></td>
+                <td>Internal stable squad roster identifier</td>
+                <td>Remote Vertex AI Reasoning Engine &amp; tool database (<code>data/athletes.json</code>, agent instructions).</td>
+                <td><code>"david_montgamery"</code> (benchmark 2k split 1:58.2, 211.9W)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin-top: 14px; font-size: 13.5px;">
+          <strong>Pre-Dispatch Translation &amp; Egress Rehydration Bridge:</strong> Direct token passing fails because remote engine instructions specifically instruct the LLM to index <code>david_montgamery</code>. Prior to cloud dispatch, <code>local_proxy.py</code> applies a pre-dispatch dictionary mapping (<code>pseudo_to_engine</code>) that translates <code>[ATHLETE_ath_5a77195e]</code> to <code>david_montgamery</code>. On egress, Gate 2 pre-rehydrates <code>david_montgamery</code> back to <code>raw_coach</code> before invoking <code>vault.rehydrate()</code>, guaranteeing that the coach sees natural names while fail-closed <code>VaultSafetyError</code> guards against orphan tokens.
+        </p>
       </div>
     </article>
 

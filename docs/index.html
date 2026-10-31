@@ -317,14 +317,14 @@ flowchart TD
             <tbody>
               <tr>
                 <td><code>tests/test_agent.py</code></td>
-                <td>Root agent structure, subagent isolation, Intervals MCP confirmation</td>
+                <td>Root agent structure, subagent composition, Intervals MCP confirmation</td>
                 <td>4</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>
                 <td><code>tests/test_tools.py</code></td>
-                <td>Erg physics, L4 stroke rates, season curriculum, and sheet generators</td>
-                <td>10</td>
+                <td>Erg physics, L4 stroke rates, season curriculum, fiches, and Concept2 logs</td>
+                <td>11</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>
@@ -335,7 +335,7 @@ flowchart TD
               </tr>
               <tr>
                 <td><code>tests/test_guardrails.py</code></td>
-                <td>Model Armor screening, friendly refusal, FallbackGemini cascade</td>
+                <td>Model Armor screening, friendly refusal, FallbackGemini cascade, DLP mocks</td>
                 <td>5</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
@@ -346,34 +346,8 @@ flowchart TD
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>
-                <td><code>tests/test_pii_vault.py</code></td>
-                <td>Reversible vault tokenization, domestic regexes, zero orphan checks</td>
-                <td>8</td>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-              </tr>
-              <tr>
-                <td><code>tests/test_docs_site.py</code></td>
-                <td>Site structure, design system parity, 20-way bidirectional navigation, asset non-zero size, zero broken links/anchors, IAP documentation &amp; zero secret leak invariants</td>
-                <td>21</td>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-              </tr>
-              <tr>
-                <td><code>tests/test_demo_auth.py</code></td>
-                <td>Cloud Run evaluator auth gate, lock screen rendering, 401 unauth checks, cookie issuance</td>
-                <td>5</td>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-              </tr>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-              </tr>
-              <tr>
-                <td><code>tests/test_governance_cli.py</code></td>
-                <td>4-tier configuration resolution and CLI subcommands</td>
-                <td>4</td>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-              </tr>
-              <tr>
                 <td><code>tests/test_gate_1_stripping.py</code></td>
-                <td>Gate 1 athlete PII vaulting and tokenization</td>
+                <td>Gate 1 athlete PII vaulting, cross-turn token consistency</td>
                 <td>2</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
@@ -384,6 +358,12 @@ flowchart TD
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>
+                <td><code>tests/test_governance_cli.py</code></td>
+                <td>4-tier configuration resolution and CLI subcommands</td>
+                <td>4</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
                 <td><code>tests/test_region_fallback.py</code></td>
                 <td>Inference router HTTP 429 quota failover across regions</td>
                 <td>2</td>
@@ -391,20 +371,32 @@ flowchart TD
               </tr>
               <tr>
                 <td><code>tests/test_persistence_store.py</code></td>
-                <td>Dual-backend SQLite / Firestore persistence with TTL</td>
+                <td>Dual-backend SQLite / Firestore persistence with TTL expiration</td>
                 <td>2</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>
+                <td><code>tests/test_demo_auth.py</code></td>
+                <td>Cloud Run evaluator auth gate, lock screen rendering, 401 unauth checks, cookie issuance</td>
+                <td>5</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
                 <td><code>tests/test_docs_site.py</code></td>
-                <td>Automated documentation site, navigation, CSS &amp; link verification</td>
-                <td>19</td>
+                <td>Site structure, design system parity, 20-way bidirectional navigation, asset non-zero size, zero broken links/anchors, IAP documentation &amp; zero secret leak invariants</td>
+                <td>21</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_regression_fixes.py</code></td>
+                <td>Athlete ID translation bridge, plan download URL-unquoting, UI theme toggle DOM/localStorage, Model Armor 4-checkpoint lifecycle</td>
+                <td>16</td>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr style="font-weight: 700; background: var(--panel);">
-                <td colspan="2">Total Automated Unit &amp; Site Test Suite</td>
-                <td>57</td>
-                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">57 / 57 GREEN (100%)</span></td>
+                <td colspan="2">Total Automated Unit, Governance &amp; Regression Test Suite</td>
+                <td>80</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">80 / 80 GREEN (100%)</span></td>
               </tr>
               <tr>
                 <td><code>evals/verify_eval_gate.sh</code></td>

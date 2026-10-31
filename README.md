@@ -1,6 +1,6 @@
 # AI-Devcamp-rowing-coach-agent 🚣‍♂️
 
-[![Tests](https://img.shields.io/badge/pytest-57%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/pytest-80%20passed-brightgreen.svg)]()
 [![Python](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)]()
 [![Google ADK](https://img.shields.io/badge/Google%20ADK-2.4.0-4285F4.svg)]()
 [![Agent Runtime](https://img.shields.io/badge/Google%20Cloud-Agent%20Runtime-blue.svg)]()
@@ -24,9 +24,9 @@ Following the structure established in the DevCamp reference project (`ai-devcam
 
 | Platform Pillar | Scope & Capabilities | Verification & Walkthrough Proof | Core Architectural Invariants |
 | :--- | :--- | :--- | :--- |
-| **Pillar 1: Build** | Deterministic Physics, Progressive Skills & FastMCP | [**Pillar 1 Walkthrough**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/walkthrough.html#pillar-1) | Concept2 equations ($W = 2.80 / (s/500)^3$), Wolverine L4 stroke grid (@16-@28), 13-week Phase 1 curriculum, human confirmation gate (`require_confirmation=True`). |
+| **Pillar 1: Build** | Deterministic Physics, Progressive Skills & FastMCP | [**Pillar 1 Walkthrough**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/walkthrough.html#pillar-1) | Concept2 equations ($W = 2.80 / (s/500)^3$), Wolverine L4 stroke grid (@16-@28), 13-week Phase 1 curriculum, human confirmation gate (`require_confirmation=True`), resilient plan artifact downloads (`GET /api/plans/{filename:path}`), and Cloud Run executive header `#theme-toggle-btn`. |
 | **Pillar 2: Scale** | Agent Runtime, Durable Sessions & Memory Bank | [**Pillar 2 Walkthrough**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/walkthrough.html#pillar-2) | Vertex AI Reasoning Engine (`5062846700507365376`), Agent Identity (workload identity), persistent multi-turn sessions, scale-to-zero memory distillation callback. |
-| **Pillar 3: Govern** | Dedicated Model Armor & Reversible PII Vault | [**Governance & PII Deep-Dive**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/governance-and-pii.html) | Dedicated `rowing-coach-guardrails` in `us-central1`, Cloud DLP domestic phone regexes, Gate 1 & Gate 2 cryptographic token vault (`[ATHLETE_ath_5a77195e]`), fail-closed orphan assertion (`VaultSafetyError`). |
+| **Pillar 3: Govern** | Dedicated Model Armor & Reversible PII Vault | [**Governance & PII Deep-Dive**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/governance-and-pii.html) | Dedicated `rowing-coach-guardrails` in `us-central1`, Cloud DLP domestic phone regexes, Gate 1 & Gate 2 cryptographic token vault (`[ATHLETE_ath_5a77195e]`), 4-checkpoint Model Armor lifecycle (Ingress, Tool Call Gate, Tool Output Shield, Egress SDP), and dual-gate athlete translation bridge (`pseudo_to_engine` and Gate 2 client rehydration with fail-closed `VaultSafetyError`). |
 | **Pillar 4: Optimise** | Golden Evals, Fail-Closed Deploy Gate & Telemetry | [**Cost Economics & Eval Gate**](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/cost-economics.html) | Golden eval suite (`refuse_dangerous_training_load`), mandatory tool rubrics (`rubric_based_tool_use_quality_v1`), exit-code 0 defense, and $0.00/mo cost floor under GCP Free Tier. |
 
 ---
@@ -66,6 +66,8 @@ uv run python local_proxy.py cli "What is today's workout progression?"
 7. **Enterprise Governance (Lab 3):** Boundary PII redaction via pure-ASGI middleware (`pii_middleware.py`), Google Cloud Model Armor regional prompt screening (`guardrails.py`), and Agent Registry CLI (`governance.py`).
 8. **Architectural Blueprint v0.2:** Decoupled sovereign EU boundary (`europe-west1`), multi-region fallback router on HTTP 429 (`backend/llm_router.py`), reversible bracketed PII vault (`backend/pii_vault.py`), and dual-backend zero-cost persistence (`backend/db.py`).
 9. **Quality Flywheel & Gated Release (Lab 4):** Golden evaluation suite (`evals/golden.json`), mandatory tool-use rubrics (`evals/eval_config.json`), and fail-closed release gate script (`evals/verify_eval_gate.sh`).
+10. **Resilient Artifact Download Route:** Serves generated weekly training sheets and coach notes via `@app.get("/api/plans/{filename:path}")`, unquoting URL entities (spaces `%20`, ampersands `%26`, UTF-8 accents), strictly sanitizing directory traversal paths to base names (`pathlib.Path.name`), searching multi-path container fallbacks (`PROJECT_ROOT / "plans"`, `/code/plans`, `/tmp/plans`), and returning clean HTTP 404s without server crashes.
+11. **Dual-Theme Executive Dashboard:** Instantaneous zero-latency light and dark mode toggling via `#theme-toggle-btn` in the Cloud Run UI header, synchronizing DOM classes (`bg-slate-100 text-slate-900` vs `bg-darkbg text-slate-200`) and persisting preference via browser `localStorage` (`rowing-coach-theme`).
 
 ---
 
@@ -119,6 +121,12 @@ flowchart TD
 - **Zero PII Leakage:** All squad member names and benchmark metrics in this repository are **completely anonymized and synthetic**. 2k reference splits are randomized across the full **1:40.0 to 2:30.0** spectrum with mathematically consistent power outputs.
 - **Zero Hardcoded Cloud Secrets:** No GCP project IDs, project numbers, reasoning engine IDs, or API keys are committed in this repository. All credentials are provided through environment variables (`.env`) or standard Google Application Default Credentials (`gcloud auth`).
 - **Human Confirmation Gate:** External calendar writes or destructive modifications are strictly guarded by `require_confirmation=True`.
+- **4-Checkpoint Model Armor Execution Lifecycle:**
+  1. *Checkpoint ① (Ingress Boundary):* Regional prompt template screening (`rowing-coach-guardrails`) intercepting prompt injection and jailbreak payloads (PI/JB v1.2) at the edge, converting security blocks into a friendly squad refusal.
+  2. *Checkpoint ② (Tool Call Gate):* Schema validation and interactive human confirmation (`require_confirmation=True`) on mutating calendar tools, preventing unauthorized workout writes.
+  3. *Checkpoint ③ (Tool Output Shield):* Indirect prompt injection defense (`tool_output_template_name`) screening untrusted external content retrieved via tools, coupled with architectural sub-agent isolation (`research_agent` via `AgentTool`).
+  4. *Checkpoint ④ (Egress Boundary):* Regional response screening (`rowing-coach-guardrails-output`) applying Sensitive Data Protection (SDP) redaction while disabling PI/JB filters to eliminate false-positive blocks, followed by Gate 2 client rehydration with fail-closed orphan token assertions (`VaultSafetyError`).
+- **Athlete ID Translation Bridge:** Bi-directional translation resolving the sovereign boundary mismatch between client-side PII-stripped cryptographic tokens (`[ATHLETE_ath_5a77195e]`) and remote Reasoning Engine roster keys (`david_montgamery`) pre-dispatch in `local_proxy.py`, with clean Gate 2 client rehydration on egress.
 - **Hackathon Reviewer Gating & IAP Architecture Decision:** The agent is deployed to Google Cloud Run as a live reviewer portal. We evaluated Google Cloud Identity-Aware Proxy (IAP) to gate the endpoint, but intentionally did not retain it because requiring evaluators to authenticate via pre-provisioned IAM accounts creates severe onboarding friction across diverse judge emails during a 3-minute pitch. Instead, the service enforces a single-instance hardware ceiling (`--max-instances 1`, `--min-instances 0`) and requires an access token generated via a cryptographically secure pseudorandom generator (undisclosed to prevent PRNG vulnerability exploitation), injected exclusively via runtime environment variables (`DEMO_PASSCODE`).
 
 ---
@@ -169,9 +177,20 @@ uv run pytest
 
 Expected result:
 ```
-tests/test_agent.py ....                                                 [ 28%]
-tests/test_tools.py ..........                                           [100%]
-======================== 14 passed in 0.99s ========================
+tests/test_agent.py ....                                                 [  5%]
+tests/test_athlete_vault_resolution.py ....                              [ 10%]
+tests/test_demo_auth.py .....                                            [ 16%]
+tests/test_docs_site.py .....................                            [ 42%]
+tests/test_gate_1_stripping.py ..                                        [ 45%]
+tests/test_gate_2_reinsertion.py ..                                      [ 47%]
+tests/test_governance_cli.py ....                                        [ 52%]
+tests/test_guardrails.py .....                                           [ 58%]
+tests/test_persistence_store.py ..                                       [ 61%]
+tests/test_pii_middleware.py ..                                          [ 63%]
+tests/test_region_fallback.py ..                                         [ 66%]
+tests/test_regression_fixes.py ................                          [ 86%]
+tests/test_tools.py ...........                                          [100%]
+============================== 80 passed in 1.59s ==============================
 ```
 
 ### 4. Run the ADC Web Proxy Interface

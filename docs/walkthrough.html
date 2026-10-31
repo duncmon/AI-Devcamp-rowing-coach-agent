@@ -84,27 +84,52 @@
           </figcaption>
         </figure>
 
+        <h3 id="resilient-plan-delivery">Resilient Plan Artifact Delivery &amp; URL Encoding Defense</h3>
+        <p>
+          During live coaching runs, plan generation tools create structured markdown session sheets with rich filenames, such as <code>Week 8 - Anaerobic &amp; L4 Pacing (19 au 25 Octobre).md</code>. Naive file endpoints break on encoded spaces (<code>%20</code>) or ampersands (<code>%26</code>), resulting in route truncation or HTTP 500 server crashes.
+        </p>
+        <p>
+          We resolved this with a hardened route in <code>local_proxy.py</code>:
+        </p>
+        <ul>
+          <li><strong>Path Parameter Routing:</strong> Uses FastAPI <code>@app.get("/api/plans/{filename:path}")</code> to capture arbitrary path segments.</li>
+          <li><strong>Entity Unquoting &amp; Traversal Defense:</strong> Applies <code>urllib.parse.unquote(filename)</code> and extracts <code>pathlib.Path(clean_name).name</code> to strictly strip directory traversal attempts.</li>
+          <li><strong>Multi-Path Resolution:</strong> Evaluates potential container storage directories across <code>PROJECT_ROOT / "plans"</code>, <code>Path("plans")</code>, <code>Path("/code/plans")</code>, and <code>Path("/tmp/plans")</code>, returning a quoted <code>Content-Disposition</code> attachment header.</li>
+          <li><strong>Fail-Safe 404 Handling:</strong> Raises a clean <code>HTTPException(status_code=404)</code> if the requested file is missing, completely eliminating unhandled 500 crashes.</li>
+        </ul>
+
+        <h3 id="ui-theme-persistence">Cloud Run Executive UI &amp; Theme Toggle</h3>
+        <p>
+          To support coaches operating in both bright outdoor boathouses and dark indoor ergo training suites, the Cloud Run executive dashboard header features a dedicated light/dark toggle button (<code>#theme-toggle-btn</code>):
+        </p>
+        <ul>
+          <li><strong>Zero-Latency DOM Switching:</strong> Synchronously modifies <code>classList</code> across <code>document.documentElement</code> and <code>document.body</code> (swapping <code>bg-slate-100 text-slate-900</code> &harr; <code>bg-darkbg text-slate-200</code>) and updates <code>#theme-icon</code> and <code>#theme-text</code> without page reloads.</li>
+          <li><strong>Browser LocalStorage Persistence:</strong> Automatically reads and writes preference via <code>localStorage.getItem('rowing-coach-theme')</code>, ensuring consistent user preference across browser sessions.</li>
+        </ul>
+
         <div class="code-block">
-          <div class="code-head"><span>Terminal Output: 57/57 Pytest Suite Execution</span></div>
+          <div class="code-head"><span>Terminal Output: 80/80 Pytest Suite Execution</span></div>
           <pre><code>============================= test session starts ==============================
 rootdir: /Users/duncanmoncrieff/projects/gdg-london-ai-devcamp-sept26/AI-Devcamp-rowing-coach-agent
 configfile: pyproject.toml
 testpaths: tests
-collected 57 items
+collected 80 items
 
-tests/test_agent.py ....                                                 [  7%]
-tests/test_athlete_vault_resolution.py ....                              [ 14%]
-tests/test_docs_site.py ...................                              [ 47%]
-tests/test_gate_1_stripping.py ..                                        [ 50%]
-tests/test_gate_2_reinsertion.py ..                                      [ 54%]
-tests/test_governance_cli.py ....                                        [ 61%]
-tests/test_guardrails.py .....                                           [ 70%]
-tests/test_persistence_store.py ..                                       [ 73%]
-tests/test_pii_middleware.py ..                                          [ 77%]
-tests/test_region_fallback.py ..                                         [ 80%]
+tests/test_agent.py ....                                                 [  5%]
+tests/test_athlete_vault_resolution.py ....                              [ 10%]
+tests/test_demo_auth.py .....                                            [ 16%]
+tests/test_docs_site.py .....................                            [ 42%]
+tests/test_gate_1_stripping.py ..                                        [ 45%]
+tests/test_gate_2_reinsertion.py ..                                      [ 47%]
+tests/test_governance_cli.py ....                                        [ 52%]
+tests/test_guardrails.py .....                                           [ 58%]
+tests/test_persistence_store.py ..                                       [ 61%]
+tests/test_pii_middleware.py ..                                          [ 63%]
+tests/test_region_fallback.py ..                                         [ 66%]
+tests/test_regression_fixes.py ................                          [ 86%]
 tests/test_tools.py ...........                                          [100%]
 
-======================== 57 passed, 6 warnings in 1.51s ========================</code></pre>
+============================== 80 passed in 1.59s ==============================</code></pre>
         </div>
       </div>
     </article>
@@ -188,6 +213,16 @@ tests/test_tools.py ...........                                          [100%]
             <strong>Figure 3.3:</strong> The conversational confirmation loop that occurred before the dedicated approval card was wired into the SSE stream.
           </figcaption>
         </figure>
+
+        <div class="callout warning" style="margin: 16px 0;">
+          <strong>Issue 3 — Remote Reasoning Engine Identity Mismatch &amp; Dual-Translation Bridge:</strong> While Gate 1 vaults Coach David into cryptographic pseudonym <code>[ATHLETE_ath_5a77195e]</code> for GDPR Article 9 privacy, the remote Vertex AI Reasoning Engine instructions and tools index the athlete as <code>david_montgamery</code> (matching <code>data/athletes.json</code>). Direct dispatch caused entity lookup mismatches.<br><br>
+          <strong>Resolution:</strong> Implemented a pre-dispatch translation bridge in <code>local_proxy.py</code> (<code>pseudo_to_engine</code>) that translates vaulted tokens to internal keys before sending to the engine. On egress, Gate 2 client rehydration substitutes <code>david_montgamery</code> back to <code>raw_coach</code> before running <code>vault.rehydrate()</code>, guaranteeing seamless coach recognition while fail-closed <code>VaultSafetyError</code> guards against orphan tokens.
+        </div>
+
+        <div class="callout warning" style="margin: 16px 0;">
+          <strong>Issue 4 — Model Armor 4-Checkpoint Architecture Verification:</strong> Traditional security quickstarts only screen direct ingress prompts, leaving the agent vulnerable to indirect prompt injection via untrusted tool outputs (e.g. scraped regatta calendars or athlete logs) and outbound data leakage.<br><br>
+          <strong>Resolution:</strong> Formalized and verified all four lifecycle checkpoints: ① Ingress prompt screening (<code>rowing-coach-guardrails</code>), ② Tool Call Gate (parameter schemas &amp; <code>require_confirmation=True</code>), ③ Tool Output Shield (screening untrusted external data via <code>tool_output_template_name</code> and <code>research_agent</code> sub-agent isolation), and ④ Egress SDP Redaction (<code>rowing-coach-guardrails-output</code>) with Gate 2 orphan token assertion. Automated regression tests verify all four checkpoints in <code>tests/test_regression_fixes.py</code>.
+        </div>
       </div>
     </article>
 
