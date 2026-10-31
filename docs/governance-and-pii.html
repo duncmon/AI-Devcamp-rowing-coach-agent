@@ -162,6 +162,78 @@ flowchart TD
           <code>"This request was flagged by our rowing squad safety policy and cannot be processed."</code>
         </div>
 
+        <h3 style="margin-top: 28px;">The 4 Checkpoints in the Agent Execution Lifecycle</h3>
+        <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 16px;">
+          Comprehensive agent defense requires screening at all four execution boundaries, rather than naive ingress-only filters:
+        </p>
+
+        <div class="mermaid">
+flowchart LR
+    C1["① Ingress Boundary<br/><b>User Prompt</b><br/>• Model Armor Ingress Template<br/>• Direct Prompt Injection<br/>• Jailbreak Screening (PI/JB)"]
+    C2["② Tool Call Gate<br/><b>Proposed Action</b><br/>• ADK Callbacks &amp; Allowlist<br/>• Parameter Schemas<br/>• Human Confirmation Gate"]
+    C3["③ Tool Output Shield<br/><b>Retrieved / Web Text</b><br/>• Model Armor Tool Shield<br/>• <b>CRITICAL BLIND SPOT</b><br/>• Screens RAG &amp; Web Output"]
+    C4["④ Egress Boundary<br/><b>Final Model Response</b><br/>• Model Armor Egress Template<br/>• SDP / PII Redaction<br/>• Credential Masking"]
+
+    C1 --> C2 --> C3 --> C4
+        </div>
+
+        <div class="callout callout-warning" style="margin: 16px 0; padding: 14px 16px; border-left: 4px solid var(--accent); background: var(--panel); border-radius: 6px;">
+          <strong>⚠️ Checkpoint ③ is the #1 blind spot in modern agent architectures:</strong> Most developer quickstarts only protect ① &amp; ④, leaving the agent completely vulnerable to indirect prompt injection from fetched training logs, external RSS feeds, or calendar payloads.
+        </div>
+
+        <h3 style="margin-top: 28px;">Decoupled Asymmetric Templates &amp; Confidence Tuning</h3>
+        <p>
+          Following Google Cloud enterprise best practices, we decouple inbound threat detection from outbound data protection, applying asymmetric filtering rules and confidence tuning:
+        </p>
+
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Shield Boundary</th>
+                <th>Dedicated Template</th>
+                <th>Primary Focus</th>
+                <th>Operational Tuning &amp; Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ingress &amp; Tool Shield</strong><br><small>(Checkpoints ① &amp; ③)</small></td>
+                <td><code>rowing-coach-guardrails</code><br><small>(<code>agent-ingress-tool-shield</code>)</small></td>
+                <td>• Prompt Injection &amp; Jailbreak (PI/JB v1.2)<br>• Google Safe Browsing malicious URL scanning<br>• Direct &amp; indirect adversarial payloads</td>
+                <td><strong>High Confidence:</strong> Requires high certainty before blocking, preventing false positives on legitimate physiological or coaching instructions.</td>
+              </tr>
+              <tr>
+                <td><strong>Egress SDP Shield</strong><br><small>(Checkpoint ④)</small></td>
+                <td><code>rowing-coach-guardrails-output</code><br><small>(<code>agent-egress-sdp-shield</code>)</small></td>
+                <td>• Sensitive Data Protection (SDP) Redaction<br>• Masks athlete phone numbers, PII, and API keys<br>• Permits helpful coaching summaries safely</td>
+                <td><strong>Zero False-Block Egress:</strong> Disables PI/JB filter on replies so that discussing safety rules never causes self-censorship.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-block" style="margin-top: 20px;">
+          <div class="code-head"><span>Python ADK Implementation Architecture (ADK 2.12+ &amp; 2.4.0 Inline Parity)</span></div>
+          <pre><code># Checkpoints ① &amp; ③: Ingress Prompt &amp; Tool Output Shield
+INGRESS_TOOL_TEMPLATE = "projects/ai-devcamp-duncan-395792/locations/us-central1/templates/rowing-coach-guardrails"
+# Checkpoint ④: Egress SDP / Sensitive Data Protection Shield
+EGRESS_SDP_TEMPLATE = "projects/ai-devcamp-duncan-395792/locations/us-central1/templates/rowing-coach-guardrails-output"
+
+# In ADK 2.12+, tool_output_template_name protects Checkpoint ③ natively:
+app = App(
+    name="rowing_coach_agent",
+    root_agent=root_agent,  # Includes Checkpoint ②: require_confirmation=True gate
+    plugins=[
+        ModelArmorPlugin(config=ModelArmorConfig(
+            prompt_template_name=INGRESS_TOOL_TEMPLATE,       # Checkpoint ①: Ingress
+            tool_output_template_name=INGRESS_TOOL_TEMPLATE,  # Checkpoint ③: Tool Output Shield (ADK 2.12+)
+            response_template_name=EGRESS_SDP_TEMPLATE,       # Checkpoint ④: Egress SDP Redaction
+        )),
+    ],
+)</code></pre>
+        </div>
+
         <h3 style="margin-top: 28px;">Direct Mitigation of the 4 Agentic Threat Vectors (OWASP Top 10 for LLMs)</h3>
         <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 16px;">
           <em>"The most dangerous prompt is the one your agent fetches."</em> In an agentic architecture, risk shifts from the user to external untrusted data and autonomous tool execution. Here is how Rowing Coach addresses each vector:
