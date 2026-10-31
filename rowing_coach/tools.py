@@ -329,7 +329,7 @@ def calculate_athlete_pacing(athlete_id: str) -> Dict[str, Any]:
     """Calculates the complete evidence-based masters & Wolverine pacing profile for an athlete.
     
     Args:
-        athlete_id: Athlete key from athletes.json (e.g. 'alex_martin', 'sophie_dubois', 'david_montgamery').
+        athlete_id: Athlete pseudonym token (e.g. '[ATHLETE_ath_5a77195e]', '[ATHLETE_ath_db95573a]').
         
     Returns:
         Dictionary with full calculated splits: 2k reference, AN power, recovery,
@@ -418,7 +418,7 @@ def align_session_pace_to_l4(athlete_id: str, intensity_zone: str) -> Dict[str, 
     rate with an explicit split reminder for easy ErgData programming.
     
     Args:
-        athlete_id: Athlete key (e.g. 'alex_martin', 'david_montgamery').
+        athlete_id: Athlete pseudonym token (e.g. '[ATHLETE_ath_5a77195e]', '[ATHLETE_ath_db95573a]').
         intensity_zone: Target intensity ('UT2', 'UT1', or 'AT').
         
     Returns:

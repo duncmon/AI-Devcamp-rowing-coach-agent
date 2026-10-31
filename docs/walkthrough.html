@@ -67,7 +67,7 @@
           <li><strong>Concept2 Physics Engine:</strong> Computes non-linear pace-to-watts (\(W = 2.80 / (s/500)^3\)) with floating-point precision, eliminating arithmetic hallucinations.</li>
           <li><strong>Wolverine Plan Level 4 Tables:</strong> Implements stroke-rate pacing grids (@16 through @28 SPM) aligning target wattage to precise splits.</li>
           <li><strong>Dynamic Season Curriculum:</strong> Models a 13-week Phase 1 macrocycle with automated calendar evaluation and priority-based overrides.</li>
-          <li><strong>Intervals.icu FastMCP Server:</strong> Stdio MCP server querying resting HR, HRV, and ATL/CTL fatigue scores, guarded behind <code>require_confirmation=True</code>.</li>
+          <li><strong>Custom-Authored Intervals.icu FastMCP Server (<code>mcp/intervals_server.py</code>):</strong> Custom-built in Python from scratch to bridge ADK with the Intervals.icu REST API. Queries resting HR, rMSSD HRV, and ATL/CTL fatigue scores, guarded behind <code>require_confirmation=True</code>.</li>
         </ul>
 
         <figure style="margin: 24px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--panel);">

@@ -1,6 +1,6 @@
-# Intervals.icu MCP Server
+# Custom Intervals.icu FastMCP Server (Engineered from Scratch)
 
-This directory contains the FastMCP stdio server connecting the `rowing_coach` agent to Intervals.icu.
+**Authored by our team specifically for the Rowing Coach Agent.** We hand-coded this custom FastMCP stdio server (`intervals_server.py`) from scratch in Python to bridge the Google ADK agent directly with the Intervals.icu REST API and endurance athlete telemetry.
 
 ### Features
 - Read athlete wellness & fitness metrics (CTL, ATL, TSB, resting HR, ramp rate).
