@@ -86,3 +86,12 @@ AI-Devcamp-rowing-coach-agent/
 - Run `uv run pytest` before and after every modification.
 - Commit atomically after completing each milestone step.
 - Preserve all existing comments and docstrings.
+
+---
+
+## 6. Hackathon & Presentation Guardrails (Always Active)
+- **Pitch & Strategy Confidentiality:** NEVER commit presentation scripts, video storyboards, competition pitch notes, or implementation plans into public Git repositories or `docs/`. Save them strictly in the parent workspace directory (`/Users/duncanmoncrieff/projects/gdg-london-ai-devcamp-sept26/`) or local untracked scratchpads.
+- **Branch Discipline:** During active hackathon development, always work on a dedicated feature branch (e.g., `hackathon-dev`). Never push commits to `main` or update the GitHub Pages live branch without explicit user review and approval.
+- **Grounded Status Reporting:** Do not use inflated labels like "production-grade" or "enterprise-complete" for components where functionality is still partial, prototype, or actively being developed. Use precise technical descriptors (e.g. "functional prototype", "verified eval baseline").
+- **Canonical Naming:** Refer to the project strictly as `Rowing Coach Agent`.
+- **GCP Client Quota Isolation:** Always explicitly set `ClientOptions(quota_project_id=PROJECT_ID)` when instantiating Google Cloud SDK clients (especially Cloud DLP and Model Armor) to prevent ambient ADC project collisions.
