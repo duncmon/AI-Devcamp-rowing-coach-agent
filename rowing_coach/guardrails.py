@@ -12,8 +12,10 @@ Standard Rowing Squad Refusal:
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+import pathlib
 import re
 from typing import Any, Dict, List, Optional
 
@@ -157,10 +159,151 @@ def model(name: str) -> FallbackGemini:
     )
 
 
+# --- Deterministic Athlete Pseudonymization & Response Sanitizer -----------
+
+_ATHLETE_MAPPINGS_INITIALIZED = False
+_ID_TO_TOKEN: dict[str, str] = {}
+_NAME_PATTERNS: list[tuple[re.Pattern, str]] = []
+
+
+def _init_athlete_mappings() -> None:
+    global _ATHLETE_MAPPINGS_INITIALIZED, _ID_TO_TOKEN, _NAME_PATTERNS
+    if _ATHLETE_MAPPINGS_INITIALIZED:
+        return
+
+    athletes_file = pathlib.Path(__file__).resolve().parents[1] / "data" / "athletes.json"
+    athletes_data = []
+    if athletes_file.exists():
+        try:
+            with open(athletes_file, "r", encoding="utf-8") as f:
+                d = json.load(f)
+                athletes_data = d.get("athletes", [])
+        except Exception as e:
+            log.warning("Failed to load athletes.json for PII guardrails: %s", e)
+
+    # Coach persona aliases -> [ATHLETE_ath_5a77195e]
+    coach_token = "[ATHLETE_ath_5a77195e]"
+    coach_aliases = [
+        "Coach David Montgamery",
+        "Coach David Montgomery",
+        "Coach David",
+        "David Montgamery",
+        "David Montgomery",
+        "david_montgamery",
+        "david_montgomery",
+        "Coach Montgomery",
+        "Coach Montgamery",
+    ]
+    for alias in coach_aliases:
+        _ID_TO_TOKEN[alias.lower()] = coach_token
+        _NAME_PATTERNS.append((re.compile(r"\b" + re.escape(alias) + r"\b", re.IGNORECASE), coach_token))
+
+    for a in athletes_data:
+        aid = a.get("id", "")
+        name = a.get("name", "")
+        pseudo = a.get("pseudonym") or f"ath_{aid}"
+        token = f"[ATHLETE_{pseudo}]"
+
+        if aid:
+            _ID_TO_TOKEN[aid.lower()] = token
+            _NAME_PATTERNS.append((re.compile(r"\b" + re.escape(aid) + r"\b", re.IGNORECASE), token))
+        if name:
+            _ID_TO_TOKEN[name.lower()] = token
+            _NAME_PATTERNS.append((re.compile(r"\b" + re.escape(name) + r"\b", re.IGNORECASE), token))
+
+    # Sort patterns by length descending so longer phrases match first
+    _NAME_PATTERNS.sort(key=lambda p: len(p[0].pattern), reverse=True)
+    _ATHLETE_MAPPINGS_INITIALIZED = True
+
+
+def sanitize_text(text: str) -> tuple[str, bool]:
+    """Deterministically scrubs cleartext athlete names, coach aliases, and parenthetical annotations."""
+    if not text:
+        return text, False
+
+    _init_athlete_mappings()
+    original = text
+
+    # 1. Strip parenthetical names following a token: e.g. [ATHLETE_ath_5a77195e] (Coach David) -> [ATHLETE_ath_5a77195e]
+    text = re.sub(r"(\[ATHLETE_[a-zA-Z0-9_]+\])\s*\([^\)]*\)", r"\1", text)
+
+    # 2. Replace known athlete names, aliases, and IDs with tokens
+    for pat, tok in _NAME_PATTERNS:
+        text = pat.sub(tok, text)
+
+    # 3. Clean up any accidental nested tokens or double brackets: e.g. [ATHLETE_[ATHLETE_ath_5a77195e]]
+    text = re.sub(r"\[ATHLETE_\[ATHLETE_([^\]]+)\]\]", r"[ATHLETE_\1]", text)
+
+    # 4. Collapse adjacent identical tokens: e.g. [ATHLETE_ath_5a77195e] [ATHLETE_ath_5a77195e]
+    text = re.sub(r"(\[ATHLETE_[a-zA-Z0-9_]+\])(?:\s+\1)+", r"\1", text)
+
+    return text, (text != original)
+
+
+def sanitize_value(val: Any) -> tuple[Any, bool]:
+    """Deterministically sanitizes a value (string, dict, or list)."""
+    _init_athlete_mappings()
+    if isinstance(val, str):
+        val_clean = val.strip()
+        val_lower = val_clean.lower()
+        if val_lower in _ID_TO_TOKEN:
+            new_val = _ID_TO_TOKEN[val_lower]
+            return new_val, (new_val != val)
+        return sanitize_text(val)
+    elif isinstance(val, list):
+        any_mod = False
+        new_list = []
+        for item in val:
+            new_item, mod = sanitize_value(item)
+            if mod:
+                any_mod = True
+            new_list.append(new_item)
+        return new_list, any_mod
+    elif isinstance(val, dict):
+        any_mod = False
+        new_dict = {}
+        for k, v in val.items():
+            new_k, k_mod = sanitize_value(k)
+            new_v, v_mod = sanitize_value(v)
+            if k_mod or v_mod:
+                any_mod = True
+            new_dict[new_k] = new_v
+        return new_dict, any_mod
+    return val, False
+
+
+def sanitize_llm_response(llm_response: LlmResponse) -> tuple[LlmResponse, bool]:
+    """Deterministically cleans function call arguments and text content in LlmResponse."""
+    if not llm_response.content or not llm_response.content.parts:
+        return llm_response, False
+
+    modified = False
+    for part in llm_response.content.parts:
+        # Sanitize function call arguments
+        if getattr(part, "function_call", None) and getattr(part.function_call, "args", None):
+            args = part.function_call.args
+            for k in list(args.keys()):
+                new_v, v_mod = sanitize_value(args[k])
+                if v_mod:
+                    args[k] = new_v
+                    modified = True
+
+        # Sanitize text
+        if getattr(part, "text", None):
+            new_text, t_mod = sanitize_text(part.text)
+            if t_mod:
+                part.text = new_text
+                modified = True
+
+    return llm_response, modified
+
+
 def friendly_block(
     callback_context: CallbackContext, llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
-    """after_model_callback: converts a Model Armor block into the standard squad refusal."""
+    """after_model_callback: converts a Model Armor block into the standard squad refusal,
+    and deterministically sanitizes function calls and generated text to eliminate PII leakage.
+    """
     if llm_response.error_code == "MODEL_ARMOR":
         log.warning("Model Armor blocked a call: %s", llm_response.error_message)
         return LlmResponse(
@@ -168,6 +311,12 @@ def friendly_block(
                 role="model", parts=[genai_types.Part.from_text(text=REFUSAL)]
             )
         )
+
+    # Deterministic Code-Level Sanitization (GDPR Article 9 & Zero PII Leakage Invariant)
+    sanitized_resp, was_modified = sanitize_llm_response(llm_response)
+    if was_modified:
+        return sanitized_resp
+
     return None
 
 

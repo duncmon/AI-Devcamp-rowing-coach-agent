@@ -549,3 +549,47 @@ def test_checkpoint_4_egress_sdp_redaction_and_orphan_assertion():
     leaked_resp = "Pacing ready for [ATHLETE_ath_5a77195e] and leaked [ATHLETE_ath_deadbeef]."
     with pytest.raises(VaultSafetyError):
         vault.rehydrate(leaked_resp, session_id)
+
+
+def test_issue5_deterministic_code_pii_sanitization_zero_llm_dependency():
+    """Issue 5: Deterministic Code-Level PII Sanitizer (Zero LLM Dependency Invariant).
+    
+    Verifies that when LLM returns raw athlete keys in function calls and parenthetical
+    cleartext names in generated text, the code-level after_model_callback and before_tool_callback
+    deterministically enforce pseudonymization without relying on LLM compliance.
+    """
+    from rowing_coach.guardrails import friendly_block, sanitize_llm_response, sanitize_text, sanitize_value
+    from rowing_coach.agent import _sanitize_tool_args
+
+    # 1. Function Call Argument Sanitization
+    fn_call = genai_types.Part.from_function_call(
+        name="align_session_pace_to_l4",
+        args={"athlete_id": "david_montgamery", "intensity_zone": "UT2"},
+    )
+    # 2. Model Text with Parenthetical Leakage
+    text_part = genai_types.Part.from_text(
+        text="For [ATHLETE_ath_5a77195e] (Coach David), a UT2 Base Session should be targeted at L4 @17 (2:25.3)."
+    )
+    resp = LlmResponse(
+        content=genai_types.Content(role="model", parts=[fn_call, text_part]),
+        error_code=None,
+    )
+
+    ctx = MagicMock(spec=CallbackContext)
+    altered = friendly_block(ctx, resp)
+
+    assert altered is not None
+    # Function call args must be tokenized
+    assert altered.content.parts[0].function_call.args["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+    # Text must have parenthetical name stripped
+    text_out = altered.content.parts[1].text
+    assert "(Coach David)" not in text_out
+    assert "Coach David" not in text_out
+    assert "David" not in text_out
+    assert "[ATHLETE_ath_5a77195e], a UT2 Base Session" in text_out
+
+    # 3. Before-tool callback verification
+    tool_args = {"athlete_id": "david_montgamery", "intensity_zone": "UT2"}
+    _sanitize_tool_args(MagicMock(), tool_args, MagicMock())
+    assert tool_args["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+

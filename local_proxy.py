@@ -201,7 +201,13 @@ async def stream_agent_pipeline(
                                 if isinstance(p, dict) and "function_call" in p:
                                     fn = p["function_call"]
                                     fn_name = fn.get("name")
-                                    fn_args = fn.get("args", {})
+                                    fn_args = dict(fn.get("args", {}))
+                                    try:
+                                        from rowing_coach.guardrails import sanitize_value
+                                        for ak, av in list(fn_args.items()):
+                                            fn_args[ak], _ = sanitize_value(av)
+                                    except Exception:
+                                        pass
                                     call_key = fn.get("id") or f"call_{inv_id}_{fn_name}"
                                     if call_key not in seen_calls:
                                         seen_calls.add(call_key)
@@ -252,6 +258,11 @@ async def stream_agent_pipeline(
                                     txt = p["text"]
                                     if not txt:
                                         continue
+                                    try:
+                                        from rowing_coach.guardrails import sanitize_text
+                                        txt, _ = sanitize_text(txt)
+                                    except Exception:
+                                        pass
                                     if is_partial is True:
                                         accumulated_text += txt
                                         yield {"type": "text", "delta": txt}

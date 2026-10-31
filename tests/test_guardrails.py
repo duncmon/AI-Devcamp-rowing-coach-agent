@@ -69,3 +69,83 @@ def test_dlp_boundary_mock():
         redacted = redact_boundary("Call Coach David at 06 12 34 56 78")
         assert "[PHONE_NUMBER]" in redacted
         assert "06 12 34 56 78" not in redacted
+
+
+def test_deterministic_sanitizer_function_call_args():
+    """Verify that friendly_block deterministically rewrites raw athlete IDs in tool calls to pseudonym tokens."""
+    fn_call = genai_types.Part.from_function_call(
+        name="align_session_pace_to_l4",
+        args={"athlete_id": "david_montgamery", "intensity_zone": "UT2"},
+    )
+    llm_resp = LlmResponse(
+        content=genai_types.Content(role="model", parts=[fn_call]),
+        error_code=None,
+    )
+    ctx = MagicMock(spec=CallbackContext)
+    result = friendly_block(ctx, llm_resp)
+
+    # Must be modified and return non-None with tokenized args
+    assert result is not None
+    assert result.content.parts[0].function_call.args["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+    assert result.content.parts[0].function_call.args["intensity_zone"] == "UT2"
+    # Also verify in-place mutation
+    assert llm_resp.content.parts[0].function_call.args["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+
+
+def test_deterministic_sanitizer_parenthetical_cleartext_text():
+    """Verify that friendly_block deterministically strips parenthetical cleartext names from text output."""
+    raw_text = (
+        "For [ATHLETE_ath_5a77195e] (Coach David), a UT2 Base Session should be targeted at L4 @17 (2:25.3). "
+        "This aligns with the midpoint of the UT2 zone (55% of 2kW)."
+    )
+    text_part = genai_types.Part.from_text(text=raw_text)
+    llm_resp = LlmResponse(
+        content=genai_types.Content(role="model", parts=[text_part]),
+        error_code=None,
+    )
+    ctx = MagicMock(spec=CallbackContext)
+    result = friendly_block(ctx, llm_resp)
+
+    assert result is not None
+    sanitized_text = result.content.parts[0].text
+    assert "(Coach David)" not in sanitized_text
+    assert "Coach David" not in sanitized_text
+    assert "David" not in sanitized_text
+    assert "[ATHLETE_ath_5a77195e], a UT2 Base Session should be targeted at L4 @17 (2:25.3)." in sanitized_text
+
+
+def test_deterministic_sanitizer_squad_names_in_text():
+    """Verify that friendly_block deterministically replaces squad names with tokens."""
+    raw_text = "Alex Martin and Sophie Dubois are training with David Montgamery today."
+    text_part = genai_types.Part.from_text(text=raw_text)
+    llm_resp = LlmResponse(
+        content=genai_types.Content(role="model", parts=[text_part]),
+        error_code=None,
+    )
+    ctx = MagicMock(spec=CallbackContext)
+    result = friendly_block(ctx, llm_resp)
+
+    assert result is not None
+    sanitized_text = result.content.parts[0].text
+    assert "Alex Martin" not in sanitized_text
+    assert "Sophie Dubois" not in sanitized_text
+    assert "David Montgamery" not in sanitized_text
+    assert "[ATHLETE_ath_db95573a]" in sanitized_text
+    assert "[ATHLETE_ath_8d369eef]" in sanitized_text
+    assert "[ATHLETE_ath_5a77195e]" in sanitized_text
+
+
+def test_agent_before_tool_callback_sanitizes_args():
+    """Verify that _sanitize_tool_args callback on root_agent mutates raw IDs in tool args before execution."""
+    from rowing_coach.agent import _sanitize_tool_args
+
+    tool_mock = MagicMock()
+    tool_mock.name = "align_session_pace_to_l4"
+    args = {"athlete_id": "david_montgamery", "intensity_zone": "UT2"}
+    ctx_mock = MagicMock()
+
+    ret = _sanitize_tool_args(tool_mock, args, ctx_mock)
+    assert ret is None  # standard callback pattern returns None so tool continues
+    assert args["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+    assert args["intensity_zone"] == "UT2"
+

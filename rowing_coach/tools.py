@@ -1096,11 +1096,11 @@ def generate_coach_notes(
         "50-minute continuous row to develop stroke-by-stroke power durability."
     )
     checkpoints = athlete_checkpoints or {
-        "alex_martin": "Watch for cadence drift on rep 3 of AT. Ensure L4 @21 split (2:27.1) remains steady.",
-        "sophie_dubois": "Balance Avi-fit cross-training with L4 sequences. Protect lumbar alignment on @16 and @18.",
-        "david_montgamery": "Lock AT 3x7' firmly at 78-82% 2k Watts (~2:07-2:09/500m). Guard against early sprint overshoot.",
-        "florence_moreau": "Coordinate Avi-fit with P1 AT pieces. Maintain 103-106 drag factor compliance.",
-        "lucas_bernard": "Enforce strict layback control on L4 low rates (@16 and @18). Avoid rushing the slide.",
+        "[ATHLETE_ath_db95573a]": "Watch for cadence drift on rep 3 of AT. Ensure L4 @21 split (2:27.1) remains steady.",
+        "[ATHLETE_ath_8d369eef]": "Balance Avi-fit cross-training with L4 sequences. Protect lumbar alignment on @16 and @18.",
+        "[ATHLETE_ath_5a77195e]": "Lock AT 3x7' firmly at 78-82% 2k Watts (~2:07-2:09/500m). Guard against early sprint overshoot.",
+        "[ATHLETE_ath_33b020c2]": "Coordinate Avi-fit with P1 AT pieces. Maintain 103-106 drag factor compliance.",
+        "[ATHLETE_ath_92c5e9dc]": "Enforce strict layback control on L4 low rates (@16 and @18). Avoid rushing the slide.",
     }
 
     filename = f"Week {week_number} - Coach Analysis & Methodology Notes.md"
