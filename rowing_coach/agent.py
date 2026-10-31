@@ -35,6 +35,7 @@ from .tools import (
     get_season_schedule,
     get_squad_roster,
     lookup_athlete,
+    parse_concept2_workout,
     store_coaching_memory,
 )
 
@@ -54,17 +55,20 @@ skill_toolset = SkillToolset(
 # ------------------------------------------------------------------------------
 # 2. Intervals.icu MCP Toolset (Gated with require_confirmation=True)
 # ------------------------------------------------------------------------------
+def _intervals_server_params():
+    return StdioServerParameters(
+        command=sys.executable,
+        args=[str(MCP_SERVER)],
+        env={
+            "DRY_RUN": os.environ.get("DRY_RUN", "true"),
+            "INTERVALS_API_KEY": os.environ.get("INTERVALS_API_KEY", ""),
+            "INTERVALS_ATHLETE_ID": os.environ.get("INTERVALS_ATHLETE_ID", "0"),
+        },
+    )
+
 intervals_toolset = McpToolset(
     connection_params=StdioConnectionParams(
-        server_params=StdioServerParameters(
-            command=sys.executable,
-            args=[str(MCP_SERVER)],
-            env={
-                "DRY_RUN": os.environ.get("DRY_RUN", "true"),
-                "INTERVALS_API_KEY": os.environ.get("INTERVALS_API_KEY", ""),
-                "INTERVALS_ATHLETE_ID": os.environ.get("INTERVALS_ATHLETE_ID", "0"),
-            },
-        ),
+        server_params=_intervals_server_params(),
     ),
     tool_filter=["get_athlete_wellness", "schedule_workout"],
     tool_name_prefix="intervals",
@@ -147,6 +151,7 @@ tools = [
     align_session_pace_to_l4,
     generate_weekly_sheet,
     generate_coach_notes,
+    parse_concept2_workout,
     store_coaching_memory,
     AgentTool(agent=research_agent),
     skill_toolset,

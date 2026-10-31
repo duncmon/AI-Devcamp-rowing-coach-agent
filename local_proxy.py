@@ -96,6 +96,7 @@ async def stream_agent_pipeline(
     user_id: str = "coach-david",
     session_id: Optional[str] = None,
     target: Optional[str] = None,
+    confirmation: Optional[Dict[str, Any]] = None,
 ) -> AsyncGenerator[Dict, None]:
     """Executes the full compliant coaching pipeline:
     1. Gate 1 PII Stripping & Vaulting
@@ -132,13 +133,35 @@ async def stream_agent_pipeline(
             "Content-Type": "application/json",
         }
 
-    payload = {
-        "input": {
-            "message": vaulted_message,
-            "user_id": user_id,
-            "session_id": session_id,
+    if confirmation:
+        call_id = confirmation.get("id", "call_adk_request_confirmation")
+        is_confirmed = bool(confirmation.get("confirmed", True))
+        payload = {
+            "input": {
+                "message": {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "function_response": {
+                                "id": call_id,
+                                "name": "adk_request_confirmation",
+                                "response": {"confirmed": is_confirmed},
+                            }
+                        }
+                    ],
+                },
+                "user_id": user_id,
+                "session_id": session_id,
+            }
         }
-    }
+    else:
+        payload = {
+            "input": {
+                "message": vaulted_message,
+                "user_id": user_id,
+                "session_id": session_id,
+            }
+        }
 
     seen_calls = set()
     accumulated_text = ""
@@ -189,6 +212,36 @@ async def stream_agent_pipeline(
                                             "args": fn_args,
                                             "elapsed_ms": int((time.time() - start_time) * 1000),
                                         }
+
+                                        # Intercept plan generation to mirror locally on coach Mac
+                                        if fn_name in ("generate_weekly_sheet", "generate_coach_notes"):
+                                            try:
+                                                from rowing_coach.tools import generate_weekly_sheet as local_gws, generate_coach_notes as local_gcn
+                                                if fn_name == "generate_weekly_sheet":
+                                                    local_p = local_gws(**fn_args)
+                                                else:
+                                                    local_p = local_gcn(**fn_args)
+                                                fname = pathlib.Path(local_p).name
+                                                yield {
+                                                    "type": "plan_generated",
+                                                    "tool": fn_name,
+                                                    "filename": fname,
+                                                    "download_url": f"/api/plans/{fname}",
+                                                }
+                                            except Exception as err:
+                                                log.warning("Local plan mirroring error: %s", err)
+
+                                        # Intercept ADK Human-In-The-Loop Confirmation Request
+                                        if fn_name == "adk_request_confirmation":
+                                            orig_call = fn_args.get("originalFunctionCall", {})
+                                            tool_conf = fn_args.get("toolConfirmation", {})
+                                            yield {
+                                                "type": "confirmation_request",
+                                                "call_id": fn.get("id") or call_key,
+                                                "tool": orig_call.get("name", "intervals_schedule_workout"),
+                                                "args": orig_call.get("args", {}),
+                                                "hint": tool_conf.get("hint", "Please approve or reject this action."),
+                                            }
 
                                 elif isinstance(p, dict) and "text" in p:
                                     txt = p["text"]
@@ -245,6 +298,16 @@ def healthz():
     return {"status": "ok", "target": "cloud", "target_engine": engine_path, "api_url": api_url}
 
 
+@app.get("/api/plans/{filename}")
+def download_plan_endpoint(filename: str):
+    from fastapi.responses import FileResponse, HTTPException
+    clean_name = pathlib.Path(filename).name
+    p_path = PROJECT_ROOT / "plans" / clean_name
+    if not p_path.exists():
+        raise HTTPException(status_code=404, detail=f"Plan file '{clean_name}' not found on local disk.")
+    return FileResponse(p_path, filename=clean_name, media_type="text/markdown")
+
+
 @app.post("/api/chat")
 async def chat_endpoint(request: Request):
     data = await request.json()
@@ -252,9 +315,16 @@ async def chat_endpoint(request: Request):
     session_id = data.get("session_id")
     user_id = data.get("user_id", "coach-david")
     target = data.get("target") or os.environ.get("PROXY_TARGET", "cloud")
+    confirmation = data.get("confirmation")
 
     async def sse_stream():
-        async for event in stream_agent_pipeline(message, user_id=user_id, session_id=session_id, target=target):
+        async for event in stream_agent_pipeline(
+            message,
+            user_id=user_id,
+            session_id=session_id,
+            target=target,
+            confirmation=confirmation,
+        ):
             payload = json.dumps(event)
             yield f"data: {payload}\n\n"
         yield "data: [DONE]\n\n"
@@ -650,6 +720,13 @@ HTML_PAGE = """<!DOCTYPE html>
       const text = userInput.value.trim();
       if (!text) return;
       userInput.value = '';
+
+      // Auto-resolve pending confirmation if user types confirmation text
+      if (window.pendingConfirmation && /^(yes|confirm|approve|proceed|ok|i confirm)/i.test(text.toLowerCase())) {
+        window.submitConfirmation(window.pendingConfirmation.call_id, true);
+        return;
+      }
+
       sendBtn.disabled = true;
 
       appendUserMessage(text);
@@ -699,6 +776,51 @@ HTML_PAGE = """<!DOCTYPE html>
                   addActivityItem(event.name, event.args, event.elapsed_ms);
                 } else if (event.type === 'stage') {
                   setStage(event.stage);
+                } else if (event.type === 'confirmation_request') {
+                  window.pendingConfirmation = event;
+                  const confCard = document.createElement('div');
+                  confCard.id = 'active-confirm-card';
+                  confCard.className = 'my-3 p-4 rounded-xl border border-amber-500/40 bg-amber-950/20 shadow-lg text-slate-200';
+                  confCard.innerHTML = `
+                    <div class="flex items-center gap-2 text-amber-400 font-bold text-xs mb-2">
+                      <i class="fa-solid fa-triangle-exclamation"></i> Human Approval Gate (Intervals.icu Staging)
+                    </div>
+                    <p class="text-xs text-slate-300 mb-2">${event.hint}</p>
+                    <div class="bg-darkbg p-2.5 rounded border border-darkborder font-mono text-[11px] mb-3 text-slate-400">
+                      <div><span class="text-slate-500">Action:</span> <strong class="text-brand-300">${event.tool}</strong></div>
+                      ${event.args && event.args.title ? `<div><span class="text-slate-500">Workout:</span> <span class="text-slate-200">${event.args.title}</span></div>` : ''}
+                      ${event.args && event.args.workout_date ? `<div><span class="text-slate-500">Date:</span> <span class="text-slate-200">${event.args.workout_date}</span> (${event.args.duration_minutes || 60} min)</div>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                      <button onclick="submitConfirmation('${event.call_id}', true)" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition">
+                        <i class="fa-solid fa-check"></i> Approve & Stage Workout
+                      </button>
+                      <button onclick="submitConfirmation('${event.call_id}', false)" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition">
+                        <i class="fa-solid fa-xmark"></i> Reject
+                      </button>
+                    </div>
+                  `;
+                  chatStream.appendChild(confCard);
+                  chatStream.scrollTop = chatStream.scrollHeight;
+                } else if (event.type === 'plan_generated') {
+                  const planCard = document.createElement('div');
+                  planCard.className = 'my-3 p-3.5 rounded-xl border border-brand-500/40 bg-brand-950/20 flex items-center justify-between text-slate-200 shadow';
+                  planCard.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg bg-brand-900/60 border border-brand-500/30 flex items-center justify-center text-brand-400 text-sm">
+                        <i class="fa-solid fa-file-lines"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-slate-200">${event.filename}</div>
+                        <div class="text-[10px] text-brand-400">Saved to local repository (plans/)</div>
+                      </div>
+                    </div>
+                    <a href="${event.download_url}" download="${event.filename}" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow transition">
+                      <i class="fa-solid fa-download"></i> Download Plan
+                    </a>
+                  `;
+                  chatStream.appendChild(planCard);
+                  chatStream.scrollTop = chatStream.scrollHeight;
                 } else if (event.type === 'text') {
                   rawAccumulated += event.delta;
                   agentBody.innerHTML = marked.parse(rawAccumulated);
@@ -719,6 +841,73 @@ HTML_PAGE = """<!DOCTYPE html>
         userInput.focus();
       }
     });
+
+    window.submitConfirmation = async function(callId, confirmed) {
+      const activeCard = document.getElementById('active-confirm-card');
+      if (activeCard) {
+        activeCard.querySelectorAll('button').forEach(b => b.disabled = true);
+        activeCard.classList.add('opacity-70');
+      }
+      appendUserMessage(confirmed ? "✓ Confirmed: Approve & stage workout on Intervals.icu" : "✗ Rejected: Cancel staging");
+      const agentBody = createAgentMessageSlot();
+      let rawAccumulated = '';
+      sendBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: confirmed ? "Confirmed" : "Rejected",
+            session_id: sessionId,
+            confirmation: { id: callId, confirmed: confirmed }
+          })
+        });
+
+        if (confirmed) setStage('staged');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const payload = line.slice(6);
+              if (payload === '[DONE]') break;
+              try {
+                const event = JSON.parse(payload);
+                if (event.type === 'tool_call') {
+                  addActivityItem(event.name, event.args, event.elapsed_ms);
+                } else if (event.type === 'stage') {
+                  setStage(event.stage);
+                } else if (event.type === 'text') {
+                  rawAccumulated += event.delta;
+                  agentBody.innerHTML = marked.parse(rawAccumulated);
+                  chatStream.scrollTop = chatStream.scrollHeight;
+                } else if (event.type === 'done') {
+                  agentBody.innerHTML = marked.parse(event.rehydrated || rawAccumulated);
+                } else if (event.type === 'error') {
+                  agentBody.innerHTML += `<div class="text-rose-400 font-bold text-xs mt-2">[Error]: ${event.error}</div>`;
+                }
+              } catch (err) {}
+            }
+          }
+        }
+      } catch (err) {
+        agentBody.innerHTML = `<p class="text-rose-400">[Confirmation Error]: ${err.message}</p>`;
+      } finally {
+        window.pendingConfirmation = null;
+        sendBtn.disabled = false;
+        userInput.focus();
+      }
+    };
   </script>
 </body>
 </html>

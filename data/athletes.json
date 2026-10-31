@@ -29,7 +29,8 @@
           "notes": "Anonymized benchmark 1:58.2"
         }
       ],
-      "hr_max": 180
+      "hr_max": 180,
+      "pseudonym": "ath_5a77195e"
     },
     {
       "id": "alex_martin",
@@ -58,7 +59,8 @@
           "notes": "Anonymized benchmark 2:08.4"
         }
       ],
-      "hr_max": 170
+      "hr_max": 170,
+      "pseudonym": "ath_db95573a"
     },
     {
       "id": "sophie_dubois",
@@ -87,7 +89,8 @@
           "notes": "Anonymized benchmark 2:16.8"
         }
       ],
-      "hr_max": 175
+      "hr_max": 175,
+      "pseudonym": "ath_8d369eef"
     },
     {
       "id": "florence_moreau",
@@ -116,7 +119,8 @@
           "notes": "Anonymized benchmark 2:24.0"
         }
       ],
-      "hr_max": 168
+      "hr_max": 168,
+      "pseudonym": "ath_33b020c2"
     },
     {
       "id": "lucas_bernard",
@@ -145,7 +149,8 @@
           "notes": "Anonymized benchmark 1:47.6"
         }
       ],
-      "hr_max": 178
+      "hr_max": 178,
+      "pseudonym": "ath_92c5e9dc"
     },
     {
       "id": "marie_laurent",
@@ -174,7 +179,8 @@
           "notes": "Anonymized benchmark 2:27.4"
         }
       ],
-      "hr_max": 166
+      "hr_max": 166,
+      "pseudonym": "ath_982d5373"
     },
     {
       "id": "pierre_simon",
@@ -203,7 +209,8 @@
           "notes": "Anonymized benchmark 1:53.0"
         }
       ],
-      "hr_max": 176
+      "hr_max": 176,
+      "pseudonym": "ath_4589e277"
     },
     {
       "id": "claire_fontaine",
@@ -232,7 +239,8 @@
           "notes": "Anonymized benchmark 2:04.6"
         }
       ],
-      "hr_max": 182
+      "hr_max": 182,
+      "pseudonym": "ath_3e5d8f68"
     },
     {
       "id": "guillaume_mercier",
@@ -261,7 +269,8 @@
           "notes": "Anonymized benchmark 1:56.2"
         }
       ],
-      "hr_max": 165
+      "hr_max": 165,
+      "pseudonym": "ath_346337ca"
     },
     {
       "id": "brigitte_roux",
@@ -290,7 +299,8 @@
           "notes": "Anonymized benchmark 2:19.4"
         }
       ],
-      "hr_max": 178
+      "hr_max": 178,
+      "pseudonym": "ath_c474dcbc"
     },
     {
       "id": "marc_leroy",
@@ -319,7 +329,8 @@
           "notes": "Anonymized benchmark 1:49.8"
         }
       ],
-      "hr_max": 168
+      "hr_max": 168,
+      "pseudonym": "ath_f1e1c907"
     },
     {
       "id": "philippe_girard",
@@ -348,7 +359,8 @@
           "notes": "Anonymized benchmark 1:41.6"
         }
       ],
-      "hr_max": 172
+      "hr_max": 172,
+      "pseudonym": "ath_3ab028ad"
     },
     {
       "id": "romain_bonnet",
@@ -377,7 +389,8 @@
           "notes": "Anonymized benchmark 1:44.2"
         }
       ],
-      "hr_max": 180
+      "hr_max": 180,
+      "pseudonym": "ath_504b221b"
     },
     {
       "id": "valerie_caron",
@@ -405,7 +418,8 @@
           "watts": 145.5,
           "notes": "Anonymized benchmark 2:14.0"
         }
-      ]
+      ],
+      "pseudonym": "ath_ae26b87e"
     },
     {
       "id": "sandrine_roche",
@@ -433,7 +447,8 @@
           "watts": 105.4,
           "notes": "Anonymized benchmark 2:29.2"
         }
-      ]
+      ],
+      "pseudonym": "ath_de660c5b"
     },
     {
       "id": "celine_brun",
@@ -461,7 +476,8 @@
           "watts": 123.3,
           "notes": "Anonymized benchmark 2:21.6"
         }
-      ]
+      ],
+      "pseudonym": "ath_90ffaf04"
     }
   ]
 }

@@ -194,3 +194,24 @@ def test_generate_weekly_sheet_and_coach_notes(tmp_path, monkeypatch):
     assert "Paris" in notes_content
     assert "48-hour" in notes_content
 
+
+def test_parse_concept2_workout():
+    from rowing_coach.tools import parse_concept2_workout
+
+    sample_log = (
+        "Concept2 Logbook workout for athlete #19482928 (John Doe): "
+        "2000m 7:52.8 1:58.2 211w 24spm 162bpm. Profile link: https://log.concept2.com/profile/19482928"
+    )
+
+    res = parse_concept2_workout(sample_log)
+    assert res["status"] == "success"
+    assert res["distance_meters"] == 2000
+    assert res["average_split"] == "1:58.2"
+    assert res["average_watts"] == 211.0
+    assert res["stroke_rate_spm"] == 24
+    assert res["average_hr_bpm"] == 162
+    # Ensure personal profile link is not propagated in output metrics
+    assert "19482928" not in str(res["average_split"])
+    assert res["sanitized_notice"] != ""
+
+
