@@ -266,3 +266,35 @@ def test_zero_secret_token_leaks():
         text = file_path.read_text(encoding="utf-8")
         matches = unmasked_pattern.findall(text)
         assert not matches, f"Potential unmasked secret token found in {file_path}: {matches}"
+
+
+def test_mermaid_diagram_responsiveness_and_pipeline_completeness():
+    """Verify that Mermaid diagrams have responsive overflow CSS and contain all 4 privacy stages."""
+    css_text = (DOCS_DIR / "style.css").read_text(encoding="utf-8")
+    assert ".mermaid" in css_text
+    assert "max-width: 100%" in css_text
+    assert "overflow-x: auto" in css_text
+
+    gov_html = (DOCS_DIR / "governance-and-pii.html").read_text(encoding="utf-8")
+    # Verify the diagram includes all critical stages without truncation
+    assert "subgraph Gate1" in gov_html
+    assert "subgraph ModelArmor" in gov_html
+    assert "subgraph CoreAgent" in gov_html or "subgraph LLM" in gov_html
+    assert "subgraph Gate2" in gov_html
+
+
+def test_sandbox_simulator_mock_clarity_and_readability():
+    """Verify Section 4 clearly demarcates the client-side simulator test bench and enforces readability."""
+    gov_html = (DOCS_DIR / "governance-and-pii.html").read_text(encoding="utf-8")
+    
+    # Must explicitly state it is an in-browser educational mock/simulator
+    assert "Interactive In-Browser Mock Test Bench" in gov_html or "Client-Side Simulator" in gov_html
+    assert "educational simulation" in gov_html.lower()
+
+    # Must provide direct reference to the live Cloud Run application
+    assert "Launch the Live Cloud Run Dashboard" in gov_html
+
+    # Output boxes must enforce legible font sizes (at least 13px) and line height
+    assert 'font-size: 13px;' in gov_html or 'font-size: 13.5px;' in gov_html
+    assert 'line-height: 1.6;' in gov_html
+
