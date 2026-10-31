@@ -16,6 +16,7 @@ COPY main.py memory_bank_config.py pii_middleware.py governance.py local_proxy.p
 RUN uv sync --frozen --no-dev
 
 ENV PORT=8080
+ENV APP_MODULE=main:app
 EXPOSE 8080
 
-CMD ["sh", "-c", "uv run uvicorn local_proxy:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uv run uvicorn ${APP_MODULE:-main:app} --host 0.0.0.0 --port ${PORT}"]

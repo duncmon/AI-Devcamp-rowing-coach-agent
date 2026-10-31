@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import pathlib
+import re
 import sys
 import time
 import urllib.parse
@@ -134,18 +135,8 @@ async def stream_agent_pipeline(
             "Content-Type": "application/json",
         }
 
-    # Prepare message for engine (translate pseudonyms to athlete keys understood by remote engine)
+    # Under GDPR Article 9, preserve client-side vault tokens directly on dispatch
     engine_message = vaulted_message
-    pseudo_to_engine = {
-        "[ATHLETE_ath_5a77195e]": "david_montgamery",
-        "ath_5a77195e": "david_montgamery",
-        "[ATHLETE_ath_db95573a]": "alex_martin",
-        "ath_db95573a": "alex_martin",
-        "[ATHLETE_ath_8d369eef]": "sophie_dubois",
-        "ath_8d369eef": "sophie_dubois",
-    }
-    for p_tok, eng_id in pseudo_to_engine.items():
-        engine_message = engine_message.replace(p_tok, eng_id)
 
     if confirmation:
         call_id = confirmation.get("id", "call_adk_request_confirmation")
@@ -276,10 +267,18 @@ async def stream_agent_pipeline(
             yield {"type": "error", "error": f"Transport Error: {str(e)}"}
 
     # --- Step 3: Gate 2 Client Rehydration ---
-    raw_coach = mappings.get("[ATHLETE_ath_5a77195e]") or mappings.get("[ATHLETE_david_montgamery]") or "Coach David"
+    to_raw = sess_vault.get("to_raw", {})
+    raw_coach = (
+        to_raw.get("[ATHLETE_ath_5a77195e]")
+        or to_raw.get("[ATHLETE_david_montgamery]")
+        or mappings.get("[ATHLETE_ath_5a77195e]")
+        or "Coach David"
+    )
     pre_rehydrated = accumulated_text
     pre_rehydrated = re.sub(r"\bDavid Montgamery\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
+    pre_rehydrated = re.sub(r"\bDavid Montgomery\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
     pre_rehydrated = re.sub(r"\bdavid_montgamery\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
+    pre_rehydrated = re.sub(r"\bath_5a77195e\b", raw_coach, pre_rehydrated, flags=re.IGNORECASE)
 
     try:
         rehydrated_text = vault.rehydrate(pre_rehydrated, session_id)
@@ -398,29 +397,34 @@ HTML_PAGE = """<!DOCTYPE html>
   </script>
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0c0f14; }
-    ::-webkit-scrollbar-thumb { background: #2a3140; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #3b4457; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    .dark ::-webkit-scrollbar-track { background: #0c0f14; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #2a3140; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark ::-webkit-scrollbar-thumb:hover { background: #3b4457; }
     .prose p { margin-bottom: 0.5rem; line-height: 1.5; }
-    .prose strong { color: #60a5fa; }
-    .prose code { background: #1f2533; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .prose strong { color: #1d4ed8; }
+    .dark .prose strong { color: #60a5fa; }
+    .prose code { background: #e2e8f0; color: #0f172a; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.85em; }
+    .dark .prose code { background: #1f2533; color: #e2e8f0; }
     .pulse-glow { box-shadow: 0 0 15px rgba(29, 99, 237, 0.4); }
   </style>
 </head>
-<body class="bg-darkbg text-slate-200 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-100 dark:bg-darkbg text-slate-900 dark:text-slate-200 min-h-screen flex flex-col font-sans antialiased">
 
   <!-- Top Navigation Header -->
-  <header class="h-16 bg-darkpanel/80 backdrop-blur border-b border-darkborder px-6 flex items-center justify-between sticky top-0 z-50">
+  <header class="h-16 bg-white/80 dark:bg-darkpanel/80 backdrop-blur border-b border-slate-200 dark:border-darkborder px-6 flex items-center justify-between sticky top-0 z-50">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-400 text-lg shadow-inner">
         🚣‍♂️
       </div>
       <div>
-        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+        <h1 class="text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
           ACL Masters Rowing Coach
           <span class="text-[10px] font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Enterprise ADK</span>
         </h1>
-        <p class="text-xs text-slate-400">Phase 1 Macrocycle (Week 8) • Coach David Persona</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Phase 1 Macrocycle (Week 8) • Coach David Persona</p>
       </div>
     </div>
 
@@ -435,11 +439,11 @@ HTML_PAGE = """<!DOCTYPE html>
         <span>PII Vault & Model Armor</span>
       </div>
 
-      <button id="reset-session-btn" title="Start fresh conversation" class="px-3 py-1.5 rounded-lg bg-darkborder hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+      <button id="reset-session-btn" title="Start fresh conversation" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-darkborder dark:hover:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
         <i class="fa-solid fa-arrows-rotate"></i> Reset Chat
       </button>
 
-      <button id="theme-toggle-btn" type="button" title="Toggle Light / Dark Mode" class="px-3 py-1.5 rounded-lg bg-darkborder hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 border border-slate-700 cursor-pointer">
+      <button id="theme-toggle-btn" type="button" title="Toggle Light / Dark Mode" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-darkborder dark:hover:bg-slate-700 text-xs text-slate-700 dark:text-slate-300 transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 cursor-pointer">
         <i id="theme-icon" class="fa-solid fa-moon text-blue-400"></i> <span id="theme-text">Dark</span>
       </button>
     </div>
@@ -449,100 +453,100 @@ HTML_PAGE = """<!DOCTYPE html>
   <div class="flex-1 flex overflow-hidden">
 
     <!-- Column 1: Periodization Pipeline Stepper -->
-    <aside class="w-72 bg-darkpanel/50 border-r border-darkborder p-5 flex flex-col justify-between hidden md:flex">
+    <aside class="w-72 bg-slate-50/80 dark:bg-darkpanel/50 border-r border-slate-200 dark:border-darkborder p-5 flex flex-col justify-between hidden md:flex">
       <div>
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
           <i class="fa-solid fa-stairs text-brand-400"></i> 5-Stage Periodization
         </h2>
 
         <div class="space-y-4 relative">
-          <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-darkborder -z-0"></div>
+          <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-darkborder -z-0"></div>
 
           <!-- Stage 1 -->
           <div id="stage-curriculum" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
-            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">1</div>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow">1</div>
             <div>
-              <p class="text-xs font-bold text-white">Season Curriculum</p>
-              <p class="text-[11px] text-slate-400">W1-W13 Phase 1 block</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">Season Curriculum</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">W1-W13 Phase 1 block</p>
             </div>
           </div>
 
           <!-- Stage 2 -->
           <div id="stage-rules" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
-            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">2</div>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow">2</div>
             <div>
-              <p class="text-xs font-bold text-white">Physiology Rules</p>
-              <p class="text-[11px] text-slate-400">Kleshnev & Seiler 3-Zone</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">Physiology Rules</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Kleshnev & Seiler 3-Zone</p>
             </div>
           </div>
 
           <!-- Stage 3 -->
           <div id="stage-pacing" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
-            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">3</div>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow">3</div>
             <div>
-              <p class="text-xs font-bold text-white">L4 Stroke Rate Grid</p>
-              <p class="text-[11px] text-slate-400">Wolverine threshold alignment</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">L4 Stroke Rate Grid</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Wolverine threshold alignment</p>
             </div>
           </div>
 
           <!-- Stage 4 -->
           <div id="stage-plan_ready" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
-            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">4</div>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow">4</div>
             <div>
-              <p class="text-xs font-bold text-white">Fiche & Notes Ready</p>
-              <p class="text-[11px] text-slate-400">Squad sheet & coach notes</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">Fiche & Notes Ready</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Squad sheet & coach notes</p>
             </div>
           </div>
 
           <!-- Stage 5 -->
           <div id="stage-staged" class="flex items-start gap-3 relative z-10 transition-all duration-300 opacity-60">
-            <div class="w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow">5</div>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow">5</div>
             <div>
-              <p class="text-xs font-bold text-white">Intervals.icu Staged</p>
-              <p class="text-[11px] text-slate-400">Confirmation gate verified</p>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">Intervals.icu Staged</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">Confirmation gate verified</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Squad Meta Card -->
-      <div class="bg-darkpanel p-3.5 rounded-xl border border-darkborder text-xs">
+      <div class="bg-white dark:bg-darkpanel p-3.5 rounded-xl border border-slate-200 dark:border-darkborder text-xs shadow-sm">
         <p class="font-bold text-brand-400 mb-1 flex items-center gap-1.5">
           <i class="fa-solid fa-circle-info"></i> Active Squad Profile
         </p>
-        <p class="text-slate-300"><strong>Coach David:</strong> 1:58.2 (211.9W)</p>
-        <p class="text-slate-400">UT2 Target: 2:21.8 @20</p>
-        <p class="text-slate-500 text-[10px] mt-1">Durable Thread: <span id="thread-id-display">...</span></p>
+        <p class="text-slate-700 dark:text-slate-300"><strong>Coach David:</strong> 1:58.2 (211.9W)</p>
+        <p class="text-slate-500 dark:text-slate-400">UT2 Target: 2:21.8 @20</p>
+        <p class="text-slate-400 dark:text-slate-500 text-[10px] mt-1">Durable Thread: <span id="thread-id-display">...</span></p>
       </div>
     </aside>
 
     <!-- Column 2: Center Interactive Chat Area -->
-    <main class="flex-1 flex flex-col bg-darkbg overflow-hidden relative">
+    <main class="flex-1 flex flex-col bg-slate-100 dark:bg-darkbg overflow-hidden relative">
       
       <!-- Chat message stream -->
       <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-5">
         
         <!-- Welcome Card -->
-        <div class="max-w-2xl mx-auto bg-darkpanel/60 border border-darkborder rounded-2xl p-5 text-sm shadow-xl">
+        <div class="max-w-2xl mx-auto bg-white/80 dark:bg-darkpanel/60 border border-slate-200 dark:border-darkborder rounded-2xl p-5 text-sm shadow-xl">
           <div class="flex items-center gap-3 mb-3">
             <span class="text-2xl">🚣‍♂️</span>
             <div>
-              <h3 class="font-bold text-white text-base">ACL Masters Coaching Workspace</h3>
-              <p class="text-xs text-slate-400">Protected by Cloud DLP Boundary Sanitization & Google Cloud Model Armor</p>
+              <h3 class="font-bold text-slate-900 dark:text-white text-base">ACL Masters Coaching Workspace</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Protected by Cloud DLP Boundary Sanitization & Google Cloud Model Armor</p>
             </div>
           </div>
-          <p class="text-slate-300 text-xs leading-relaxed mb-4">
+          <p class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed mb-4">
             Ask for athlete split alignments, Wolverine Level 4 tables, French squad fiches, or stage workouts directly to Intervals.icu with confirmation protection.
           </p>
 
-          <div class="flex flex-wrap gap-2 pt-2 border-t border-darkborder/50">
-            <button type="button" data-prompt="Coach David's UT2 Base Session" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-darkborder/50">
+            <button type="button" data-prompt="Coach David's UT2 Base Session" class="chip-btn text-[11px] bg-white hover:bg-brand-50 hover:text-brand-600 hover:border-brand-300 dark:bg-darkborder dark:hover:bg-brand-600/20 dark:hover:text-brand-300 dark:hover:border-brand-500/40 border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 shadow-sm transition cursor-pointer">
               💡 Coach David's UT2 Base Session
             </button>
-            <button type="button" data-prompt="Calculate L4 Grid for Alex Martin" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
+            <button type="button" data-prompt="Calculate L4 Grid for Alex Martin" class="chip-btn text-[11px] bg-white hover:bg-brand-50 hover:text-brand-600 hover:border-brand-300 dark:bg-darkborder dark:hover:bg-brand-600/20 dark:hover:text-brand-300 dark:hover:border-brand-500/40 border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 shadow-sm transition cursor-pointer">
               💡 Calculate L4 Grid for Alex Martin
             </button>
-            <button type="button" data-prompt="Stage 3x7min AT on Intervals.icu" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
+            <button type="button" data-prompt="Stage 3x7min AT on Intervals.icu" class="chip-btn text-[11px] bg-white hover:bg-brand-50 hover:text-brand-600 hover:border-brand-300 dark:bg-darkborder dark:hover:bg-brand-600/20 dark:hover:text-brand-300 dark:hover:border-brand-500/40 border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 shadow-sm transition cursor-pointer">
               💡 Stage 3x7min AT on Intervals.icu
             </button>
           </div>
@@ -551,7 +555,7 @@ HTML_PAGE = """<!DOCTYPE html>
       </div>
 
       <!-- Bottom Chat Input Bar -->
-      <div class="p-4 bg-darkpanel/80 backdrop-blur border-t border-darkborder">
+      <div class="p-4 bg-white/80 dark:bg-darkpanel/80 backdrop-blur border-t border-slate-200 dark:border-darkborder">
         <form id="chat-form" class="max-w-3xl mx-auto flex gap-3">
           <input 
             type="text" 
@@ -559,7 +563,7 @@ HTML_PAGE = """<!DOCTYPE html>
             placeholder="Ask about workouts, L4 stroke rates, or athlete pacing (PII is vaulted automatically)..." 
             autocomplete="off" 
             required 
-            class="flex-1 bg-darkbg border border-darkborder rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+            class="flex-1 bg-white dark:bg-darkbg border border-slate-300 dark:border-darkborder rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
           >
           <button 
             type="submit" 
@@ -574,26 +578,26 @@ HTML_PAGE = """<!DOCTYPE html>
     </main>
 
     <!-- Column 3: Telemetry, Activity Feed & PII Compliance Drawer -->
-    <aside class="w-80 bg-darkpanel/70 border-l border-darkborder flex flex-col hidden lg:flex">
+    <aside class="w-80 bg-slate-50/80 dark:bg-darkpanel/70 border-l border-slate-200 dark:border-darkborder flex flex-col hidden lg:flex">
       
       <!-- Tabs Header -->
-      <div class="flex border-b border-darkborder bg-darkpanel">
+      <div class="flex border-b border-slate-200 dark:border-darkborder bg-slate-100 dark:bg-darkpanel">
         <button id="tab-activity-btn" class="flex-1 py-3 text-xs font-bold text-brand-400 border-b-2 border-brand-500 transition flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-bolt"></i> Activity Feed
         </button>
-        <button id="tab-pii-btn" class="flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+        <button id="tab-pii-btn" class="flex-1 py-3 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-fingerprint"></i> PII Audit Vault
         </button>
       </div>
 
       <!-- Tab Content: Activity Feed -->
       <div id="tab-activity-content" class="flex-1 p-4 overflow-y-auto space-y-3">
-        <p class="text-[11px] text-slate-400 flex items-center justify-between">
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
           <span>In-Flight Tool Traces</span>
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
         </p>
         <div id="activity-list" class="space-y-2 text-xs">
-          <div class="p-2.5 rounded-lg bg-darkbg/50 border border-darkborder text-slate-400 text-center italic text-[11px]">
+          <div class="p-2.5 rounded-lg bg-slate-100/70 dark:bg-darkbg/50 border border-slate-200 dark:border-darkborder text-slate-500 dark:text-slate-400 text-center italic text-[11px]">
             No tool executions yet this turn.
           </div>
         </div>
@@ -603,7 +607,7 @@ HTML_PAGE = """<!DOCTYPE html>
       <div id="tab-pii-content" class="flex-1 p-4 overflow-y-auto space-y-4 hidden">
         <div>
           <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Gate 1: Boundary Sanitization</span>
-          <div class="p-2.5 rounded-lg bg-darkbg border border-darkborder text-[11px] font-mono break-all" id="audit-vaulted-display">
+          <div class="p-2.5 rounded-lg bg-white dark:bg-darkbg border border-slate-200 dark:border-darkborder text-[11px] font-mono break-all text-slate-800 dark:text-slate-200" id="audit-vaulted-display">
             Awaiting prompt...
           </div>
         </div>
@@ -617,15 +621,15 @@ HTML_PAGE = """<!DOCTYPE html>
 
         <div>
           <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Model Armor Screening</span>
-          <div class="p-2.5 rounded-lg bg-darkbg border border-darkborder text-[11px]">
-            <p class="text-slate-300">Template: <span class="text-brand-400 font-mono">rowing-coach-guardrails</span></p>
-            <p class="text-slate-400">Status: <span id="audit-armor-status" class="text-emerald-400 font-bold">READY</span></p>
+          <div class="p-2.5 rounded-lg bg-white dark:bg-darkbg border border-slate-200 dark:border-darkborder text-[11px]">
+            <p class="text-slate-700 dark:text-slate-300">Template: <span class="text-brand-400 font-mono">rowing-coach-guardrails</span></p>
+            <p class="text-slate-500 dark:text-slate-400">Status: <span id="audit-armor-status" class="text-emerald-400 font-bold">READY</span></p>
           </div>
         </div>
 
         <div>
           <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">Legal Invariant Checklist</span>
-          <ul class="text-[11px] text-slate-300 space-y-1">
+          <ul class="text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
             <li>✅ Cloud DLP Byte-offset Check</li>
             <li>✅ Zero PII Leaked to LLM Weights</li>
             <li>✅ Reversible Client Rehydration</li>
@@ -689,14 +693,14 @@ HTML_PAGE = """<!DOCTYPE html>
 
     tabActBtn.addEventListener('click', () => {
       tabActBtn.className = 'flex-1 py-3 text-xs font-bold text-brand-400 border-b-2 border-brand-500 transition flex items-center justify-center gap-1.5';
-      tabPiiBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5';
+      tabPiiBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition flex items-center justify-center gap-1.5';
       tabActContent.classList.remove('hidden');
       tabPiiContent.classList.add('hidden');
     });
 
     tabPiiBtn.addEventListener('click', () => {
       tabPiiBtn.className = 'flex-1 py-3 text-xs font-bold text-indigo-400 border-b-2 border-indigo-500 transition flex items-center justify-center gap-1.5';
-      tabActBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5';
+      tabActBtn.className = 'flex-1 py-3 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition flex items-center justify-center gap-1.5';
       tabPiiContent.classList.remove('hidden');
       tabActContent.classList.add('hidden');
     });
@@ -717,7 +721,7 @@ HTML_PAGE = """<!DOCTYPE html>
         } else {
           el.classList.add('opacity-60');
           el.classList.remove('opacity-100');
-          num.className = 'w-8 h-8 rounded-full bg-darkborder border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 shadow';
+          num.className = 'w-8 h-8 rounded-full bg-slate-200 dark:bg-darkborder border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shadow';
         }
       });
     }
@@ -748,10 +752,10 @@ HTML_PAGE = """<!DOCTYPE html>
       const div = document.createElement('div');
       div.className = 'max-w-2xl mr-auto flex gap-3 items-start';
       div.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-brand-400 flex-shrink-0">
+        <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-brand-500 dark:text-brand-400 flex-shrink-0">
           🚣‍♂️
         </div>
-        <div class="bg-darkpanel border border-darkborder text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-md max-w-lg w-full prose">
+        <div class="bg-white dark:bg-darkpanel border border-slate-200 dark:border-darkborder text-slate-800 dark:text-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm shadow-md max-w-lg w-full prose">
           <p class="font-bold text-xs text-brand-400 mb-1">ACL Coach Assistant</p>
           <div class="agent-body min-h-[1.5rem]"><span class="inline-block w-2 h-4 bg-brand-400 animate-pulse"></span></div>
         </div>
@@ -766,15 +770,15 @@ HTML_PAGE = """<!DOCTYPE html>
         activityList.innerHTML = '';
       }
       const item = document.createElement('div');
-      item.className = 'p-2.5 rounded-lg bg-darkbg border border-darkborder transition hover:border-slate-600';
+      item.className = 'p-2.5 rounded-lg bg-white dark:bg-darkbg border border-slate-200 dark:border-darkborder transition hover:border-slate-400 dark:hover:border-slate-600 shadow-sm';
       item.innerHTML = `
-        <div class="flex items-center justify-between font-bold text-slate-200 text-[11px] mb-1">
+        <div class="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 text-[11px] mb-1">
           <span class="text-brand-400 flex items-center gap-1.5">
             <i class="fa-solid fa-gears text-[10px]"></i> ${name}
           </span>
           <span class="text-slate-500 text-[10px] font-mono">${elapsed}ms</span>
         </div>
-        <pre class="text-[10px] text-slate-400 font-mono overflow-x-auto bg-darkpanel p-1.5 rounded">${JSON.stringify(args, null, 1)}</pre>
+        <pre class="text-[10px] text-slate-600 dark:text-slate-400 font-mono overflow-x-auto bg-slate-100 dark:bg-darkpanel p-1.5 rounded">${JSON.stringify(args, null, 1)}</pre>
       `;
       activityList.appendChild(item);
       activityList.scrollTop = activityList.scrollHeight;
@@ -831,8 +835,8 @@ HTML_PAGE = """<!DOCTYPE html>
                   } else {
                     keys.forEach(k => {
                       const p = document.createElement('div');
-                      p.className = 'flex items-center justify-between bg-darkbg p-1.5 rounded border border-darkborder font-mono text-[10px]';
-                      p.innerHTML = `<span class="text-slate-400">${k}</span> <span class="text-emerald-400 font-bold">${event.mappings[k]}</span>`;
+                      p.className = 'flex items-center justify-between bg-slate-100 dark:bg-darkbg p-1.5 rounded border border-slate-200 dark:border-darkborder font-mono text-[10px]';
+                      p.innerHTML = `<span class="text-slate-600 dark:text-slate-400">${k}</span> <span class="text-emerald-500 dark:text-emerald-400 font-bold">${event.mappings[k]}</span>`;
                       mapList.appendChild(p);
                     });
                   }
@@ -844,16 +848,16 @@ HTML_PAGE = """<!DOCTYPE html>
                   window.pendingConfirmation = event;
                   const confCard = document.createElement('div');
                   confCard.id = 'active-confirm-card';
-                  confCard.className = 'my-3 p-4 rounded-xl border border-amber-500/40 bg-amber-950/20 shadow-lg text-slate-200';
+                  confCard.className = 'my-3 p-4 rounded-xl border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 shadow-lg text-slate-800 dark:text-slate-200';
                   confCard.innerHTML = `
-                    <div class="flex items-center gap-2 text-amber-400 font-bold text-xs mb-2">
+                    <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-xs mb-2">
                       <i class="fa-solid fa-triangle-exclamation"></i> Human Approval Gate (Intervals.icu Staging)
                     </div>
-                    <p class="text-xs text-slate-300 mb-2">${event.hint}</p>
-                    <div class="bg-darkbg p-2.5 rounded border border-darkborder font-mono text-[11px] mb-3 text-slate-400">
-                      <div><span class="text-slate-500">Action:</span> <strong class="text-brand-300">${event.tool}</strong></div>
-                      ${event.args && event.args.title ? `<div><span class="text-slate-500">Workout:</span> <span class="text-slate-200">${event.args.title}</span></div>` : ''}
-                      ${event.args && event.args.workout_date ? `<div><span class="text-slate-500">Date:</span> <span class="text-slate-200">${event.args.workout_date}</span> (${event.args.duration_minutes || 60} min)</div>` : ''}
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mb-2">${event.hint}</p>
+                    <div class="bg-white dark:bg-darkbg p-2.5 rounded border border-slate-200 dark:border-darkborder font-mono text-[11px] mb-3 text-slate-600 dark:text-slate-400">
+                      <div><span class="text-slate-500">Action:</span> <strong class="text-brand-600 dark:text-brand-300">${event.tool}</strong></div>
+                      ${event.args && event.args.title ? `<div><span class="text-slate-500">Workout:</span> <span class="text-slate-800 dark:text-slate-200">${event.args.title}</span></div>` : ''}
+                      ${event.args && event.args.workout_date ? `<div><span class="text-slate-500">Date:</span> <span class="text-slate-800 dark:text-slate-200">${event.args.workout_date}</span> (${event.args.duration_minutes || 60} min)</div>` : ''}
                     </div>
                     <div class="flex gap-2">
                       <button onclick="submitConfirmation('${event.call_id}', true)" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition">
@@ -868,15 +872,15 @@ HTML_PAGE = """<!DOCTYPE html>
                   chatStream.scrollTop = chatStream.scrollHeight;
                 } else if (event.type === 'plan_generated') {
                   const planCard = document.createElement('div');
-                  planCard.className = 'my-3 p-3.5 rounded-xl border border-brand-500/40 bg-brand-950/20 flex items-center justify-between text-slate-200 shadow';
+                  planCard.className = 'my-3 p-3.5 rounded-xl border border-brand-500/40 bg-brand-50 dark:bg-brand-950/20 flex items-center justify-between text-slate-800 dark:text-slate-200 shadow';
                   planCard.innerHTML = `
                     <div class="flex items-center gap-2.5">
-                      <div class="w-8 h-8 rounded-lg bg-brand-900/60 border border-brand-500/30 flex items-center justify-center text-brand-400 text-sm">
+                      <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/60 border border-brand-300 dark:border-brand-500/30 flex items-center justify-center text-brand-500 dark:text-brand-400 text-sm">
                         <i class="fa-solid fa-file-lines"></i>
                       </div>
                       <div>
-                        <div class="text-xs font-bold text-slate-200">${event.filename}</div>
-                        <div class="text-[10px] text-brand-400">Saved to local repository (plans/)</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-200">${event.filename}</div>
+                        <div class="text-[10px] text-brand-600 dark:text-brand-400">Saved to local repository (plans/)</div>
                       </div>
                     </div>
                     <a href="${event.download_url}" download="${event.filename.replace(/"/g, '&quot;')}" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow transition">

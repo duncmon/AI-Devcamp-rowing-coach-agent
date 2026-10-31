@@ -172,15 +172,33 @@ def _load_athletes() -> Dict[str, Any]:
     return athletes_dict
 
 
+def _pseudonymized_athlete_card(athlete_dict: Dict[str, Any], raw_id: str) -> Dict[str, Any]:
+    """Returns a GDPR Article 9 compliant copy of an athlete record with pseudonym tokens."""
+    card = dict(athlete_dict)
+    pseudo = card.get("pseudonym") or f"ath_{raw_id}"
+    token = f"[ATHLETE_{pseudo}]"
+    card["id"] = token
+    card["name"] = token
+    card["pseudonym"] = pseudo
+    return card
+
+
 def get_squad_roster() -> Dict[str, Any]:
-    """Retrieves the complete ACL Masters Rowing Squad roster, including all athletes, categories, roles, and active 2k benchmark splits."""
+    """Retrieves the complete ACL Masters Rowing Squad roster under GDPR Article 9 pseudonymization.
+    
+    All athlete identifiers and names are returned as pseudonym tokens ([ATHLETE_ath_...])
+    to prevent PII leakage to the model or cloud execution traces.
+    """
     athletes = _load_athletes()
     roster = []
     for aid, a in athletes.items():
         bm = a.get("current_benchmark", {})
+        pseudo = a.get("pseudonym") or f"ath_{aid}"
+        token = f"[ATHLETE_{pseudo}]"
         roster.append({
-            "id": aid,
-            "name": a.get("name", aid),
+            "id": token,
+            "name": token,
+            "pseudonym": pseudo,
             "role": a.get("role", "Rower"),
             "category": a.get("category", "Master"),
             "gender": a.get("gender", ""),
@@ -216,23 +234,20 @@ def lookup_athlete(query: Optional[str] = None) -> Dict[str, Any]:
 
     # Exact match on ID
     if clean_query in athletes:
-        a = athletes[clean_query]
-        a["id"] = clean_query
-        return {"status": "success", "athlete": a}
+        card = _pseudonymized_athlete_card(athletes[clean_query], clean_query)
+        return {"status": "success", "athlete": card}
 
     # Match on cryptographic pseudonym (e.g. ath_5a77195e)
     for aid, a in athletes.items():
         if a.get("pseudonym", "").lower() == clean_query:
-            athlete_copy = dict(a)
-            athlete_copy["id"] = aid
-            return {"status": "success", "athlete": athlete_copy}
+            card = _pseudonymized_athlete_card(a, aid)
+            return {"status": "success", "athlete": card}
 
     # Match default coach persona aliases / first athlete token
-    if clean_query in ("athlete_name_1", "coach", "coach david", "david montgomery", "head coach"):
+    if clean_query in ("athlete_name_1", "coach", "coach david", "david montgomery", "david montgamery", "head coach"):
         if "david_montgamery" in athletes:
-            a = dict(athletes["david_montgamery"])
-            a["id"] = "david_montgamery"
-            return {"status": "success", "athlete": a}
+            card = _pseudonymized_athlete_card(athletes["david_montgamery"], "david_montgamery")
+            return {"status": "success", "athlete": card}
 
     # Search in name, pseudonym, or ID
     matches = []
@@ -242,22 +257,20 @@ def lookup_athlete(query: Optional[str] = None) -> Dict[str, Any]:
         if (clean_query in aid.lower() or 
             clean_query in name or 
             (pseudo and clean_query in pseudo)):
-            athlete_copy = dict(a)
-            athlete_copy["id"] = aid
-            matches.append(athlete_copy)
+            matches.append(_pseudonymized_athlete_card(a, aid))
 
     if len(matches) == 1:
         return {"status": "success", "athlete": matches[0]}
     elif len(matches) > 1:
-        names = [f"{m['name']} (id: {m['id']})" for m in matches]
+        tokens = [f"{m['id']}" for m in matches]
         return {
             "status": "multiple_matches",
-            "message": f"Found {len(matches)} athletes matching '{query}': {', '.join(names)}. Please refine your query.",
+            "message": f"Found {len(matches)} athletes matching query: {', '.join(tokens)}. Please refine your query.",
             "matches": matches,
         }
     return {
         "status": "not_found",
-        "message": f"No athlete found matching '{query}'. Available athletes: {', '.join(a.get('name', k) for k, a in athletes.items())}",
+        "message": f"No athlete found matching query '{query}'. Use get_squad_roster() to view available squad members.",
     }
 
 
@@ -366,10 +379,14 @@ def calculate_athlete_pacing(athlete_id: str) -> Dict[str, Any]:
     for r in range(16, 29):
         l4_table[f"@{r}"] = seconds_to_pace(calculate_l4_split(split_2k_sec, r))
 
+    token = athlete.get("id") if str(athlete.get("id", "")).startswith("[ATHLETE_") else f"[ATHLETE_{athlete.get('pseudonym', athlete['id'])}]"
+    pseudo = athlete.get("pseudonym") or token.strip("[]").replace("ATHLETE_", "")
+
     return {
         "status": "success",
-        "athlete_id": athlete["id"],
-        "name": athlete["name"],
+        "athlete_id": token,
+        "name": token,
+        "pseudonym": pseudo,
         "category": athlete.get("category", ""),
         "benchmark_2k_split": athlete["benchmark_2k_split"],
         "benchmark_2k_watts": watts_2k,
@@ -443,10 +460,14 @@ def align_session_pace_to_l4(athlete_id: str, intensity_zone: str) -> Dict[str, 
     reminder_fr = f"allure L4 @{best_rate} ({l4_split_str})"
     reminder_en = f"L4 @{best_rate} pace ({l4_split_str})"
 
+    token = athlete.get("id") if str(athlete.get("id", "")).startswith("[ATHLETE_") else f"[ATHLETE_{athlete.get('pseudonym', athlete['id'])}]"
+    pseudo = athlete.get("pseudonym") or token.strip("[]").replace("ATHLETE_", "")
+
     return {
         "status": "success",
-        "athlete_id": athlete["id"],
-        "name": athlete["name"],
+        "athlete_id": token,
+        "name": token,
+        "pseudonym": pseudo,
         "zone": zone_desc,
         "target_percent_watts": f"{int(target_pct * 100)}%",
         "midpoint_split": midpoint_split_str,

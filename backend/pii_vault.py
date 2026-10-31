@@ -35,6 +35,7 @@ class ReversiblePiiVault:
         # Maps session_id -> { "to_token": {raw: token}, "to_raw": {token: raw}, "counters": {category: int} }
         self._sessions: Dict[str, Dict] = {}
         self._squad_roster_map = self._load_squad_pseudonym_map()
+        self._squad_reverse_map = self._load_squad_reverse_map()
 
     def _load_squad_pseudonym_map(self) -> Dict[str, str]:
         """Loads all athletes and known aliases, mapping lowercase name to pseudonym."""
@@ -57,6 +58,31 @@ class ReversiblePiiVault:
             except Exception as e:
                 log.warning(f"Failed to load squad athletes in vault: {e}")
         return m
+
+    def _load_squad_reverse_map(self) -> Dict[str, str]:
+        """Loads reverse mapping from squad tokens to friendly display names for Gate 2 rehydration."""
+        rev: Dict[str, str] = {
+            "[ATHLETE_ath_5a77195e]": "Coach David",
+            "[ATHLETE_david_montgamery]": "Coach David",
+        }
+        if ATHLETES_FILE.exists():
+            try:
+                with open(ATHLETES_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                for a in data.get("athletes", []):
+                    aid = a.get("id", "")
+                    name = a.get("name", aid)
+                    pseudonym = a.get("pseudonym", f"ath_{aid}")
+                    token = f"[ATHLETE_{pseudonym}]"
+                    if aid == "david_montgamery" or pseudonym == "ath_5a77195e":
+                        rev[token] = "Coach David"
+                        rev[f"[ATHLETE_{aid}]"] = "Coach David"
+                    else:
+                        rev[token] = name
+                        rev[f"[ATHLETE_{aid}]"] = name
+            except Exception as e:
+                log.warning(f"Failed to load squad reverse map in vault: {e}")
+        return rev
 
     def _get_session(self, session_id: str) -> Dict:
         if session_id not in self._sessions:
@@ -159,11 +185,16 @@ class ReversiblePiiVault:
         sess = self._get_session(session_id)
         to_raw = sess["to_raw"]
 
-        # Replace known tokens
+        # Step 1: Replace session-specific tokens first (preserves exact user prompt phrasing)
         for token, raw in to_raw.items():
             text = text.replace(token, raw)
 
-        # Safety Audit: check for leftover / orphan / hallucinated tokens
+        # Step 2: Replace remaining known squad tokens from reverse map (e.g. from tool outputs)
+        for token, raw in self._squad_reverse_map.items():
+            if token in text:
+                text = text.replace(token, raw)
+
+        # Step 3: Safety Audit: check for leftover / orphan / hallucinated tokens
         orphan_pattern = r"\[(?:(?:ATHLETE_NAME|PHONE_NUMBER|EMAIL_ADDRESS)_\d+|ATHLETE_ath_[a-f0-9]+)\]"
         orphans = re.findall(orphan_pattern, text)
         if orphans:
