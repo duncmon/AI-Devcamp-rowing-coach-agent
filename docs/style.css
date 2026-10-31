@@ -331,6 +331,21 @@ a.tile:hover {
   min-width: 0;
 }
 
+/* Responsive Mermaid Diagram Containers */
+.mermaid {
+  overflow-x: auto;
+  max-width: 100%;
+  text-align: center;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.mermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 .step-header {
   padding: 18px 24px;
   background: rgba(0,0,0,0.02);

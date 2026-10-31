@@ -70,45 +70,27 @@ def client():
 # 1. ISSUE 1: ATHLETE ID TRANSLATION (INGRESS & EGRESS)
 # ==============================================================================
 
-def test_ingress_athlete_id_translation_dictionary():
-    """Verify pseudo_to_engine mapping dictionary in local_proxy transforms all squad tokens."""
-    pseudo_to_engine = {
-        "[ATHLETE_ath_5a77195e]": "david_montgamery",
-        "ath_5a77195e": "david_montgamery",
-        "[ATHLETE_ath_db95573a]": "alex_martin",
-        "ath_db95573a": "alex_martin",
-        "[ATHLETE_ath_8d369eef]": "sophie_dubois",
-        "ath_8d369eef": "sophie_dubois",
-    }
+def test_ingress_athlete_tokens_preserved_on_dispatch():
+    """Verify client-side vault tokens are preserved during dispatch without unmasking."""
+    vault = ReversiblePiiVault()
+    session_id = "test_ingress_preserve_sess"
 
-    # Test David Montgamery tokens (with bracketed token and bare hash)
-    msg_david_bracket = "What is [ATHLETE_ath_5a77195e]'s UT2 base session?"
-    msg_david_bare = "Fetch records for ath_5a77195e on the ergo."
-    for p_tok, eng_id in pseudo_to_engine.items():
-        msg_david_bracket = msg_david_bracket.replace(p_tok, eng_id)
-        msg_david_bare = msg_david_bare.replace(p_tok, eng_id)
+    msg = "Calculate pacing for Coach David and Alex Martin."
+    vaulted = vault.strip_and_vault(msg, session_id)
 
-    assert "david_montgamery" in msg_david_bracket
-    assert "[ATHLETE_ath_5a77195e]" not in msg_david_bracket
-    assert "david_montgamery" in msg_david_bare
-    assert "ath_5a77195e" not in msg_david_bare
-
-    # Test Alex Martin tokens
-    msg_alex = "Calculate pacing for [ATHLETE_ath_db95573a] (ath_db95573a)."
-    for p_tok, eng_id in pseudo_to_engine.items():
-        msg_alex = msg_alex.replace(p_tok, eng_id)
-    assert msg_alex == "Calculate pacing for alex_martin (alex_martin)."
-
-    # Test Sophie Dubois tokens
-    msg_sophie = "Prepare sheet for [ATHLETE_ath_8d369eef] (ath_8d369eef)."
-    for p_tok, eng_id in pseudo_to_engine.items():
-        msg_sophie = msg_sophie.replace(p_tok, eng_id)
-    assert msg_sophie == "Prepare sheet for sophie_dubois (sophie_dubois)."
+    # Ingress dispatch message retains vault tokens under GDPR Article 9
+    engine_message = vaulted
+    assert "[ATHLETE_ath_5a77195e]" in engine_message
+    assert "[ATHLETE_ath_db95573a]" in engine_message
+    assert "david_montgamery" not in engine_message
+    assert "alex_martin" not in engine_message
+    assert "Coach David" not in engine_message
+    assert "Alex Martin" not in engine_message
 
 
 @pytest.mark.anyio
-async def test_ingress_translation_in_stream_pipeline():
-    """Verify stream_agent_pipeline translates vaulted athlete tokens before dispatching payload to engine."""
+async def test_ingress_preserves_tokens_in_stream_pipeline():
+    """Verify stream_agent_pipeline dispatches vaulted athlete tokens directly to engine."""
     captured_payload = None
 
     class MockStreamContext:
@@ -125,7 +107,7 @@ async def test_ingress_translation_in_stream_pipeline():
             chunk = {
                 "output": {
                     "content": {
-                        "parts": [{"text": "Pacing profile for david_montgamery: 1:58.2."}]
+                        "parts": [{"text": "Pacing profile for [ATHLETE_ath_5a77195e]: 1:58.2."}]
                     }
                 }
             }
@@ -144,17 +126,85 @@ async def test_ingress_translation_in_stream_pipeline():
         ):
             events.append(evt)
 
-        # Verify engine received internal key 'david_montgamery', never raw 'Coach David' or vault token
+        # Verify engine received vault token [ATHLETE_ath_5a77195e], never raw name or snake_case key
         assert captured_payload is not None
         engine_msg = captured_payload["input"]["message"]
-        assert "david_montgamery" in engine_msg
+        assert "[ATHLETE_ath_5a77195e]" in engine_msg
+        assert "david_montgamery" not in engine_msg
         assert "Coach David" not in engine_msg
-        assert "[ATHLETE_ath_5a77195e]" not in engine_msg
 
         # Verify pii_audit event was emitted with mappings
         audit_events = [e for e in events if e.get("type") == "pii_audit"]
         assert len(audit_events) == 1
         assert "[ATHLETE_ath_5a77195e]" in audit_events[0]["mappings"].values()
+
+
+def test_tools_return_pseudonym_tokens_under_gdpr_article_9():
+    """Verify all biometric coaching tools return pseudonym tokens rather than cleartext names or raw IDs."""
+    from rowing_coach.tools import (
+        lookup_athlete,
+        get_squad_roster,
+        calculate_athlete_pacing,
+        align_session_pace_to_l4,
+    )
+
+    # 1. lookup_athlete returns pseudonym token
+    res_alex = lookup_athlete("Alex")
+    assert res_alex["status"] == "success"
+    assert res_alex["athlete"]["id"] in ("[ATHLETE_ath_db95573a]", "ath_db95573a")
+    assert "Alex Martin" not in str(res_alex["athlete"].get("name", ""))
+    assert "[ATHLETE_ath_db95573a]" in res_alex["athlete"]["name"]
+
+    # 2. get_squad_roster strips all cleartext names
+    roster_res = get_squad_roster()
+    assert roster_res["status"] == "success"
+    for athlete in roster_res["squad_roster"]:
+        assert athlete["id"].startswith("[ATHLETE_") or athlete["id"].startswith("ath_")
+        assert "Alex Martin" not in athlete["name"]
+        assert "David Montgomery" not in athlete["name"]
+        assert "Sophie Dubois" not in athlete["name"]
+
+    # 3. calculate_athlete_pacing preserves pseudonym token
+    pacing = calculate_athlete_pacing("[ATHLETE_ath_5a77195e]")
+    assert pacing["status"] == "success"
+    assert pacing["athlete_id"] in ("[ATHLETE_ath_5a77195e]", "ath_5a77195e")
+    assert pacing["name"] in ("[ATHLETE_ath_5a77195e]", "ath_5a77195e")
+    assert "David Montgamery" not in str(pacing)
+    assert pacing["benchmark_2k_split"] == "1:58.2"
+
+    # 4. align_session_pace_to_l4 outputs pseudonym token
+    align = align_session_pace_to_l4("[ATHLETE_ath_db95573a]", "UT1")
+    assert align["status"] == "success"
+    assert align["athlete_id"] in ("[ATHLETE_ath_db95573a]", "ath_db95573a")
+    assert "Alex Martin" not in align["name"]
+    assert "Alex Martin" not in align["prescription_reminder_fr"]
+    assert "Alex Martin" not in align["prescription_reminder_en"]
+
+
+def test_gate_2_rehydrates_tool_squad_tokens_without_prompt_pii():
+    """Verify Gate 2 rehydrates squad tokens returned by tools even when prompt contained no athlete names."""
+    vault = ReversiblePiiVault()
+    session_id = "session_roster_query"
+
+    # User sends an impersonal query containing zero athlete names
+    user_prompt = "Who is in the squad and what are their categories?"
+    vaulted_prompt = vault.strip_and_vault(user_prompt, session_id)
+    assert vaulted_prompt == user_prompt
+
+    # Simulated LLM output using squad tokens returned by get_squad_roster
+    llm_output = (
+        "Here is the squad roster:\n"
+        "- [ATHLETE_ath_5a77195e]: Coach & Rower (Master Veteran)\n"
+        "- [ATHLETE_ath_db95573a]: Rower (Master)\n"
+        "- [ATHLETE_ath_8d369eef]: Rower (Master)"
+    )
+
+    rehydrated = vault.rehydrate(llm_output, session_id)
+
+    assert "Coach David: Coach & Rower" in rehydrated
+    assert "Alex Martin: Rower" in rehydrated
+    assert "Sophie Dubois: Rower" in rehydrated
+    assert "[ATHLETE_" not in rehydrated
 
 
 def test_egress_gate2_rehydration_david():

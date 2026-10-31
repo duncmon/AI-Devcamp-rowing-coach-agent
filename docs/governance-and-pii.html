@@ -66,42 +66,39 @@
         <div class="mermaid">
 flowchart TD
     Raw["Raw User Prompt:<br/>'Add rower David Montgomery, 06 12 34 56 78, 2k 1:58.2'"]
-    
-    subgraph Gate1["Gate 1: Ingress Boundary Sanitization &amp; Vaulting"]
-        ASGI["Pure-ASGI RedactUserMessages Middleware<br/>(pii_middleware.py)"]
-        DLP["Google Cloud DLP API<br/>(ClientOptions quota_project_id fixed)"]
-        DomesticRegex["Domestic Regex Patterns<br/>(French 0[1-9]..., UK 020..., Quoted Names)"]
-        Vault["Reversible Session Vault<br/>(backend/pii_vault.py)"]
+
+    subgraph Gate1["Gate 1: Ingress Boundary Sanitization &amp; Vaulting (Pure-ASGI)"]
+        ASGI["pii_middleware.py &amp; Cloud DLP + Domestic Regexes"]
+        Vault["backend/pii_vault.py (Reversible Token Vault)"]
+        ASGI --> Vault
     end
-    
-    subgraph ModelArmor["Google Cloud Model Armor Screening"]
-        Template["Template: rowing-coach-guardrails (us-central1)<br/>INSPECT_AND_BLOCK Mode"]
+
+    subgraph ModelArmor["Google Cloud Model Armor Screening (us-central1)"]
+        Template["Template: rowing-coach-guardrails<br/>INSPECT_AND_BLOCK Mode"]
         AdversarialCheck{"Prompt Injection<br/>or Jailbreak?"}
         Block["Standard Squad Refusal:<br/>'Flagged by rowing squad safety policy'"]
+        Template --> AdversarialCheck
+        AdversarialCheck -->|Yes| Block
     end
-    
-    subgraph LLM["Foundation Model Execution"]
+
+    subgraph CoreAgent["Foundation Model Execution (Vertex AI)"]
         Gemini["Gemini 2.5 Flash on Vertex AI<br/>(Receives ONLY Synthetic Tokens)"]
+        Tools["Tool Output Shield<br/>(calculate_athlete_pacing, Intervals MCP)"]
+        Gemini <-->|"Tool Call &amp; Pseudonym Return"| Tools
     end
-    
+
     subgraph Gate2["Gate 2: Client Egress Rehydration &amp; Safety Assertion"]
         OrphanCheck{"Contains Unmapped<br/>Tokens (e.g. [ATHLETE_99])?"}
         RaiseError["VaultSafetyError Raised<br/>(Fail-Closed Invariant)"]
         Rehydrate["Rehydrated Output Delivered to Coach<br/>('[ATHLETE_ath_5a77195e]' &rarr; 'David Montgomery')"]
+        OrphanCheck -->|Orphan Detected| RaiseError
+        OrphanCheck -->|All Mapped| Rehydrate
     end
 
-    Raw --> ASGI
-    ASGI --> DLP
-    ASGI --> DomesticRegex
-    DLP --> Vault
-    DomesticRegex --> Vault
+    Raw --> Gate1
     Vault -->|"Tokens: [ATHLETE_ath_5a77195e], [PHONE_NUMBER_1]"| Template
-    Template --> AdversarialCheck
-    AdversarialCheck -->|Yes| Block
     AdversarialCheck -->|No| Gemini
     Gemini -->|"Response with [ATHLETE_ath_5a77195e]"| OrphanCheck
-    OrphanCheck -->|Orphan Detected| RaiseError
-    OrphanCheck -->|All Mapped| Rehydrate
         </div>
 
         <figure style="margin: 24px 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--panel);">
@@ -350,45 +347,76 @@ app = App(
     <article class="step-card" id="interactive-simulator">
       <div class="step-header">
         <span class="step-num">Section 4</span>
-        <h2 class="step-title">Interactive Generative UI: GDPR Article 9 Vault &amp; Pacing Simulator</h2>
+        <h2 class="step-title">Interactive Sandbox: Client-Side GDPR Art. 9 Vault Simulator</h2>
       </div>
       <div class="step-body">
-        <p>
-          Experience the 3-stage privacy and pacing workflow interactively. Select an athlete, trigger Gate 1 sanitization, simulate LLM reasoning with cryptographic tokens, and inspect Gate 2 rehydration:
+        <!-- Educational Simulation Disclaimer Banner -->
+        <div style="background: rgba(66, 133, 244, 0.08); border: 1px solid rgba(66, 133, 244, 0.35); border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: flex-start; gap: 14px;">
+          <div style="font-size: 24px; line-height: 1; flex-shrink: 0;">🧪</div>
+          <div>
+            <div style="font-weight: 700; font-size: 14px; color: var(--build); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Interactive In-Browser Mock Test Bench (Client-Side Simulator)</div>
+            <div style="font-size: 13.5px; color: var(--text); line-height: 1.55;">
+              <strong>Note:</strong> This widget is an <em>in-browser educational simulation</em> designed to demonstrate the 3-stage Gate 1 &amp; Gate 2 cryptographic vaulting lifecycle directly in your browser without requiring live GCP credentials or cloud quota.
+              <br><br>
+              <strong>Looking for the live 3-column coaching app?</strong> The real production coaching workspace featuring live streaming tool traces, 5-stage periodization stepper, and authenticated Vertex AI reasoning engine is hosted on Google Cloud Run:
+              <br>
+              👉 <a href="https://rowing-coach-demo-498585195540.us-central1.run.app" target="_blank" style="font-weight: 700; text-decoration: underline;">Launch the Live Cloud Run Dashboard &rarr;</a> (Passcode provided in hackathon portal submission)
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 14px; color: var(--muted); margin-bottom: 16px;">
+          Test the 3-stage privacy and pacing workflow step-by-step: select a test athlete, click <strong>1. Run Gate 1</strong> to observe boundary tokenization, click <strong>2. Simulate LLM</strong> to see what Gemini processes, and click <strong>3. Run Gate 2</strong> to verify egress rehydration.
         </p>
 
         <!-- Interactive Widget Container -->
-        <div id="vaultSimulator" style="border: 1px solid var(--border); border-radius: 12px; padding: 24px; background: var(--panel); margin: 20px 0;">
-          <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-            <button type="button" class="badge blue" style="cursor: pointer; padding: 6px 12px;" onclick="loadRower('David Montgomery', '06 12 34 56 78', '1:58.2', 'ath_5a77195e')">Coach David Montgomery</button>
-            <button type="button" class="badge green" style="cursor: pointer; padding: 6px 12px;" onclick="loadRower('Alex Martin', '07 89 01 23 45', '2:08.4', 'ath_c3445f1e')">Alex Martin (Master)</button>
-            <button type="button" class="badge yellow" style="cursor: pointer; padding: 6px 12px;" onclick="loadRower('Claire Fontaine', '06 98 76 54 32', '2:02.1', 'ath_9a22d41b')">Claire Fontaine (Master F)</button>
+        <div id="vaultSimulator" style="border: 1px solid var(--border); border-radius: 14px; padding: 24px; background: var(--panel); margin: 20px 0; box-shadow: var(--shadow);">
+          <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Load Sample Athlete:</span>
+            <button type="button" class="badge blue" style="cursor: pointer; padding: 6px 14px; font-size: 12.5px; font-weight: 600;" onclick="loadRower('David Montgomery', '06 12 34 56 78', '1:58.2', 'ath_5a77195e')">Coach David Montgomery</button>
+            <button type="button" class="badge green" style="cursor: pointer; padding: 6px 14px; font-size: 12.5px; font-weight: 600;" onclick="loadRower('Alex Martin', '07 89 01 23 45', '2:08.4', 'ath_c3445f1e')">Alex Martin (Master)</button>
+            <button type="button" class="badge yellow" style="cursor: pointer; padding: 6px 14px; font-size: 12.5px; font-weight: 600;" onclick="loadRower('Claire Fontaine', '06 98 76 54 32', '2:02.1', 'ath_9a22d41b')">Claire Fontaine (Master F)</button>
           </div>
 
-          <label style="display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px;">Input Prompt (Coach Request):</label>
-          <input type="text" id="simPrompt" value="Calculate UT2 base session and L4 alignment for David Montgomery, mobile 06 12 34 56 78" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 13px; margin-bottom: 16px;">
+          <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Input Prompt (Coach Request):</label>
+          <input type="text" id="simPrompt" value="Calculate UT2 base session and L4 alignment for David Montgomery, mobile 06 12 34 56 78" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 13.5px; margin-bottom: 20px;">
 
           <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-            <button type="button" onclick="runGate1()" style="padding: 8px 16px; background: var(--build); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">1. Run Gate 1 (Sanitize &amp; Vault)</button>
-            <button type="button" onclick="runSimInference()" style="padding: 8px 16px; background: var(--scale); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">2. Simulate LLM &amp; Tool Pacing</button>
-            <button type="button" onclick="runGate2()" style="padding: 8px 16px; background: var(--govern); color: #1a1e24; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer;">3. Run Gate 2 (Rehydrate)</button>
-            <button type="button" onclick="resetSim()" style="padding: 8px 16px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer;">Reset</button>
+            <button type="button" onclick="runGate1()" style="padding: 10px 18px; background: var(--build); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: var(--shadow);">1. Run Gate 1 (Sanitize &amp; Vault)</button>
+            <button type="button" onclick="runSimInference()" style="padding: 10px 18px; background: var(--scale); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: var(--shadow);">2. Simulate LLM &amp; Tool Pacing</button>
+            <button type="button" onclick="runGate2()" style="padding: 10px 18px; background: var(--govern); color: #1a1e24; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: var(--shadow);">3. Run Gate 2 (Rehydrate)</button>
+            <button type="button" onclick="resetSim()" style="padding: 10px 16px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer;">Reset Test</button>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: var(--bg);">
-              <div style="font-size: 11px; font-weight: 700; color: var(--build); text-transform: uppercase; margin-bottom: 6px;">Gate 1 Ingress Output (To LLM)</div>
-              <pre id="gate1Output" style="margin: 0; font-size: 12px; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text);">[Click '1. Run Gate 1' to sanitize]</pre>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px;">
+            <div style="border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; background: var(--bg); display: flex; flex-col; justify-content: space-between;">
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--build); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--build);"></span>
+                  Gate 1 Ingress Output (To LLM)
+                </div>
+                <pre id="gate1Output" style="margin: 0; font-size: 13px; line-height: 1.6; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text); background: rgba(0,0,0,0.03); padding: 12px; border-radius: 6px; border: 1px dashed var(--border);">[Click '1. Run Gate 1' to sanitize]</pre>
+              </div>
             </div>
 
-            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: var(--bg);">
-              <div style="font-size: 11px; font-weight: 700; color: var(--scale); text-transform: uppercase; margin-bottom: 6px;">LLM Response (Synthetic Tokens)</div>
-              <pre id="llmOutput" style="margin: 0; font-size: 12px; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text);">[Awaiting Gate 1]</pre>
+            <div style="border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; background: var(--bg); display: flex; flex-col; justify-content: space-between;">
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--scale); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--scale);"></span>
+                  LLM Response (Synthetic Tokens)
+                </div>
+                <pre id="llmOutput" style="margin: 0; font-size: 13px; line-height: 1.6; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text); background: rgba(0,0,0,0.03); padding: 12px; border-radius: 6px; border: 1px dashed var(--border);">[Awaiting Gate 1]</pre>
+              </div>
             </div>
 
-            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: var(--bg);">
-              <div style="font-size: 11px; font-weight: 700; color: var(--govern); text-transform: uppercase; margin-bottom: 6px;">Gate 2 Rehydrated Client Display</div>
-              <pre id="gate2Output" style="margin: 0; font-size: 12px; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text);">[Awaiting LLM Response]</pre>
+            <div style="border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; background: var(--bg); display: flex; flex-col; justify-content: space-between;">
+              <div>
+                <div style="font-size: 12px; font-weight: 800; color: var(--govern); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--govern);"></span>
+                  Gate 2 Rehydrated Client Display
+                </div>
+                <pre id="gate2Output" style="margin: 0; font-size: 13px; line-height: 1.6; white-space: pre-wrap; font-family: var(--font-mono); color: var(--text); background: rgba(0,0,0,0.03); padding: 12px; border-radius: 6px; border: 1px dashed var(--border);">[Awaiting LLM Response]</pre>
+              </div>
             </div>
           </div>
         </div>

@@ -57,16 +57,22 @@ def test_tools_resolve_cryptographic_pseudonyms():
     # Lookup by token
     res = lookup_athlete("[ATHLETE_ath_5a77195e]")
     assert res.get("status") == "success"
-    assert res["athlete"]["id"] == "david_montgamery"
+    assert res["athlete"]["id"] == "[ATHLETE_ath_5a77195e]"
+    assert res["athlete"]["name"] == "[ATHLETE_ath_5a77195e]"
+    assert res["athlete"]["pseudonym"] == "ath_5a77195e"
     assert res["athlete"]["benchmark_2k_split"] == "1:58.2"
 
     # Pacing by token
     pacing = calculate_athlete_pacing("[ATHLETE_ath_5a77195e]")
     assert pacing["status"] == "success"
+    assert pacing["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+    assert pacing["name"] == "[ATHLETE_ath_5a77195e]"
     assert pacing["benchmark_2k_split"] == "1:58.2"
     assert "@17" in pacing["l4_table"]
 
     # Align session by token
     align = align_session_pace_to_l4("[ATHLETE_ath_5a77195e]", "UT2")
     assert align["status"] == "success"
+    assert align["athlete_id"] == "[ATHLETE_ath_5a77195e]"
+    assert align["name"] == "[ATHLETE_ath_5a77195e]"
     assert align["aligned_stroke_rate"] in (17, 20)

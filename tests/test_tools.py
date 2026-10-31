@@ -69,16 +69,22 @@ def test_l4_stroke_rate_formula_alain():
 def test_lookup_athlete():
     res = lookup_athlete("Alex")
     assert res["status"] == "success"
-    assert "Martin" in res["athlete"]["name"]
+    assert res["athlete"]["name"] == "[ATHLETE_ath_db95573a]"
+    assert res["athlete"]["id"] == "[ATHLETE_ath_db95573a]"
+    assert res["athlete"]["pseudonym"] == "ath_db95573a"
     assert res["athlete"]["benchmark_2k_split"] == "2:08.4"
 
     res_david = lookup_athlete("david")
     assert res_david["status"] == "success"
-    assert "David" in res_david["athlete"]["name"]
+    assert res_david["athlete"]["name"] == "[ATHLETE_ath_5a77195e]"
+    assert res_david["athlete"]["id"] == "[ATHLETE_ath_5a77195e]"
+    assert res_david["athlete"]["pseudonym"] == "ath_5a77195e"
 
     res_celine = lookup_athlete("celine")
     assert res_celine["status"] == "success"
-    assert "Céline" in res_celine["athlete"]["name"] or "Celine" in res_celine["athlete"]["name"]
+    assert res_celine["athlete"]["name"] == "[ATHLETE_ath_90ffaf04]"
+    assert res_celine["athlete"]["id"] == "[ATHLETE_ath_90ffaf04]"
+    assert res_celine["athlete"]["pseudonym"] == "ath_90ffaf04"
 
 
 def test_align_session_pace_to_l4():
