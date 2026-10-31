@@ -360,6 +360,37 @@ flowchart TD
       </div>
     </article>
 
+    <!-- Section 6: Live Reviewer Access & Identity Architecture (IAP Trade-Off) -->
+    <article class="step-card" id="reviewer-access-iap">
+      <div class="step-header">
+        <span class="step-num">Section 6</span>
+        <h2 class="step-title">Live Reviewer Access &amp; Identity Architecture: The IAP Trade-Off</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          For the GDG London Hackathon showcase, a live evaluation entry point was deployed to Google Cloud Run to enable organizers and judges to interact with the agent end-to-end:
+        </p>
+
+        <div class="callout callout-info" style="margin: 16px 0; padding: 16px; border-left: 4px solid var(--primary); background: var(--surface-card); border-radius: 6px;">
+          <h4 style="margin: 0 0 8px; font-size: 15px;">💡 Identity-Aware Proxy (IAP) Evaluation: Why Considered, Why Not Retained</h4>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.6;">
+            We evaluated Google Cloud <strong>Identity-Aware Proxy (IAP)</strong> to secure access to the Cloud Run deployment. While IAP provides enterprise zero-trust identity verification via Google Workspace / Cloud Identity at the Cloud Load Balancer boundary, <strong>it was deliberately not retained for the hackathon</strong>. Hackathon judges, mentors, and peer evaluators utilize a diverse mixture of personal Google accounts, corporate workspace tenants, and external organizational emails. Requiring every evaluator to be individually pre-provisioned in Google Cloud IAM or navigate OAuth consent authorization screens introduces unacceptable onboarding friction during a rapid 3-minute pitch.
+          </p>
+        </div>
+
+        <h3 style="font-size: 16px; margin: 20px 0 10px;">Retained Access Architecture: Fail-Closed Ephemeral Gating</h3>
+        <p>
+          Instead of introducing IAM onboarding friction, the live Cloud Run entry point implements a fail-closed application gate:
+        </p>
+        <ul style="margin: 12px 0 16px 20px; line-height: 1.6; font-size: 14px;">
+          <li><strong>Pseudorandom Token Generation:</strong> The evaluator access code was generated using a cryptographically secure pseudorandom generator. The specific generator and its seed mechanics are intentionally kept confidential as a defense-in-depth measure against theoretical PRNG vulnerabilities or seed prediction. Neither the internal format nor the raw token is ever disclosed publicly or committed to source control.</li>
+          <li><strong>Strict Secret Hygiene:</strong> The repository code and public commits contain strictly masked representations (<code>rowing-********-devcamp-2026</code>). The active secret is injected exclusively at runtime via Cloud Run environment variables (<code>DEMO_PASSCODE</code>) and communicated privately to judges in the hackathon portal submission.</li>
+          <li><strong>Hardware Ceiling &amp; Anti-Denial-of-Wallet:</strong> The Cloud Run service enforces strict hardware limits (<code>--max-instances 1</code>, <code>--min-instances 0</code>, 512MiB RAM, 1 vCPU), paired with Cloud Billing budget caps. Even under adversarial crawler probing, compute and inference costs cannot exceed the fixed hardware ceiling, scaling to zero immediately when idle.</li>
+          <li><strong>Fail-Closed Session Gating:</strong> Requests without valid credentials receive a sleek dark-mode lock screen (HTTP 200). Direct unauthenticated API calls (<code>/api/chat</code>) return HTTP 401 Unauthorized. Evaluators accessing the direct reviewer URL (<code>?code=...</code>) are automatically issued an HTTP-only session cookie that unlocks the coaching dashboard for their review session.</li>
+        </ul>
+      </div>
+    </article>
+
     <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div>Rowing Coach Agent · GDG London AI DevCamp 2026 Hackathon</div>
       <div>Maintained in <code>docs/governance-and-pii.html</code></div>

@@ -289,6 +289,11 @@ flowchart TD
           <p><strong>Decision:</strong> Bind vaulted athlete names to SHA-256 cryptographic squad tokens (<code>[ATHLETE_ath_5a77195e]</code>) dynamically matching <code>data/athletes.json</code>.</p>
           <p><strong>Rationale:</strong> Resolves the fundamental tension between privacy and functionality: the LLM never sees real names, yet deterministic algorithmic tools can look up the rower's 2k split and L4 pacing grid.</p>
         </div>
+        <div class="adr-block">
+          <h3>ADR-6: Live Reviewer Access &amp; Identity Architecture (IAP Trade-Off)</h3>
+          <p><strong>Decision:</strong> Deploy a serverless proxy to Cloud Run protected by an unguessable token generated with a pseudorandom generator (undisclosed to prevent PRNG vulnerability exploitation) injected via runtime environment variables (<code>DEMO_PASSCODE</code>), paired with a strict single-instance hardware ceiling (<code>--max-instances 1</code>, <code>--min-instances 0</code>).</p>
+          <p><strong>Rationale:</strong> We evaluated Identity-Aware Proxy (IAP), but did not retain it because it requires evaluators to be individually pre-provisioned in Google Cloud IAM and navigate OAuth consent screens, creating unacceptable onboarding friction across diverse judge emails during a 3-minute pitch.</p>
+        </div>
       </div>
     </article>
 
@@ -338,6 +343,26 @@ flowchart TD
                 <td><code>tests/test_pii_middleware.py</code></td>
                 <td>Pure-ASGI request interception and fail-closed 503 behavior</td>
                 <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_pii_vault.py</code></td>
+                <td>Reversible vault tokenization, domestic regexes, zero orphan checks</td>
+                <td>8</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_docs_site.py</code></td>
+                <td>Site structure, design system parity, 20-way bidirectional navigation, asset non-zero size, zero broken links/anchors, IAP documentation &amp; zero secret leak invariants</td>
+                <td>21</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_demo_auth.py</code></td>
+                <td>Cloud Run evaluator auth gate, lock screen rendering, 401 unauth checks, cookie issuance</td>
+                <td>5</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
                 <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
               </tr>
               <tr>

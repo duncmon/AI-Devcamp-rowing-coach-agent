@@ -119,6 +119,17 @@ flowchart TD
 - **Zero PII Leakage:** All squad member names and benchmark metrics in this repository are **completely anonymized and synthetic**. 2k reference splits are randomized across the full **1:40.0 to 2:30.0** spectrum with mathematically consistent power outputs.
 - **Zero Hardcoded Cloud Secrets:** No GCP project IDs, project numbers, reasoning engine IDs, or API keys are committed in this repository. All credentials are provided through environment variables (`.env`) or standard Google Application Default Credentials (`gcloud auth`).
 - **Human Confirmation Gate:** External calendar writes or destructive modifications are strictly guarded by `require_confirmation=True`.
+- **Hackathon Reviewer Gating & IAP Architecture Decision:** The agent is deployed to Google Cloud Run as a live reviewer portal. We evaluated Google Cloud Identity-Aware Proxy (IAP) to gate the endpoint, but intentionally did not retain it because requiring evaluators to authenticate via pre-provisioned IAM accounts creates severe onboarding friction across diverse judge emails during a 3-minute pitch. Instead, the service enforces a single-instance hardware ceiling (`--max-instances 1`, `--min-instances 0`) and requires an access token generated via a cryptographically secure pseudorandom generator (undisclosed to prevent PRNG vulnerability exploitation), injected exclusively via runtime environment variables (`DEMO_PASSCODE`).
+
+---
+
+## 🌐 Live Interactive Reviewer Demo (Google Cloud Run)
+
+Hackathon organizers, judges, and mentors can access the live agent deployment directly:
+
+- **Public Endpoint:** `https://rowing-coach-demo-498585195540.us-central1.run.app`
+- **Authentication:** Unauthenticated requests display an evaluator lock screen. Evaluators can unlock the dashboard by entering the passcode provided in the hackathon submission portal, or by opening the direct reviewer link (which automatically sets a secure session cookie).
+- **Cost Protection:** The service runs on Cloud Run with `--max-instances 1`, `--min-instances 0`, and 512MiB RAM, ensuring zero idle spend and an absolute cost ceiling against automated web crawler probing.
 
 ---
 

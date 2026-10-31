@@ -25,4 +25,5 @@ filterwarnings = [
     "ignore::DeprecationWarning:google.genai.*",
     "ignore:.*BaseAgentConfig is deprecated.*:DeprecationWarning",
     "ignore:.*feature FeatureName.PLUGGABLE_AUTH is enabled.*:UserWarning",
+    "ignore:.*Using .httpx. with .starlette.testclient. is deprecated.*",
 ]

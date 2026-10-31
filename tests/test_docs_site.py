@@ -225,3 +225,44 @@ def test_readme_link_invariants():
         if target_fragment:
             assert target_fragment in page_parsers[target_page].ids, \
                 f"README link '{link}' targets non-existent anchor #{target_fragment} in {target_page}"
+
+
+def test_reviewer_access_and_iap_tradeoff_documented():
+    """Verify that live reviewer access, IAP trade-off, and pseudorandom token generation are documented."""
+    gov_html = (DOCS_DIR / "governance-and-pii.html").read_text(encoding="utf-8")
+    critique_html = (DOCS_DIR / "design-critique.html").read_text(encoding="utf-8")
+    index_html = (DOCS_DIR / "index.html").read_text(encoding="utf-8")
+    readme = README_PATH.read_text(encoding="utf-8")
+
+    # Both deep-dive pages must document Identity-Aware Proxy (IAP)
+    assert "Identity-Aware Proxy" in gov_html or "IAP" in gov_html
+    assert "Identity-Aware Proxy" in critique_html or "IAP" in critique_html
+    assert "IAP" in index_html
+    assert "Identity-Aware Proxy" in readme
+
+    # Must explain why IAP was not retained (friction across evaluator domains)
+    assert "friction" in gov_html.lower()
+    assert "friction" in critique_html.lower()
+
+    # Must mention pseudorandom token generation without disclosing generator mechanics
+    assert "pseudorandom" in gov_html.lower()
+    assert "pseudorandom" in critique_html.lower()
+    assert "pseudorandom" in index_html.lower()
+
+    # Must mention the Cloud Run hardware ceiling (--max-instances 1)
+    assert "--max-instances 1" in gov_html
+    assert "--max-instances 1" in critique_html
+    assert "--max-instances 1" in readme
+
+
+def test_zero_secret_token_leaks():
+    """Ensure that no active unmasked passcodes are leaked into docs, README, or test files."""
+    all_files_to_check = list(DOCS_DIR.glob("*.html")) + [README_PATH, Path(__file__).resolve()]
+
+    # Pattern for unmasked raw codes (e.g. rowing- followed by real 8 chars without asterisks)
+    unmasked_pattern = re.compile(r'rowing-(?!\*{8})[a-zA-Z0-9~_!@#$%^&+=,.-]{8}-devcamp-2026')
+
+    for file_path in all_files_to_check:
+        text = file_path.read_text(encoding="utf-8")
+        matches = unmasked_pattern.findall(text)
+        assert not matches, f"Potential unmasked secret token found in {file_path}: {matches}"

@@ -207,6 +207,12 @@ flowchart TD
                 <td>Cloud Console Playground, direct cURL</td>
                 <td>The Console Playground lacks session continuity and streaming controls. The local proxy authenticates via Google ADC, maintains persistent session cookies, and renders clean streaming text via Server-Sent Events (SSE).</td>
               </tr>
+              <tr>
+                <td><strong>Reviewer Access Ingress</strong></td>
+                <td><strong>Ephemeral Pseudorandom Gated Cloud Run</strong></td>
+                <td>Google Cloud Identity-Aware Proxy (IAP)</td>
+                <td>IAP provides enterprise zero-trust identity verification via Google Workspace at the Cloud Load Balancer boundary, but was not retained for the hackathon because it introduces severe onboarding friction (IAM provisioning, OAuth consent screens) across diverse evaluator email domains in a 3-minute pitch. The retained solution uses a pseudorandomly generated access token in Cloud Run environment variables with a strict single-instance hardware ceiling.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -250,6 +256,14 @@ flowchart TD
         </p>
         <p>
           <strong>Solution:</strong> Completely sanitized all tracked source code to read IDs from environment variables or dynamically match the runtime URL. Untracked and added <code>deployment_metadata.json</code> to <code>.gitignore</code>. Executed a clean squash of local commit history prior to pushing, ensuring zero sensitive strings ever reached GitHub.
+        </p>
+
+        <h3>5. Reviewer Ingress &amp; Identity Architecture: The IAP Friction Trade-Off</h3>
+        <p>
+          <strong>Problem:</strong> To provide judges and organizers with a live, hands-on demonstration of the deployed agent without requiring a local setup, the proxy needed to be accessible over the public internet. However, leaving the endpoint completely open creates denial-of-wallet risks against the live Vertex AI Reasoning Engine, while traditional enterprise Identity-Aware Proxy (IAP) requires judges to be pre-provisioned with Google Cloud IAM accounts.
+        </p>
+        <p>
+          <strong>Solution:</strong> Thoroughly evaluated Google Cloud IAP, but chose <strong>not to retain it</strong> due to the severe onboarding friction it creates for evaluators with varied email domains during a rapid 3-minute pitch. Instead, implemented an ephemeral session gate in <code>local_proxy.py</code> deployed to Cloud Run with strict hardware limits (<code>--max-instances 1</code>, <code>--min-instances 0</code>, 512MiB RAM). Evaluator access is protected by an access code generated via a pseudorandom generator (undisclosed to prevent PRNG vulnerability exploitation) injected via runtime environment variables (<code>DEMO_PASSCODE</code>).
         </p>
       </div>
     </article>
