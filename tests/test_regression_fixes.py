@@ -255,6 +255,14 @@ def test_egress_orphan_token_fails_closed_with_safety_error():
     assert "orphan or hallucinated PII tokens" in safe_output
 
 
+def test_local_proxy_imports_re_and_executes_egress_without_name_error():
+    """Regression test for Cloud Run Error Reporting: NameError: name 're' is not defined in local_proxy.py:281."""
+    import local_proxy
+    assert hasattr(local_proxy, "re"), "local_proxy.py must import 're' module at module scope"
+    assert getattr(local_proxy, "re") is not None
+
+
+
 # ==============================================================================
 # 2. ISSUE 2: PLAN DOWNLOAD ROUTE (/api/plans/{filename:path})
 # ==============================================================================
