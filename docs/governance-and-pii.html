@@ -161,6 +161,45 @@ flowchart TD
           <br><br>
           <code>"This request was flagged by our rowing squad safety policy and cannot be processed."</code>
         </div>
+
+        <h3 style="margin-top: 28px;">Direct Mitigation of the 4 Agentic Threat Vectors (OWASP Top 10 for LLMs)</h3>
+        <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 16px;">
+          <em>"The most dangerous prompt is the one your agent fetches."</em> In an agentic architecture, risk shifts from the user to external untrusted data and autonomous tool execution. Here is how Rowing Coach addresses each vector:
+        </p>
+
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Threat Vector</th>
+                <th>Agentic Risk</th>
+                <th>Rowing Coach Defense Implementation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Indirect Prompt Injection</strong></td>
+                <td>Malicious instructions hidden in fetched documents, web pages, or training logs.</td>
+                <td>Isolated <code>rowing_researcher</code> sub-agent execution boundary + Model Armor <code>piAndJailbreakFilterSettings</code> edge screening before untrusted text reaches the root orchestrator.</td>
+              </tr>
+              <tr>
+                <td><strong>2. Tool &amp; MCP Poisoning</strong></td>
+                <td>Compromised external APIs feeding toxic, adversary-controlled data into tool results.</td>
+                <td>Human-in-the-loop confirmation gate (<code>require_confirmation=True</code>) enforced in code on all calendar/wearable write operations. Malicious payloads cannot execute mutations autonomously.</td>
+              </tr>
+              <tr>
+                <td><strong>3. Over-Privileged Blast Radius</strong></td>
+                <td>Agents executing under static, un-scoped admin credentials with unbounded write access.</td>
+                <td>Google Cloud <strong>Agent Identity</strong> (Workload Identity principal <code>principal://agents.global...</code>) eliminating static API keys; strict separation of read-only wellness lookups from mutating schedule tools.</td>
+              </tr>
+              <tr>
+                <td><strong>4. Sensitive Data Disclosure</strong></td>
+                <td>Intermediate agent scratchpads, tool outputs, or logs leaking athlete PII/health data.</td>
+                <td>Pure-ASGI boundary redaction + GDPR Article 9 Cryptographic Pseudonym Vault (<code>[ATHLETE_ath_5a77195e]</code>) ensuring model weights and Cloud Logging traces never receive raw personal identifiers.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </article>
 

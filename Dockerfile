@@ -11,11 +11,11 @@ COPY plans ./plans
 COPY data ./data
 COPY mcp ./mcp
 COPY backend ./backend
-COPY main.py memory_bank_config.py pii_middleware.py governance.py ./
+COPY main.py memory_bank_config.py pii_middleware.py governance.py local_proxy.py ./
 
 RUN uv sync --frozen --no-dev
 
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["sh", "-c", "uv run uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uv run uvicorn local_proxy:app --host 0.0.0.0 --port ${PORT}"]

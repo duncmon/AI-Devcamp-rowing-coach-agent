@@ -310,6 +310,14 @@ def download_plan_endpoint(filename: str):
 
 @app.post("/api/chat")
 async def chat_endpoint(request: Request):
+    if DEMO_PASSCODE:
+        code_cookie = request.cookies.get("rowing_passcode")
+        code_header = request.headers.get("X-Passcode")
+        code_query = request.query_params.get("code")
+        if code_cookie != DEMO_PASSCODE and code_header != DEMO_PASSCODE and code_query != DEMO_PASSCODE:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=401, detail="Unauthorized: Invalid or missing hackathon reviewer passcode.")
+
     data = await request.json()
     message = data.get("message", "")
     session_id = data.get("session_id")
@@ -914,8 +922,59 @@ HTML_PAGE = """<!DOCTYPE html>
 """
 
 
+DEMO_PASSCODE = os.environ.get("DEMO_PASSCODE", "")
+
+LOCK_SCREEN_HTML = """<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>ACL Masters Rowing Coach — Reviewer Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
+  <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
+    <div class="w-16 h-16 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+      🚣‍♂️
+    </div>
+    <h1 class="text-xl font-bold tracking-tight mb-1 text-white">ACL Masters Rowing Coach</h1>
+    <p class="text-xs text-slate-400 mb-6">GDG London AI DevCamp Hackathon Live Evaluation Portal</p>
+    
+    <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-left mb-6 text-xs text-amber-300">
+      <span class="font-bold">🛡️ Evaluation Gating Active:</span> To protect cloud inference budgets and prevent public crawler abuse, please enter the hackathon review passcode to access the live Vertex AI Reasoning Engine.
+    </div>
+
+    <form method="GET" action="/" class="space-y-4">
+      <div>
+        <input type="password" name="code" placeholder="Enter Reviewer Passcode" required autofocus
+               class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-sm text-center font-mono text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg text-sm transition-colors shadow-lg shadow-blue-500/20">
+        Unlock Live Coaching Workspace &rarr;
+      </button>
+    </form>
+    
+    <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+      Passcode provided in hackathon portal submission: <code class="text-blue-400 font-mono">rowing-********-devcamp-2026</code>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+
 @app.get("/", response_class=HTMLResponse)
-def index_page():
+def index_page(request: Request):
+    if DEMO_PASSCODE:
+        code_param = request.query_params.get("code")
+        code_cookie = request.cookies.get("rowing_passcode")
+        if code_param != DEMO_PASSCODE and code_cookie != DEMO_PASSCODE:
+            return HTMLResponse(content=LOCK_SCREEN_HTML)
+        
+        response = HTMLResponse(content=HTML_PAGE)
+        if code_param == DEMO_PASSCODE:
+            response.set_cookie(key="rowing_passcode", value=DEMO_PASSCODE, max_age=86400, httponly=True)
+        return response
     return HTMLResponse(content=HTML_PAGE)
 
 

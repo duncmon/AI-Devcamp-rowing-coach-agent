@@ -21,3 +21,8 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning:google.genai.*",
+    "ignore:.*BaseAgentConfig is deprecated.*:DeprecationWarning",
+    "ignore:.*feature FeatureName.PLUGGABLE_AUTH is enabled.*:UserWarning",
+]

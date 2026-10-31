@@ -10,6 +10,10 @@
 > **GDG London AI DevCamp Hackathon Submission (31 October 2026)**  
 > An autonomous rowing coach assistant built with the **Google Agent Development Kit (ADK)** and deployed on **Google Cloud Agent Runtime** with **Agent Identity**, **Vertex AI Memory Bank**, **Model Armor regional screening**, **Pure-ASGI PII redaction**, and an **Architectural Blueprint v0.2 multi-region router**. It implements an **evidence-based masters rowing physiology system** and the **Wolverine Plan Level 4 pacing framework** for Masters athletes.
 
+> 🛡️ **CORE BREAKTHROUGH: GDPR ARTICLE 9 SPECIAL CATEGORY HEALTH DATA & CRYPTOGRAPHIC PSEUDONYMIZATION**  
+> In competitive rowing, cardiovascular biomarkers, 2k power benchmarks, fatigue scores, and injury records constitute **Special Category Health Data** under European law (GDPR Article 9). Naive redaction makes AI coaching impossible—the assistant cannot identify which athlete's training file or pacing history to consult.  
+> **Our Production Solution:** A two-gate cryptographic pseudonym pipeline (`[ATHLETE_ath_5a77195e]`). Raw athlete names, emails, and domestic phone numbers are scrubbed at the pure-ASGI network boundary before prompts ever touch Vertex AI model weights or Google Cloud Logging traces. Algorithmic coaching tools unwrap the cryptographic pseudonym to look up exact benchmark splits and Wolverine L4 tables, while Gate 2 safely rehydrates the coach's view with fail-closed orphan token assertions (`VaultSafetyError`).
+
 📖 **[Live Documentation Site (GitHub Pages)](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/)** | 🏃 **[4-Pillar Walkthrough & Run-Through](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/walkthrough.html)** | 🛡️ **[Governance & PII Architecture](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/governance-and-pii.html)** | 💰 **[Unit Economics & Telemetry](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/cost-economics.html)** | 📄 **[Submission Design Critique](https://duncmon.github.io/AI-Devcamp-rowing-coach-agent/design-critique.html)**
 
 ---
