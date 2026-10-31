@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Submission Design Critique &amp; Retrospective — Rowing Coach Agent</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+  <script>
+    try {
+      var t = localStorage.getItem("rowing-coach-theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <div class="brand-mark" style="background: var(--accent);"></div>
+      <a href="index.html" class="nav-title">Rowing Coach Agent</a>
+      <span class="nav-subtitle">Submission Critique &amp; Retrospective</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Architecture</a>
+      <a href="walkthrough.html">Run-Through &amp; Proof</a>
+      <a href="governance-and-pii.html">Governance &amp; PII</a>
+      <a href="cost-economics.html">Cost Economics</a>
+      <a href="design-critique.html" class="active">Design Critique</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">🌗</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Hero Header -->
+    <section class="hero">
+      <div class="hero-meta">
+        <a href="index.html" class="badge blue">Google Agent Platform</a>
+        <a href="walkthrough.html" class="badge green">ADK 2.4.0</a>
+        <a href="governance-and-pii.html" class="badge yellow">Vertex AI Reasoning Engine</a>
+        <a href="cost-economics.html" class="badge red">Fail-Closed Gate</a>
+      </div>
+      <h1>Architecture, Implementation Rationale &amp; Project Critique</h1>
+      <p class="lead">
+        A deep architectural post-mortem of the <strong>Rowing Coach Agent</strong> built for the GDG London AI DevCamp Hackathon (October 31, 2026). This document analyzes our core sports science rationale, deliberate platform departures, engineering hurdles, security trade-offs, and future production roadmap.
+      </p>
+    </section>
+
+    <!-- SECTION 1 -->
+    <article class="step-card" id="executive-summary">
+      <div class="step-header">
+        <span class="step-num">Section 1</span>
+        <h2 class="step-title">Executive Summary &amp; Sports Science Motivation</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          Rowing is one of the most physically and physiologically demanding endurance sports in the world. High-performance masters rowers (athletes aged 27 to 70+) face unique physiological constraints: elevated recovery requirements, age-dependent heart rate ceilings, and the necessity of precision training intensities. Training plans such as the <strong>Wolverine Plan Level 4 (L4)</strong> framework require mathematically exact stroke-rate and pace distributions derived from non-linear ergometer physics equations:
+        </p>
+        <p style="text-align: center; font-size: 18px; margin: 20px 0;">
+          $$W = \frac{2.80}{(s/500)^3}$$
+        </p>
+        <p>
+          Standard conversational LLMs fail in this domain because they hallucinate physics calculations, suffer from arithmetic drift, lack calendar context, and cannot durably remember coaching adaptations across sessions.
+        </p>
+        <p><code>AI-Devcamp-rowing-coach-agent</code> solves these challenges by combining:</p>
+        <ul>
+          <li><strong>Google Agent Development Kit (ADK 2.4.0)</strong> for multi-tool orchestration, state management, and sub-agent delegation.</li>
+          <li><strong>Google Cloud Agent Runtime</strong> with <strong>Agent Identity</strong> for enterprise-grade, serverless deployment.</li>
+          <li><strong>Vertex AI Memory Bank</strong> for persistent, long-term semantic distillation of coaching directives and squad overrides.</li>
+          <li><strong>Deterministic Physics &amp; Wolverine L4 Engines</strong> in pure Python, offloading arithmetic from the LLM to deterministic code.</li>
+          <li><strong>FastMCP Integration with Human-in-the-Loop Gating</strong> to interface with training platforms (Intervals.icu) safely.</li>
+          <li><strong>ADC-Secured Web Proxy UI</strong> for low-latency streaming interactions and durable session continuity.</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- SECTION 2 -->
+    <article class="step-card" id="system-architecture">
+      <div class="step-header">
+        <span class="step-num">Section 2</span>
+        <h2 class="step-title">System Architecture &amp; Enterprise Topology</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          The architecture cleanly separates client ingress, authentication boundaries, managed Google Cloud Agent Runtime components, and gated external integrations:
+        </p>
+
+        <div class="mermaid">
+flowchart TD
+    subgraph ClientLayer["Client & Access Layer"]
+        Coach["Coach / Athlete (Browser UI)"]
+        Proxy["Local ADC Web Proxy<br/>(local_proxy.py / FastAPI / SSE)"]
+        Coach <-->|HTTP / Server-Sent Events| Proxy
+    end
+
+    subgraph SecurityBoundary["Security & Identity Boundary"]
+        ADC["Google Application Default Credentials<br/>(OAuth2 Bearer Token)"]
+        Proxy -.->|ADC Auth| IAM["Cloud IAM / Agent Identity<br/>(workload identity principal)"]
+    end
+
+    subgraph CloudRuntime["Google Cloud Agent Runtime (us-central1)"]
+        Engine["Reasoning Engine Container<br/>(FastAPI / ADK Runner)"]
+        
+        subgraph ADKAgent["ADK Root Agent (rowing_coach)"]
+            Model["Gemini 2.5 Flash"]
+            
+            subgraph DeterministicTools["Deterministic Physics & State Tools"]
+                Physics["Concept2 Physics Engine<br/>(pace_to_seconds, split_to_watts)"]
+                L4["Wolverine L4 Grid & Pacing<br/>(calculate_athlete_pacing, align_session_pace_to_l4)"]
+                Curriculum["Season & Squad State<br/>(get_season_schedule, get_squad_overrides)"]
+                DirectMem["Direct Memory Writer<br/>(store_coaching_memory)"]
+            end
+            
+            subgraph ExternalIntegrations["Toolsets & Sub-Agents"]
+                RulesSkill["SkillToolset: masters-rowing-rules<br/>(3R Physiology, Dynamic Warmups)"]
+                Researcher["AgentTool: rowing_researcher<br/>(Gemini 2.5 Flash + Google Search)"]
+                MCPClient["McpToolset: Intervals.icu Server<br/>(FastMCP stdio)"]
+            end
+            
+            Model --> DeterministicTools
+            Model --> ExternalIntegrations
+        end
+        
+        Engine --> ADKAgent
+    end
+
+    subgraph CloudServices["Managed GCP Services"]
+        MemBank["Vertex AI Memory Bank<br/>(Reasoning Engine Memories API)"]
+        CloudRun["Cloud Run Managed Compute"]
+        CloudTrace["Cloud Trace & Cloud Logging"]
+    end
+
+    subgraph ExternalPlatforms["External Platforms (Human Gated)"]
+        Gate{"Human Confirmation Gate<br/>(require_confirmation=True)"}
+        Intervals["Intervals.icu REST API / Dry Run"]
+    end
+
+    Proxy <-->|POST /streamQuery| Engine
+    IAM --> Engine
+    Engine --> CloudRun
+    DirectMem -->|Generate Fact| MemBank
+    ADKAgent -->|Distil Session| MemBank
+    ADKAgent -.->|Telemetry| CloudTrace
+    MCPClient --> Gate
+    Gate -->|Approved| Intervals
+        </div>
+      </div>
+    </article>
+
+    <!-- SECTION 3 -->
+    <article class="step-card" id="design-choices">
+      <div class="step-header">
+        <span class="step-num">Section 3</span>
+        <h2 class="step-title">Design Choices &amp; Implementation Rationale</h2>
+      </div>
+      <div class="step-body">
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Architectural Decision</th>
+                <th>Chosen Strategy</th>
+                <th>Alternatives Considered</th>
+                <th>Rationale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Agent Hosting Platform</strong></td>
+                <td><strong>Google Cloud Agent Runtime</strong> (<code>reasoningEngines</code>)</td>
+                <td>Self-hosted Docker container on Cloud Run / GKE</td>
+                <td>Agent Runtime provides native integration with Vertex AI Reasoning Engine APIs, managed Agent Identity (workload identity), automatic OpenTelemetry tracing, and turnkey Memory Bank bindings.</td>
+              </tr>
+              <tr>
+                <td><strong>Model Selection</strong></td>
+                <td><strong>Gemini 2.5 Flash</strong></td>
+                <td>Gemini 2.5 Pro, Gemini 1.5 Pro</td>
+                <td>Flash offers sub-second inference, low cost, and strong tool-calling reliability. Pacing arithmetic is offloaded to deterministic code, so large parameter reasoning engines are unnecessary.</td>
+              </tr>
+              <tr>
+                <td><strong>Ergometer Physics</strong></td>
+                <td><strong>Deterministic Python Module</strong></td>
+                <td>In-prompt LLM calculation</td>
+                <td>Ergometer physics (\(W = 2.80 / (s/500)^3\)) is non-linear and sensitive to fractional seconds. LLMs frequently produce inaccurate splits; delegating to Python guarantees 100% mathematical fidelity.</td>
+              </tr>
+              <tr>
+                <td><strong>Long-Term State</strong></td>
+                <td><strong>Vertex AI Memory Bank</strong></td>
+                <td>Raw chat history injection, vector database (Chroma/Pinecone)</td>
+                <td>Memory Bank automatically distils high-level facts from conversational turns. Using Vertex AI direct memories API allows the coach to consign explicit training rules permanently without manual embedding pipelines.</td>
+              </tr>
+              <tr>
+                <td><strong>Calendar &amp; Wearable Sync</strong></td>
+                <td><strong>FastMCP with Human Gating</strong></td>
+                <td>Unrestricted direct REST API calls</td>
+                <td>Autonomous write operations to an athlete's live training calendar pose safety risks. Configuring <code>require_confirmation=True</code> enforces human-in-the-loop sign-off before modifying workouts.</td>
+              </tr>
+              <tr>
+                <td><strong>Client Interface</strong></td>
+                <td><strong>Local ADC Streaming Proxy</strong></td>
+                <td>Cloud Console Playground, direct cURL</td>
+                <td>The Console Playground lacks session continuity and streaming controls. The local proxy authenticates via Google ADC, maintains persistent session cookies, and renders clean streaming text via Server-Sent Events (SSE).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <!-- SECTION 4 -->
+    <article class="step-card" id="difficulties-encountered">
+      <div class="step-header">
+        <span class="step-num">Section 4</span>
+        <h2 class="step-title">Difficulties Encountered &amp; Engineering Solutions</h2>
+      </div>
+      <div class="step-body">
+        <h3>1. Multi-Step Tool Streaming Duplication</h3>
+        <p>
+          <strong>Problem:</strong> During multi-step turns (e.g. agent emits thought &rarr; invokes tool &rarr; produces final answer), the ADK Reasoning Engine emits incremental delta chunks with <code>partial: true</code> followed by a full turn aggregate event with <code>partial: false</code>. Naive streaming in the web proxy caused the initial text to be echoed twice in the UI.
+        </p>
+        <p>
+          <strong>Solution:</strong> Refactored <code>stream_remote_agent</code> in <code>local_proxy.py</code> to stream text strictly from <code>partial: true</code> chunks and ignore <code>partial: false</code> events when partial chunks have already been emitted. Tool call notifications were deduplicated by invocation ID.
+        </p>
+
+        <h3>2. Immediate Memory Bank Persistence</h3>
+        <p>
+          <strong>Problem:</strong> The standard ADK <code>_stage_after_agent</code> lifecycle hook distils memories asynchronously at session close or after complete turns, meaning explicit directives ("remember this plan for week 8") were not immediately searchable in subsequent turns.
+        </p>
+        <p>
+          <strong>Solution:</strong> Created the <code>store_coaching_memory</code> tool using <code>client.agent_engines.memories.generate()</code>. The agent calls this tool immediately whenever a coach issues a formal instruction, guaranteeing immediate persistence to Vertex AI Memory Bank.
+        </p>
+
+        <h3>3. Dynamic Temporal Context &amp; Multi-Week Overrides</h3>
+        <p>
+          <strong>Problem:</strong> Standard prompts with hardcoded dates lose temporal accuracy as weeks progress. Real-world coaching requires dynamic adaptations (e.g. an active 4-week anaerobic block overriding base curriculum).
+        </p>
+        <p>
+          <strong>Solution:</strong> Developed dynamic date calculation via <code>datetime.date.today()</code> resolving calendar dates to season weeks. Created <code>plans/squad_overrides.json</code> to store active macro/mesocycle overrides, ensuring the agent prioritizes active blocks over default curriculum files.
+        </p>
+
+        <h3>4. Git Security &amp; Environment Isolation</h3>
+        <p>
+          <strong>Problem:</strong> Deployment artifacts (<code>deployment_metadata.json</code>) generated by <code>agents-cli</code> contained internal GCP project numbers and reasoning engine IDs, posing a leakage risk if pushed to a public GitHub repository.
+        </p>
+        <p>
+          <strong>Solution:</strong> Completely sanitized all tracked source code to read IDs from environment variables or dynamically match the runtime URL. Untracked and added <code>deployment_metadata.json</code> to <code>.gitignore</code>. Executed a clean squash of local commit history prior to pushing, ensuring zero sensitive strings ever reached GitHub.
+        </p>
+      </div>
+    </article>
+
+    <!-- SECTION 5 -->
+    <article class="step-card" id="critical-evaluation">
+      <div class="step-header">
+        <span class="step-num">Section 5</span>
+        <h2 class="step-title">Critical Evaluation, Security Posture &amp; Cost Protection</h2>
+      </div>
+      <div class="step-body">
+        <h3>Architecture &amp; Modularity</h3>
+        <p>
+          <strong>Strengths:</strong> Clean separation between reasoning (Gemini), domain logic (Wolverine L4, 3R physiology rules), deterministic physics, and persistent memory. The architecture is modular and extensible to other endurance sports (cycling, running, swimming).<br>
+          <strong>Limitations:</strong> Squad overrides and athlete rosters were originally stored in local JSON files inside the container. In an enterprise production setting, these should be hosted in Cloud SQL (PostgreSQL) or Cloud Firestore with real-time change data capture (CDC).
+        </p>
+
+        <h3>Security &amp; IAM Posture</h3>
+        <ul>
+          <li><strong>Zero Hardcoded Secrets:</strong> No API keys, project numbers, or engine IDs in source control.</li>
+          <li><strong>Workload Identity:</strong> Agent Runtime uses managed Agent Identity (<code>principal://...</code>).</li>
+          <li><strong>Confirmation Gating:</strong> Destructive or modifying writes (Intervals.icu calendar) require human confirmation.</li>
+        </ul>
+
+        <h3>Performance &amp; Cold-Start Economics</h3>
+        <p>
+          Once warm, Gemini 2.5 Flash responds in under 1.5 seconds. Scale-to-zero cold starts on Agent Runtime can introduce a 20–30 second delay on initial turn invocation. For production deployment, setting <code>--min-instances 1</code> eliminates cold starts at a modest baseline cost.
+        </p>
+
+        <h3>Credit Protection Controls for the Public Demo</h3>
+        <ol>
+          <li><strong>Strict Instance Capping:</strong> Enforce <code>--max-instances 1</code> on the Cloud Run web proxy and backend reasoning engine container to prevent unbounded autoscaling under traffic spikes.</li>
+          <li><strong>Session Turn &amp; Token Rate Limiting:</strong> Implement IP-based sliding window rate limits (e.g. maximum 5 turns per minute, 20 turns per session) and restrict max output tokens per turn.</li>
+          <li><strong>Passcode / Reviewer Access Gating:</strong> Protect the public demo route with a lightweight evaluator access code or Google OAuth sign-in to prevent public search engine crawlers and automated bots from triggering inference turns.</li>
+          <li><strong>Google Cloud Billing Hard Cap &amp; Alerts:</strong> Configure automated budget alerts and programmatic Cloud Function disabling to shut down services if monthly devcamp credit thresholds are approached.</li>
+        </ol>
+      </div>
+    </article>
+
+    <!-- SECTION 6 -->
+    <article class="step-card" id="roadmap">
+      <div class="step-header">
+        <span class="step-num">Section 6</span>
+        <h2 class="step-title">Future Production Roadmap</h2>
+      </div>
+      <div class="step-body">
+        <ol>
+          <li><strong>Gated Public Web Demo (Cloud Run):</strong> Deploy a containerized frontend to Google Cloud Run with strict rate limiting, reviewer passcode protection, and <code>--max-instances 1</code> to protect cloud credits.</li>
+          <li><strong>Biometric Feedback Loop:</strong> Two-way synchronization with Intervals.icu and Garmin Connect for automated daily readiness adjustments based on nocturnal HRV and resting heart rate.</li>
+          <li><strong>Voice Ergometer Interface:</strong> Hands-free voice control (WebRTC / Gemini Live API) allowing athletes to receive real-time split adjustments while actively rowing on the ergometer.</li>
+          <li><strong>Multi-Squad RBAC:</strong> Role-based access control enabling head coaches, squad leads, and individual athletes to access tailored views of training data.</li>
+        </ol>
+      </div>
+    </article>
+
+    <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>Rowing Coach Agent · GDG London AI DevCamp 2026 Hackathon</div>
+      <div>Maintained in <code>docs/design-critique.html</code></div>
+    </footer>
+  </main>
+
+  <script src="lightbox.js"></script>
+  <script src="toc.js"></script>
+  <script>
+    (function () {
+      var KEY = "rowing-coach-theme";
+      var root = document.documentElement;
+      var btn = document.getElementById("themeToggle");
+      if (btn) {
+        btn.addEventListener("click", function () {
+          var current = root.dataset.theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          var next = current === "dark" ? "light" : "dark";
+          root.dataset.theme = next;
+          try { localStorage.setItem(KEY, next); } catch (e) {}
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

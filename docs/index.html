@@ -3,51 +3,119 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rowing Coach Agent — System Architecture & Documentation</title>
+  <title>Rowing Coach Agent — System Architecture &amp; Documentation Gateway</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+  <script>
+    try {
+      var t = localStorage.getItem("rowing-coach-theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
+
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-left">
       <div class="brand-mark" style="background: var(--scale);"></div>
       <a href="index.html" class="nav-title">Rowing Coach Agent</a>
-      <span class="nav-subtitle">System Architecture &amp; Verification</span>
+      <span class="nav-subtitle">System Architecture &amp; Verification Gateway</span>
     </div>
     <nav class="nav-links">
       <a href="index.html" class="active">Architecture</a>
       <a href="walkthrough.html">Run-Through &amp; Proof</a>
       <a href="governance-and-pii.html">Governance &amp; PII</a>
       <a href="cost-economics.html">Cost Economics</a>
-      <a href="ARCHITECTURE_AND_SUBMISSION.md">Design Critique</a>
+      <a href="design-critique.html">Design Critique</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">🌗</button>
     </nav>
   </header>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <nav id="toc" class="toc">
-        <h3>Contents</h3>
-        <ul>
-          <li><a href="#overview">1. Executive Overview</a></li>
-          <li><a href="#four-pillars">2. Four Enterprise Pillars</a></li>
-          <li><a href="#blueprint">3. Architectural Blueprint v0.2</a></li>
-          <li><a href="#governance">4. Governance & PII Safety</a></li>
-          <li><a href="#evals">5. Evals & Fail-Closed Gate</a></li>
-          <li><a href="#adrs">6. Architectural Decision Records</a></li>
-          <li><a href="#verification">7. Verification Matrix</a></li>
-        </ul>
-      </nav>
-    </aside>
+  <main>
 
-    <main class="content">
-      <section id="overview" class="card">
-        <h2>1. Executive Overview & Persona</h2>
+    <!-- Hero Header -->
+    <section class="hero">
+      <div class="hero-meta">
+        <a href="#four-pillars" class="badge blue">4 Enterprise Pillars</a>
+        <a href="#verification" class="badge green">57 / 57 Pytest Green</a>
+        <a href="governance-and-pii.html" class="badge yellow">GDPR Art. 9 Vault</a>
+        <a href="cost-economics.html" class="badge red">Fail-Closed Gate</a>
+      </div>
+      <h1>Rowing Coach Agent: Master Architecture &amp; Verification Gateway</h1>
+      <p class="lead">
+        An enterprise-grade autonomous coaching co-pilot built with the <strong>Google Agent Development Kit (ADK)</strong> and deployed on <strong>Google Cloud Agent Runtime</strong> with <strong>Agent Identity</strong>, <strong>Vertex AI Memory Bank</strong>, <strong>Model Armor regional screening</strong>, <strong>Pure-ASGI PII Vaulting</strong>, and the <strong>Architectural Blueprint v0.2 multi-region router</strong>. It implements an evidence-based masters rowing physiology system and the <strong>Wolverine Plan Level 4 pacing framework</strong>.
+      </p>
+    </section>
+
+    <!-- Fast Navigation Bento Grid -->
+    <section class="bento" id="portal-directory">
+      <a href="walkthrough.html#pillar-1" class="tile pillar-build span-6">
+        <div class="kicker">Pillar 1 · Build</div>
+        <div class="title">Deterministic Physics &amp; FastMCP</div>
+        <div class="desc">Exact Concept2 equations (\(W = 2.80 / (s/500)^3\)), Wolverine L4 grids (@16-@28 SPM), and Intervals.icu wearable sync guarded by human confirmation.</div>
+        <div class="meta">
+          <span>Explore Pillar 1 Walkthrough</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+      <a href="walkthrough.html#pillar-2" class="tile pillar-scale span-6">
+        <div class="kicker">Pillar 2 · Scale</div>
+        <div class="title">Agent Runtime &amp; Memory Bank</div>
+        <div class="desc">Vertex AI Reasoning Engine container (<code>5062846700507365376</code>), Workload Identity principal, durable sessions, and scale-to-zero memory distillation callback.</div>
+        <div class="meta">
+          <span>Explore Pillar 2 Walkthrough</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+      <a href="governance-and-pii.html" class="tile pillar-govern span-4">
+        <div class="kicker">Pillar 3 · Govern</div>
+        <div class="title">GDPR Art. 9 &amp; Reversible Vault</div>
+        <div class="desc">Cryptographic pseudonymization (<code>ath_5a77195e</code>), Pure-ASGI boundary sanitization, and regional Model Armor screening.</div>
+        <div class="meta">
+          <span>Explore Governance Deep-Dive</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+      <a href="cost-economics.html" class="tile pillar-optimise span-4">
+        <div class="kicker">Pillar 4 · Optimise</div>
+        <div class="title">Unit Economics &amp; Eval Gate</div>
+        <div class="desc">Empirical BigQuery telemetry, context caching economics (68% hit ratio), exit-code 0 shell defense, and $0.00/mo cost floor under Free Tier.</div>
+        <div class="meta">
+          <span>Explore Cost Economics</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+      <a href="design-critique.html" class="tile span-4" style="border-left: 4px solid var(--accent);">
+        <div class="kicker" style="color: var(--accent);">Retrospective</div>
+        <div class="title">Submission Design Critique</div>
+        <div class="desc">Comprehensive architectural critique, deliberate workshop departures, failure mode dissections, security trade-offs, and future production roadmap.</div>
+        <div class="meta">
+          <span>Read Full Critique</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+    </section>
+
+    <!-- SECTION 1 -->
+    <article class="step-card" id="overview">
+      <div class="step-header">
+        <span class="step-num">Section 1</span>
+        <h2 class="step-title">Executive Overview &amp; Athlete Persona</h2>
+      </div>
+      <div class="step-body">
         <p>
           The <strong>Rowing Coach Agent</strong> is an enterprise-grade artificial intelligence coaching assistant built on Google's 
           <strong>Agent Development Kit (ADK)</strong> and the <strong>Gemini Enterprise Agent Platform</strong>. It serves 
-          <strong>Coach David Montgamery</strong> and the Masters rowing squad at <em>Aviron Club du Lac (ACL)</em>.
+          <strong>Coach David Montgomery</strong> and the Masters rowing squad at <em>Aviron Club du Lac (ACL)</em>.
         </p>
         <p>
           Unlike generic fitness bots, the agent mathematically models rowing biomechanics (Dr. Valery Kleshnev), 
@@ -58,63 +126,88 @@
         <div class="mermaid">
 flowchart LR
     Athlete["Coach David / Squad Rower"] --> Ingress["Agent Gateway / Pure-ASGI Boundary"]
-    Ingress -->|"PII Stripped & Screened"| Root["Rowing Coach Orchestrator"]
+    Ingress -->|"PII Stripped &amp; Screened"| Root["Rowing Coach Orchestrator"]
     Root --> Skills["SkillToolset: masters-rowing-rules"]
     Root --> SubAgent["AgentTool: rowing_researcher (google_search)"]
-    Root --> Physics["Algorithmic Tools: L4 Tables & Erg Physics"]
+    Root --> Physics["Algorithmic Tools: L4 Tables &amp; Erg Physics"]
     Root --> Intervals["McpToolset: Intervals.icu (require_confirmation=True)"]
     Root --> Memory["Vertex AI Memory Bank"]
         </div>
-      </section>
+      </div>
+    </article>
 
-      <section id="four-pillars" class="card">
-        <h2>2. Four Enterprise Pillars Alignment</h2>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Pillar</th>
-              <th>Enterprise Capability</th>
-              <th>Rowing Coach Implementation</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong style="color: var(--build);">Pillar 1: Build</strong></td>
-              <td>ADK Agent, Progressive Skills, Sub-agents, MCP</td>
-              <td>Multi-agent root orchestrator, <code>SkillToolset</code> progressive disclosure, isolated <code>google_search</code> researcher sub-agent, and FastMCP Intervals.icu server.</td>
-            </tr>
-            <tr>
-              <td><strong style="color: var(--scale);">Pillar 2: Scale</strong></td>
-              <td>Agent Runtime, Durable Sessions, Memory Bank</td>
-              <td>Deployed to Vertex AI Reasoning Engine with dedicated Agent Identity; persistent multi-turn coaching sessions and scale-to-zero memory distillation callback.</td>
-            </tr>
-            <tr>
-              <td><strong style="color: var(--govern);">Pillar 3: Govern</strong></td>
-              <td>Model Armor, Cloud DLP, Agent Registry, Policy Gate</td>
-              <td>Pure-ASGI <code>RedactUserMessages</code> middleware with domestic phone regexes, Model Armor regional screening with friendly squad refusal, and semantic policy binding.</td>
-            </tr>
-            <tr>
-              <td><strong style="color: var(--optimise);">Pillar 4: Optimise</strong></td>
-              <td>Golden Evals, CI Release Gating, Quota Optimization</td>
-              <td>Domain-critical safety and physiological evals, mandatory tool-use rubrics (<code>rubric_based_tool_use_quality_v1</code>), and fail-closed CI release gate script.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+    <!-- SECTION 2 -->
+    <article class="step-card" id="four-pillars">
+      <div class="step-header">
+        <span class="step-num">Section 2</span>
+        <h2 class="step-title">Four Enterprise Pillars Alignment</h2>
+      </div>
+      <div class="step-body">
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pillar</th>
+                <th>Enterprise Capability</th>
+                <th>Rowing Coach Implementation</th>
+                <th>Walkthrough Proof</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color: var(--build);">Pillar 1: Build</strong></td>
+                <td>ADK Agent, Progressive Skills, Sub-agents, MCP</td>
+                <td>Multi-agent root orchestrator, <code>SkillToolset</code> progressive disclosure, isolated <code>google_search</code> researcher sub-agent, and FastMCP Intervals.icu server.</td>
+                <td><a href="walkthrough.html#pillar-1" style="font-weight: 600;">View Pillar 1 Proof &rarr;</a></td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--scale);">Pillar 2: Scale</strong></td>
+                <td>Agent Runtime, Durable Sessions, Memory Bank</td>
+                <td>Deployed to Vertex AI Reasoning Engine with dedicated Agent Identity; persistent multi-turn coaching sessions and scale-to-zero memory distillation callback.</td>
+                <td><a href="walkthrough.html#pillar-2" style="font-weight: 600;">View Pillar 2 Proof &rarr;</a></td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--govern);">Pillar 3: Govern</strong></td>
+                <td>Model Armor, Cloud DLP, Agent Registry, Policy Gate</td>
+                <td>Pure-ASGI <code>RedactUserMessages</code> middleware with domestic phone regexes, Model Armor regional screening with friendly squad refusal, and semantic policy binding.</td>
+                <td><a href="governance-and-pii.html" style="font-weight: 600;">View Governance Deep-Dive &rarr;</a></td>
+              </tr>
+              <tr>
+                <td><strong style="color: var(--optimise);">Pillar 4: Optimise</strong></td>
+                <td>Golden Evals, CI Release Gating, Quota Optimization</td>
+                <td>Domain-critical safety and physiological evals, mandatory tool-use rubrics (<code>rubric_based_tool_use_quality_v1</code>), and fail-closed CI release gate script.</td>
+                <td><a href="cost-economics.html" style="font-weight: 600;">View Cost Economics &rarr;</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
 
-      <section id="blueprint" class="card">
-        <h2>3. Architectural Blueprint v0.2 Implementation</h2>
+    <!-- SECTION 3 -->
+    <article class="step-card" id="blueprint">
+      <div class="step-header">
+        <span class="step-num">Section 3</span>
+        <h2 class="step-title">Architectural Blueprint v0.2 Implementation</h2>
+      </div>
+      <div class="step-body">
         <p>Blueprint v0.2 introduces sovereign European data protection, multi-region high availability, and zero-cost cloud persistence:</p>
         <ul>
           <li><strong>Decoupled Sovereign EU Boundary:</strong> Data protection layers (Model Armor, Cloud DLP byte-offset redaction, and database state) are pinned strictly to <code>europe-west1</code> (Belgium), isolating athlete privacy from external jurisdictions.</li>
           <li><strong>Multi-Region Inference Router (<code>backend/llm_router.py</code>):</strong> Dynamic failover router cascading across <code>global &rarr; europe-west1 &rarr; europe-west9 &rarr; us-central1</code> upon catching HTTP 429 quota exhaustion, injecting mandatory token preservation directives.</li>
-          <li><strong>Reversible Bracketed PII Vault (<code>backend/pii_vault.py</code>):</strong> Replaces athlete names, domestic phones, and emails with deterministic tokens (<code>[ATHLETE_NAME_1]</code>, <code>[PHONE_NUMBER_1]</code>), preserving multi-turn history while asserting zero orphan tokens on rehydration.</li>
+          <li><strong>Reversible Cryptographic PII Vault (<code>backend/pii_vault.py</code>):</strong> Replaces athlete names, domestic phones, and emails with deterministic cryptographic tokens (<code>[ATHLETE_ath_5a77195e]</code>, <code>[PHONE_NUMBER_1]</code>), preserving multi-turn history while asserting zero orphan tokens on rehydration.</li>
           <li><strong>Dual-Backend Zero-Cost Persistence (<code>backend/db.py</code>):</strong> Automatic hybrid storage utilizing local SQLite for dev/testing and Google Cloud Firestore (Native Mode) permanent Free Tier for production deployment (fixed $0.00/mo cost floor).</li>
         </ul>
-      </section>
+      </div>
+    </article>
 
-      <section id="governance" class="card">
-        <h2>4. Governance & PII Safety Architecture</h2>
+    <!-- SECTION 4 -->
+    <article class="step-card" id="governance">
+      <div class="step-header">
+        <span class="step-num">Section 4</span>
+        <h2 class="step-title">Governance &amp; PII Safety Architecture</h2>
+      </div>
+      <div class="step-body">
         <p>
           Personal information in sports applications (athlete cardiovascular benchmarks, contact phone numbers, emergency contact details) 
           must never leak into shared model weights, durable session stores, or Cloud Logging traces.
@@ -122,7 +215,7 @@ flowchart LR
         <div class="mermaid">
 flowchart TD
     User["Athlete Input: 'Coach, update Daniel Okonkwo at 06 12 34 56 78'"] --> ASGI["Pure-ASGI RedactUserMessages"]
-    ASGI -->|"Cloud DLP + Domestic Regex"| Clean["Sanitized: 'Coach, update [PERSON_NAME] at [PHONE_NUMBER]'"]
+    ASGI -->|"Cloud DLP + Domestic Regex"| Clean["Sanitized: 'Coach, update [ATHLETE_ath_...] at [PHONE_NUMBER]'"]
     Clean --> ModelArmor["Model Armor Ingress Screening"]
     ModelArmor -->|"Benign Prompt"| Agent["Rowing Coach Orchestrator"]
     ModelArmor -->|"Adversarial Prompt"| Refusal["Standard Refusal: 'Flagged by rowing squad safety policy'"]
@@ -130,10 +223,16 @@ flowchart TD
     Gate -->|"Yes"| Confirm["ADK Approval Gate: require_confirmation=True"]
     Gate -->|"No"| Output["Coaching Recommendation Generated"]
         </div>
-      </section>
+      </div>
+    </article>
 
-      <section id="evals" class="card">
-        <h2>5. Golden Evaluations & Fail-Closed CI/CD Release Gating</h2>
+    <!-- SECTION 5 -->
+    <article class="step-card" id="evals">
+      <div class="step-header">
+        <span class="step-num">Section 5</span>
+        <h2 class="step-title">Golden Evaluations &amp; Fail-Closed CI/CD Release Gating</h2>
+      </div>
+      <div class="step-body">
         <p>
           In accordance with <strong>Learning 30</strong> and <strong>Learning 31</strong> discovered in Lab 4:
         </p>
@@ -141,10 +240,16 @@ flowchart TD
           <li><strong>The Exit-Code 0 Trap:</strong> <code>adk eval</code> returns exit code <code>0</code> even when evaluations fail. Bare CI pipelines wave failing agents into production. Our release script (<code>evals/verify_eval_gate.sh</code>) parses <code>Tests failed: [0-9]+</code> explicitly and fails closed.</li>
           <li><strong>Mandatory Tool-Use Rubrics:</strong> Natural language response matching alone allows models to hallucinate answers while skipping tools. Our evaluation configuration (<code>evals/eval_config.json</code>) enforces <code>rubric_based_tool_use_quality_v1</code> to prove that the agent actively loaded the rules skill and curriculum.</li>
         </ol>
-      </section>
+      </div>
+    </article>
 
-      <section id="adrs" class="card">
-        <h2>6. Architectural Decision Records (ADRs)</h2>
+    <!-- SECTION 6 -->
+    <article class="step-card" id="adrs">
+      <div class="step-header">
+        <span class="step-num">Section 6</span>
+        <h2 class="step-title">Architectural Decision Records (ADRs)</h2>
+      </div>
+      <div class="step-body">
         <div class="adr-block">
           <h3>ADR-1: Pure-ASGI Middleware Redaction over Tool-Based Redaction</h3>
           <p><strong>Decision:</strong> Scrub athlete personal data at the HTTP protocol boundary before prompt text touches the session store or model memory.</p>
@@ -165,90 +270,137 @@ flowchart TD
           <p><strong>Decision:</strong> Require <code>rubric_based_tool_use_quality_v1</code> in all golden evaluation configs.</p>
           <p><strong>Rationale:</strong> Prevents silent regressions where the model answers from hallucinated memory while bypassing <code>SkillToolset</code> or safety tools.</p>
         </div>
-      </section>
+        <div class="adr-block">
+          <h3>ADR-5: GDPR Article 9 Cryptographic Pseudonymization</h3>
+          <p><strong>Decision:</strong> Bind vaulted athlete names to SHA-256 cryptographic squad tokens (<code>[ATHLETE_ath_5a77195e]</code>) dynamically matching <code>data/athletes.json</code>.</p>
+          <p><strong>Rationale:</strong> Resolves the fundamental tension between privacy and functionality: the LLM never sees real names, yet deterministic algorithmic tools can look up the rower's 2k split and L4 pacing grid.</p>
+        </div>
+      </div>
+    </article>
 
-      <section id="verification" class="card">
-        <h2>7. Verification Matrix & Test Status</h2>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Test Module</th>
-              <th>Scope</th>
-              <th>Tests</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>tests/test_agent.py</code></td>
-              <td>Root agent structure, subagent isolation, Intervals MCP confirmation</td>
-              <td>4</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_tools.py</code></td>
-              <td>Erg physics, L4 stroke rates, season curriculum, and sheet generators</td>
-              <td>10</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_guardrails.py</code></td>
-              <td>Model Armor screening, friendly refusal, FallbackGemini cascade</td>
-              <td>5</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_pii_middleware.py</code></td>
-              <td>Pure-ASGI request interception and fail-closed 503 behavior</td>
-              <td>2</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_governance_cli.py</code></td>
-              <td>4-tier configuration resolution and CLI subcommands</td>
-              <td>4</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_gate_1_stripping.py</code></td>
-              <td>Gate 1 athlete PII vaulting and tokenization</td>
-              <td>2</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_gate_2_reinsertion.py</code></td>
-              <td>Gate 2 clean token rehydration and orphan token assertion</td>
-              <td>2</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_region_fallback.py</code></td>
-              <td>Inference router HTTP 429 quota failover across regions</td>
-              <td>2</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr>
-              <td><code>tests/test_persistence_store.py</code></td>
-              <td>Dual-backend SQLite / Firestore persistence with TTL</td>
-              <td>2</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
-            </tr>
-            <tr style="font-weight: 700; background: var(--panel);">
-              <td colspan="2">Total Automated Unit Test Suite</td>
-              <td>33</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">33 / 33 GREEN (100%)</span></td>
-            </tr>
-            <tr>
-              <td><code>evals/verify_eval_gate.sh</code></td>
-              <td>Fail-closed CI release gate defense across red, green, empty runs</td>
-              <td>3 Scenarios</td>
-              <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">100% VERIFIED</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </main>
-  </div>
+    <!-- SECTION 7 -->
+    <article class="step-card" id="verification">
+      <div class="step-header">
+        <span class="step-num">Section 7</span>
+        <h2 class="step-title">Verification Matrix &amp; Test Status</h2>
+      </div>
+      <div class="step-body">
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Test Module</th>
+                <th>Scope</th>
+                <th>Tests</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>tests/test_agent.py</code></td>
+                <td>Root agent structure, subagent isolation, Intervals MCP confirmation</td>
+                <td>4</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_tools.py</code></td>
+                <td>Erg physics, L4 stroke rates, season curriculum, and sheet generators</td>
+                <td>10</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_athlete_vault_resolution.py</code></td>
+                <td>GDPR Art. 9 cryptographic pseudonym vaulting &amp; tool resolution</td>
+                <td>4</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_guardrails.py</code></td>
+                <td>Model Armor screening, friendly refusal, FallbackGemini cascade</td>
+                <td>5</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_pii_middleware.py</code></td>
+                <td>Pure-ASGI request interception and fail-closed 503 behavior</td>
+                <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_governance_cli.py</code></td>
+                <td>4-tier configuration resolution and CLI subcommands</td>
+                <td>4</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_gate_1_stripping.py</code></td>
+                <td>Gate 1 athlete PII vaulting and tokenization</td>
+                <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_gate_2_reinsertion.py</code></td>
+                <td>Gate 2 clean token rehydration and orphan token assertion</td>
+                <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_region_fallback.py</code></td>
+                <td>Inference router HTTP 429 quota failover across regions</td>
+                <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_persistence_store.py</code></td>
+                <td>Dual-backend SQLite / Firestore persistence with TTL</td>
+                <td>2</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr>
+                <td><code>tests/test_docs_site.py</code></td>
+                <td>Automated documentation site, navigation, CSS &amp; link verification</td>
+                <td>19</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">PASSED</span></td>
+              </tr>
+              <tr style="font-weight: 700; background: var(--panel);">
+                <td colspan="2">Total Automated Unit &amp; Site Test Suite</td>
+                <td>57</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">57 / 57 GREEN (100%)</span></td>
+              </tr>
+              <tr>
+                <td><code>evals/verify_eval_gate.sh</code></td>
+                <td>Fail-closed CI release gate defense across red, green, empty runs</td>
+                <td>3 Scenarios</td>
+                <td><span class="badge" style="background: var(--scale-soft); color: var(--scale);">100% VERIFIED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>Rowing Coach Agent · GDG London AI DevCamp 2026 Hackathon</div>
+      <div>Maintained in <code>docs/index.html</code></div>
+    </footer>
+  </main>
+
   <script src="lightbox.js"></script>
+  <script src="toc.js"></script>
+  <script>
+    (function () {
+      var KEY = "rowing-coach-theme";
+      var root = document.documentElement;
+      var btn = document.getElementById("themeToggle");
+      if (btn) {
+        btn.addEventListener("click", function () {
+          var current = root.dataset.theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          var next = current === "dark" ? "light" : "dark";
+          root.dataset.theme = next;
+          try { localStorage.setItem(KEY, next); } catch (e) {}
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

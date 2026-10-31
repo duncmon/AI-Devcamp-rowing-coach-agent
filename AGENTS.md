@@ -100,10 +100,12 @@ AI-Devcamp-rowing-coach-agent/
 
 ## 7. Active Sprint: Hackathon Day Phase 14 (31 Oct 2026)
 * **Master Tracking Document:** [`../ai-devcamp-labs/PROGRESS.md`](../ai-devcamp-labs/PROGRESS.md) (Phase 14)
-* **Implementation Plan:** [`hackathon_demo_fixes_plan.md`](file:///Users/duncanmoncrieff/.gemini/antigravity/brain/0814051f-3a0d-4014-9cc3-525fd6412fe3/hackathon_demo_fixes_plan.md)
+* **Implementation Plan:** [`site_and_readme_redesign_plan.md`](file:///Users/duncanmoncrieff/.gemini/antigravity/brain/0814051f-3a0d-4014-9cc3-525fd6412fe3/site_and_readme_redesign_plan.md)
 * **Core Sprint Tasks:**
-  1. Cryptographic non-decipherable pseudonym tokens (`[ATHLETE_ath_8f2d...]`) resolving to internal biometric roster IDs (`david_montgamery`, etc.) in `backend/pii_vault.py` and `rowing_coach/tools.py`.
+  1. Cryptographic non-decipherable pseudonym tokens (`[ATHLETE_ath_5a77195e]`) resolving to internal biometric roster IDs in `backend/pii_vault.py` and `rowing_coach/tools.py`.
   2. Direct markdown plan return & local download in `rowing_coach/tools.py` and `local_proxy.py` (solving `/code/plans` container isolation).
   3. Interactive Approval Card UI and route in `local_proxy.py` + unblocking read-only `intervals_get_athlete_wellness`.
   4. Concept2 logbook link & erg screen telemetry ingestion tool.
+  5. Documentation site redesign (`index.html`, `walkthrough.html`, `governance-and-pii.html`, `cost-economics.html`, `design-critique.html`), live GitHub Pages URL link repairs in `README.md`, authentic walkthrough screenshot embeddings, and interactive Generative UI GDPR Art. 9 simulator.
+  6. Automated Documentation Site Test Suite (`tests/test_docs_site.py`) with 19 comprehensive checks covering HTML5 structure, CSS/scripts, bidirectional navigation across all 20 permutations, zero dead links/anchors, asset non-zero size, and README invariants (57/57 total repository tests green).
 

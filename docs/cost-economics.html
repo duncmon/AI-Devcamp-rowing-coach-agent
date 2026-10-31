@@ -3,10 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cost Economics & Telemetry — Rowing Coach Agent</title>
+  <title>Cost Economics &amp; Telemetry — Rowing Coach Agent</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+  <script>
+    try {
+      var t = localStorage.getItem("rowing-coach-theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
 
@@ -22,117 +31,135 @@
       <a href="walkthrough.html">Run-Through &amp; Proof</a>
       <a href="governance-and-pii.html">Governance &amp; PII</a>
       <a href="cost-economics.html" class="active">Cost Economics</a>
-      <a href="ARCHITECTURE_AND_SUBMISSION.md">Design Critique</a>
+      <a href="design-critique.html">Design Critique</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">🌗</button>
     </nav>
   </header>
 
-  <main style="max-width: 1040px; margin: 0 auto; padding: 40px 24px;">
+  <main>
 
-    <div class="hero-meta" style="margin-bottom: 16px;">
-      <span class="badge" style="background: var(--optimise-soft); color: var(--optimise);">Pillar 4 · Optimise</span>
-      <span class="badge blue">BigQuery Agent Analytics</span>
-      <span class="badge green">Empirical Telemetry</span>
-    </div>
-
-    <h1 style="font-size: 34px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px;">
-      Unit Economics: Baseline Agent vs. PII Vaulting &amp; Governance
-    </h1>
-    <p class="lead" style="color: var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px;">
-      How much does compliance actually cost in production? By analyzing authentic BigQuery Agent Analytics telemetry from <code>ai-devcamp-labs</code>, this study calculates the exact marginal cost of stripping athlete PII, persisting token mappings, and rehydrating coaching recommendations.
-    </p>
+    <!-- Hero Header -->
+    <section class="hero">
+      <div class="hero-meta">
+        <a href="#baseline-economics" class="badge red">Pillar 4 · Optimise</a>
+        <a href="#marginal-cost" class="badge blue">BigQuery Agent Analytics</a>
+        <a href="#model-armor-roi" class="badge green">Empirical Telemetry</a>
+        <a href="#eval-gate" class="badge yellow">Fail-Closed Gate</a>
+      </div>
+      <h1>Unit Economics: Baseline Agent vs. PII Vaulting &amp; Governance</h1>
+      <p class="lead">
+        How much does compliance actually cost in production? By analyzing authentic BigQuery Agent Analytics telemetry from the DevCamp project suite, this study calculates the exact marginal cost of stripping athlete PII, persisting token mappings, and rehydrating coaching recommendations.
+      </p>
+    </section>
 
     <!-- Section 1: Baseline Economics -->
-    <section class="card" style="margin-bottom: 28px;">
-      <h2>1. The Baseline Economics (from `ai-devcamp-labs` Lab 4)</h2>
-      <p>
-        In Lab 4 Step 5 of the reference project, 60 multi-turn simulated trajectories (361 interaction events) were evaluated and audited via BigQuery Agent Analytics (<code>v_llm_response</code> and <code>v_agent_events</code>):
-      </p>
+    <article class="step-card" id="baseline-economics">
+      <div class="step-header">
+        <span class="step-num">Section 1</span>
+        <h2 class="step-title">The Baseline Economics (from BigQuery Analytics)</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          In Lab 4 Step 5 of the reference project, 60 multi-turn simulated trajectories (361 interaction events) were evaluated and audited via BigQuery Agent Analytics (<code>v_llm_response</code> and <code>v_agent_events</code>):
+        </p>
 
-      <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
-        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">BASELINE SPEND PER TURN</div>
-          <div style="font-size: 26px; font-weight: 800; color: var(--build);">$0.0064</div>
-          <div style="font-size: 11px; color: var(--faint);">~0.64¢ on Gemini 2.5 Flash</div>
-        </div>
-        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CONTEXT CACHE HIT RATIO</div>
-          <div style="font-size: 26px; font-weight: 800; color: var(--scale);">68.0%</div>
-          <div style="font-size: 11px; color: var(--faint);">999k of 1.47M tokens cached</div>
-        </div>
-        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CACHED INPUT DISCOUNT</div>
-          <div style="font-size: 26px; font-weight: 800; color: var(--scale);">75% OFF</div>
-          <div style="font-size: 11px; color: var(--faint);">$0.075/M vs $0.30/M standard</div>
-        </div>
-        <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
-          <div style="font-size: 12px; color: var(--muted); font-weight: 600;">THINKING TOKENS SHARE</div>
-          <div style="font-size: 26px; font-weight: 800; color: var(--optimise);">60.8%</div>
-          <div style="font-size: 11px; color: var(--faint);">Billed at $2.50/M output rate</div>
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
+          <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 12px; color: var(--muted); font-weight: 600;">BASELINE SPEND PER TURN</div>
+            <div style="font-size: 26px; font-weight: 800; color: var(--build);">$0.0064</div>
+            <div style="font-size: 11px; color: var(--faint);">~0.64¢ on Gemini 2.5 Flash</div>
+          </div>
+          <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CONTEXT CACHE HIT RATIO</div>
+            <div style="font-size: 26px; font-weight: 800; color: var(--scale);">68.0%</div>
+            <div style="font-size: 11px; color: var(--faint);">999k of 1.47M tokens cached</div>
+          </div>
+          <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 12px; color: var(--muted); font-weight: 600;">CACHED INPUT DISCOUNT</div>
+            <div style="font-size: 26px; font-weight: 800; color: var(--scale);">75% OFF</div>
+            <div style="font-size: 11px; color: var(--faint);">$0.075/M vs $0.30/M standard</div>
+          </div>
+          <div class="stat-card" style="padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="font-size: 12px; color: var(--muted); font-weight: 600;">THINKING TOKENS SHARE</div>
+            <div style="font-size: 26px; font-weight: 800; color: var(--optimise);">60.8%</div>
+            <div style="font-size: 11px; color: var(--faint);">Billed at $2.50/M output rate</div>
+          </div>
         </div>
       </div>
-    </section>
+    </article>
 
     <!-- Section 2: Marginal Cost of PII Stripping & Vaulting -->
-    <section class="card" style="margin-bottom: 28px;">
-      <h2>2. Marginal Cost Breakdown of the PII Architecture</h2>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Architecture Layer</th>
-            <th>GCP Free Tier Allowance</th>
-            <th>Effective Cost Under Free Tier</th>
-            <th>Enterprise Scale Cost (>1M turns/mo)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Gate 1: Boundary Stripping &amp; Regex</strong></td>
-            <td>In-process compute (<1ms ASGI middleware)</td>
-            <td><strong>$0.00</strong></td>
-            <td><strong>$0.00</strong></td>
-          </tr>
-          <tr>
-            <td><strong>Cloud DLP API Inspection</strong></td>
-            <td>1 GB text inspection / month</td>
-            <td><strong>$0.00</strong> (~2M turns free)</td>
-            <td>$0.0000005 / turn ($1.00 / GB)</td>
-          </tr>
-          <tr>
-            <td><strong>Session Vault DB (Firestore)</strong></td>
-            <td>20,000 writes/day &amp; 50k reads/day</td>
-            <td><strong>$0.00</strong> (600k turns/month free)</td>
-            <td>$0.0000018 / turn ($0.18 / 100k writes)</td>
-          </tr>
-          <tr>
-            <td><strong>Gemini 2.5 Flash Token Delta</strong></td>
-            <td>Synthetic tokens equal raw length</td>
-            <td><strong>$0.00</strong> (Identical token volume)</td>
-            <td><strong>$0.00</strong> (Identical token volume)</td>
-          </tr>
-          <tr>
-            <td><strong>Gate 2: Client Rehydration</strong></td>
-            <td>In-memory string map (<0.1ms)</td>
-            <td><strong>$0.00</strong></td>
-            <td><strong>$0.00</strong></td>
-          </tr>
-          <tr style="font-weight: 700; background: var(--panel);">
-            <td>Total Marginal PII Overhead</td>
-            <td>Up to 20,000 requests per day</td>
-            <td><strong style="color: var(--scale);">$0.00000 / turn (0.0% increase)</strong></td>
-            <td><strong style="color: var(--build);">$0.000003 / turn (+0.04% increase)</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <article class="step-card" id="marginal-cost">
+      <div class="step-header">
+        <span class="step-num">Section 2</span>
+        <h2 class="step-title">Marginal Cost Breakdown of the PII Architecture</h2>
+      </div>
+      <div class="step-body">
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Architecture Layer</th>
+                <th>GCP Free Tier Allowance</th>
+                <th>Effective Cost Under Free Tier</th>
+                <th>Enterprise Scale Cost (&gt;1M turns/mo)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Gate 1: Boundary Stripping &amp; Regex</strong></td>
+                <td>In-process compute (&lt;1ms ASGI middleware)</td>
+                <td><strong>$0.00</strong></td>
+                <td><strong>$0.00</strong></td>
+              </tr>
+              <tr>
+                <td><strong>Cloud DLP API Inspection</strong></td>
+                <td>1 GB text inspection / month</td>
+                <td><strong>$0.00</strong> (~2M turns free)</td>
+                <td>$0.0000005 / turn ($1.00 / GB)</td>
+              </tr>
+              <tr>
+                <td><strong>Session Vault DB (Firestore)</strong></td>
+                <td>20,000 writes/day &amp; 50k reads/day</td>
+                <td><strong>$0.00</strong> (600k turns/month free)</td>
+                <td>$0.0000018 / turn ($0.18 / 100k writes)</td>
+              </tr>
+              <tr>
+                <td><strong>Gemini 2.5 Flash Token Delta</strong></td>
+                <td>Synthetic tokens equal raw length</td>
+                <td><strong>$0.00</strong> (Identical token volume)</td>
+                <td><strong>$0.00</strong> (Identical token volume)</td>
+              </tr>
+              <tr>
+                <td><strong>Gate 2: Client Rehydration</strong></td>
+                <td>In-memory string map (&lt;0.1ms)</td>
+                <td><strong>$0.00</strong></td>
+                <td><strong>$0.00</strong></td>
+              </tr>
+              <tr style="font-weight: 700; background: var(--panel);">
+                <td>Total Marginal PII Overhead</td>
+                <td>Up to 20,000 requests per day</td>
+                <td><strong style="color: var(--scale);">$0.00000 / turn (0.0% increase)</strong></td>
+                <td><strong style="color: var(--build);">$0.000003 / turn (+0.04% increase)</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
 
     <!-- Section 3: Model Armor ROI -->
-    <section class="card">
-      <h2>3. The Security ROI: Model Armor vs. Prompt Jailbreaks</h2>
-      <p>
-        While Cloud DLP and Firestore vaulting are essentially cost-free under Google Cloud's monthly tier, <strong>Google Cloud Model Armor</strong> incurs an explicit cost of <strong>$0.001 per call</strong> (1/10th of a cent).
-      </p>
+    <article class="step-card" id="model-armor-roi">
+      <div class="step-header">
+        <span class="step-num">Section 3</span>
+        <h2 class="step-title">The Security ROI: Model Armor vs. Prompt Jailbreaks</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          While Cloud DLP and Firestore vaulting are essentially cost-free under Google Cloud's monthly tier, <strong>Google Cloud Model Armor</strong> incurs an explicit cost of <strong>$0.001 per call</strong> (1/10th of a cent).
+        </p>
 
-      <div class="mermaid">
+        <div class="mermaid">
 flowchart LR
     subgraph AttackWithArmor["With Edge Model Armor Gate"]
         In1["Jailbreak Attempt"] --> MA["Model Armor ($0.001)"]
@@ -145,13 +172,71 @@ flowchart LR
         LLM --> ComplexReasoning["Multi-step Tool &amp; Reasoning Loop<br/>(400+ thinking tokens generated)"]
         ComplexReasoning --> Spend2["Total Cost: $0.0074<br/>Latency: ~7,500 ms"]
     end
-      </div>
+        </div>
 
-      <div class="callout check" style="margin-top: 16px;">
-        <strong>Economic Conclusion:</strong> During malicious scanning or red-team probing, Model Armor pays for itself: blocking an injection payload at the edge costs <strong>$0.001</strong>, whereas allowing that request to execute against Gemini incurs <strong>$0.007+ in wasted output and thinking tokens</strong>, plus container memory pressure.
+        <div class="callout check" style="margin-top: 16px;">
+          <strong>Economic Conclusion:</strong> During malicious scanning or red-team probing, Model Armor pays for itself: blocking an injection payload at the edge costs <strong>$0.001</strong>, whereas allowing that request to execute against Gemini incurs <strong>$0.007+ in wasted output and thinking tokens</strong>, plus container memory pressure.
+        </div>
       </div>
-    </section>
+    </article>
 
+    <!-- Section 4: Fail-Closed Eval Release Gate -->
+    <article class="step-card" id="eval-gate">
+      <div class="step-header">
+        <span class="step-num">Section 4</span>
+        <h2 class="step-title">Fail-Closed Evaluation Release Gating &amp; Exit-Code 0 Defense</h2>
+      </div>
+      <div class="step-body">
+        <p>
+          In automated deployment pipelines, silent test failures represent a severe reliability risk. The ADK CLI command <code>adk eval</code> exits with return code <code>0</code> even when tests fail. Our production release script (<code>evals/verify_eval_gate.sh</code>) parses the terminal output defensively:
+        </p>
+        <div class="code-block">
+          <div class="code-head"><span>Defensive CI/CD Shell Parsing Protocol (cloudbuild.yaml / verify_eval_gate.sh)</span></div>
+          <pre><code># Defensive Shell Pattern: Catch Exit-Code 0 on Test Failures
+OUTPUT=$(adk eval rowing_coach --config_path evals/eval_config.json 2>&1)
+EXIT_CODE=$?
+
+# Extract failure count from summary line: 'Tests failed: N'
+FAILURES=$(echo "$OUTPUT" | grep -oE "Tests failed: [0-9]+" | awk '{print $3}' | tail -n 1)
+
+if [ -z "$FAILURES" ]; then
+  echo "CRITICAL: Unable to parse eval test summary line. Failing closed." >&2
+  exit 1
+fi
+
+if [ "$FAILURES" -gt 0 ]; then
+  echo "PIPELINE REJECTED: $FAILURES evaluation cases failed (exit code was $EXIT_CODE)." >&2
+  exit 1
+fi
+
+echo "PIPELINE APPROVED: Zero test failures detected. Proceeding to production deploy."
+exit 0</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <footer style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>Rowing Coach Agent · GDG London AI DevCamp 2026 Hackathon</div>
+      <div>Maintained in <code>docs/cost-economics.html</code></div>
+    </footer>
   </main>
+
+  <script src="lightbox.js"></script>
+  <script src="toc.js"></script>
+  <script>
+    (function () {
+      var KEY = "rowing-coach-theme";
+      var root = document.documentElement;
+      var btn = document.getElementById("themeToggle");
+      if (btn) {
+        btn.addEventListener("click", function () {
+          var current = root.dataset.theme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          var next = current === "dark" ? "light" : "dark";
+          root.dataset.theme = next;
+          try { localStorage.setItem(KEY, next); } catch (e) {}
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
