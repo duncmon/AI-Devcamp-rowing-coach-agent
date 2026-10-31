@@ -500,13 +500,13 @@ HTML_PAGE = """<!DOCTYPE html>
           </p>
 
           <div class="flex flex-wrap gap-2 pt-2 border-t border-darkborder/50">
-            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+            <button type="button" data-prompt="Coach David's UT2 Base Session" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
               💡 Coach David's UT2 Base Session
             </button>
-            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+            <button type="button" data-prompt="Calculate L4 Grid for Alex Martin" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
               💡 Calculate L4 Grid for Alex Martin
             </button>
-            <button class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition">
+            <button type="button" data-prompt="Stage 3x7min AT on Intervals.icu" class="chip-btn text-[11px] bg-darkborder hover:bg-brand-600/20 hover:text-brand-300 hover:border-brand-500/40 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-300 transition cursor-pointer">
               💡 Stage 3x7min AT on Intervals.icu
             </button>
           </div>
@@ -634,15 +634,6 @@ HTML_PAGE = """<!DOCTYPE html>
       tabActContent.classList.add('hidden');
     });
 
-    // Quick Chip Clicks
-    document.querySelectorAll('.chip-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const text = btn.textContent.replace('💡', '').trim();
-        document.getElementById('user-input').value = text;
-        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
-      });
-    });
-
     // Stage Stepper Activation
     const stageIds = ['curriculum', 'rules', 'pacing', 'plan_ready', 'staged'];
     function setStage(stage) {
@@ -722,12 +713,10 @@ HTML_PAGE = """<!DOCTYPE html>
       activityList.scrollTop = activityList.scrollHeight;
     }
 
-    // Submit handler
-    chatForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const text = userInput.value.trim();
+    // Central prompt submit logic
+    async function submitPrompt(text) {
       if (!text) return;
-      userInput.value = '';
+      if (userInput) userInput.value = '';
 
       // Auto-resolve pending confirmation if user types confirmation text
       if (window.pendingConfirmation && /^(yes|confirm|approve|proceed|ok|i confirm)/i.test(text.toLowerCase())) {
@@ -735,7 +724,7 @@ HTML_PAGE = """<!DOCTYPE html>
         return;
       }
 
-      sendBtn.disabled = true;
+      if (sendBtn) sendBtn.disabled = true;
 
       appendUserMessage(text);
       const agentBody = createAgentMessageSlot();
@@ -845,9 +834,26 @@ HTML_PAGE = """<!DOCTYPE html>
       } catch (err) {
         agentBody.innerHTML = `<p class="text-rose-400">[Network Error]: ${err.message}</p>`;
       } finally {
-        sendBtn.disabled = false;
-        userInput.focus();
+        if (sendBtn) sendBtn.disabled = false;
+        if (userInput) userInput.focus();
       }
+    }
+
+    // Attach form submit
+    if (chatForm) {
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        submitPrompt(userInput.value.trim());
+      });
+    }
+
+    // Attach Quick Chip Clicks
+    document.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const text = btn.getAttribute('data-prompt') || btn.textContent.replace('💡', '').trim();
+        submitPrompt(text);
+      });
     });
 
     window.submitConfirmation = async function(callId, confirmed) {
@@ -882,7 +888,7 @@ HTML_PAGE = """<!DOCTYPE html>
           const { done, value } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n\n');
+          const lines = buffer.split('\\n\\n');
           buffer = lines.pop();
 
           for (const line of lines) {
